@@ -1,0 +1,3 @@
+fastapi==0.118.0
+python-multipart==0.0.20
+psycopg[binary]==3.2.10

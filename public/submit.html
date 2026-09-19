@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>채점 — IBA Scoring Machine</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+<main>
+  <h1>채점</h1>
+  <p>팀명·닉네임을 적고 예측 결과 CSV를 올리면 바로 점수가 나옵니다.</p>
+
+  <form class="stack" id="form" novalidate>
+    <label>팀명
+      <input type="text" name="team" id="team" maxlength="40" autocomplete="off" required>
+      <span class="hint">공백·대소문자는 무시됩니다. 처음 제출한 표기가 리더보드에 남습니다.</span>
+    </label>
+    <label>닉네임
+      <input type="text" name="nickname" id="nickname" maxlength="40" autocomplete="off" required>
+    </label>
+    <label>제출 파일
+      <input type="file" name="file" id="file" accept=".csv,text/csv" required>
+      <span class="hint">헤더 <code>id,price</code>, 39,085행, <a href="/data/sample_submission.csv" download>sample_submission.csv</a>와 같은 순서. 2 MB 이하.</span>
+    </label>
+    <div class="row">
+      <button type="submit" class="primary" id="submitBtn">채점하기</button>
+      <span class="quota" id="quota"></span>
+    </div>
+  </form>
+
+  <section class="result" id="result" hidden aria-live="polite"></section>
+
+  <hr>
+  <h2>형식 안내</h2>
+  <ul>
+    <li>파일은 UTF-8 CSV. BOM·CRLF는 괜찮습니다.</li>
+    <li><code>id</code> 열은 test.csv의 순서와 값이 모두 같아야 합니다. <strong>정렬하거나 섞지 마세요.</strong> id가 중복이라 순서로 채점합니다.</li>
+    <li><code>price</code>는 빈 값 없이 모두 숫자여야 합니다. 음수는 0으로 바꿔 채점합니다.</li>
+    <li>형식 오류로 거부된 제출은 오늘 횟수에 들어가지 않습니다.</li>
+  </ul>
+</main>
+
+<script>
+(function () {
+  const { fmt, api, rememberTeam, recallTeam } = window.IBA || {};
+  const form = document.getElementById("form");
+  const teamEl = document.getElementById("team");
+  const nickEl = document.getElementById("nickname");
+  const fileEl = document.getElementById("file");
+  const btn = document.getElementById("submitBtn");
+  const quotaEl = document.getElementById("quota");
+  const resultEl = document.getElementById("result");
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const saved = window.IBA.recallTeam();
+    if (saved.team) teamEl.value = saved.team;
+    if (saved.nickname) nickEl.value = saved.nickname;
+    if (saved.team) loadQuota();
+  });
+
+  let quotaTimer = null;
+  teamEl.addEventListener("input", () => {
+    clearTimeout(quotaTimer);
+    quotaTimer = setTimeout(loadQuota, 400);
+  });
+
+  async function loadQuota() {
+    const team = teamEl.value.trim();
+    if (!team) { quotaEl.textContent = ""; return; }
+    const r = await window.IBA.api("/api/quota?team=" + encodeURIComponent(team));
+    if (!r.ok) { quotaEl.textContent = ""; return; }
+    const q = r.body;
+    quotaEl.innerHTML = `오늘 <strong>${q.used_today}/${q.limit}</strong>회 사용, <strong>${q.remaining_today}</strong>회 남음`;
+  }
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  function showError(title, detail) {
+    resultEl.hidden = false;
+    resultEl.innerHTML = `<p class="msg-error"><strong>${esc(title)}</strong></p>${detail ? `<p>${esc(detail)}</p>` : ""}`;
+  }
+
+  function showScore(b) {
+    const f = window.IBA.fmt;
+    const clipped = b.negative_clipped > 0
+      ? `<p class="msg-warn">음수 예측 ${f.int(b.negative_clipped)}건을 0으로 바꿔 채점했습니다.</p>` : "";
+    resultEl.hidden = false;
+    resultEl.innerHTML = `
+      <p class="msg-ok"><strong>채점 완료</strong> — ${esc(b.team)}</p>
+      <div class="score">
+        <div><div class="label">RMSE</div><div class="value">${f.rmse(b.rmse)}</div></div>
+        <div><div class="label">R²</div><div class="value sub">${f.r2(b.r2)}</div></div>
+        <div><div class="label">현재 팀 순위</div><div class="value sub">${b.rank ?? "-"}위</div></div>
+      </div>
+      ${clipped}
+      <p class="small">오늘 ${b.remaining_today}회 남음. <a href="/leaderboard.html">리더보드 보기</a></p>`;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const team = teamEl.value.trim(), nickname = nickEl.value.trim(), file = fileEl.files[0];
+    if (!team) return showError("팀명을 입력하세요.");
+    if (!nickname) return showError("닉네임을 입력하세요.");
+    if (!file) return showError("제출 파일을 선택하세요.");
+    if (file.size > 2 * 1024 * 1024) return showError("파일이 2 MB를 넘습니다.", "정상 제출은 약 0.5 MB입니다.");
+
+    const fd = new FormData();
+    fd.append("team", team); fd.append("nickname", nickname); fd.append("file", file);
+    btn.disabled = true; btn.textContent = "채점 중…";
+    resultEl.hidden = true;
+    try {
+      const r = await window.IBA.api("/api/submit", { method: "POST", body: fd });
+      if (r.ok) {
+        window.IBA.rememberTeam(team, nickname);
+        showScore(r.body);
+      } else if (r.status === 429) {
+        showError(r.body.message, "초기화: " + window.IBA.fmt.time(r.body.resets_at) + " (KST)");
+      } else if (r.body && r.body.message) {
+        showError("제출이 거부되었습니다" + (r.body.row ? ` (${r.body.row}행)` : ""), r.body.message);
+      } else {
+        showError("서버 오류가 났습니다.", `HTTP ${r.status}`);
+      }
+    } catch (err) {
+      showError("네트워크 오류가 났습니다.", String(err));
+    } finally {
+      btn.disabled = false; btn.textContent = "채점하기";
+      loadQuota();
+    }
+  });
+})();
+</script>
+</body>
+</html>

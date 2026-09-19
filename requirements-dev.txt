@@ -1,0 +1,4 @@
+-r requirements.txt
+uvicorn==0.37.0
+httpx==0.28.1
+pytest==8.4.2

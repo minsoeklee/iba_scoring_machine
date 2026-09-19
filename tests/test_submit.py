@@ -1,0 +1,121 @@
+import math
+
+import pytest
+
+from tests.conftest import ANSWER_ROWS, csv_bytes, perfect_rows, submit
+
+
+def test_perfect_submission_scores_zero_rmse(client):
+    r = submit(client, csv_bytes(perfect_rows()))
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["rmse"] == 0
+    assert body["r2"] == 1
+    assert body["negative_clipped"] == 0
+    assert body["remaining_today"] == 2
+    assert body["rank"] == 1
+    assert body["team"] == "3조"
+
+
+def test_known_error_gives_expected_rmse(client):
+    # 모든 예측이 정답보다 100 크면 RMSE는 정확히 100
+    rows = [(i, p + 100) for i, p in ANSWER_ROWS]
+    body = submit(client, csv_bytes(rows)).json()
+    assert math.isclose(body["rmse"], 100.0)
+    assert body["r2"] < 1
+
+
+def test_bom_crlf_and_trailing_blank_lines_are_accepted(client):
+    text = "﻿id,price\r\n" + "\r\n".join(f"{i},{p}" for i, p in ANSWER_ROWS) + "\r\n\r\n"
+    r = submit(client, text.encode("utf-8"))
+    assert r.status_code == 200, r.text
+
+
+def test_header_typo_rejected(client):
+    r = submit(client, csv_bytes(perfect_rows(), header="id,prices"))
+    assert r.status_code == 400
+    assert r.json()["error_code"] == "bad_header"
+    assert r.json()["row"] == 1
+
+
+def test_missing_row_rejected(client):
+    r = submit(client, csv_bytes(perfect_rows()[:-1]))
+    assert r.status_code == 400
+    body = r.json()
+    assert body["error_code"] == "row_count"
+    assert "4개" in body["message"] and "5개" in body["message"]
+
+
+def test_swapped_rows_rejected_with_row_number(client):
+    rows = perfect_rows()
+    rows[0], rows[1] = rows[1], rows[0]
+    r = submit(client, csv_bytes(rows))
+    assert r.status_code == 400
+    body = r.json()
+    assert body["error_code"] == "id_mismatch"
+    assert body["row"] == 2
+
+
+def test_duplicate_ids_in_correct_order_are_fine(client):
+    # ANSWER_ROWS에는 id 10001이 두 번 나온다. 순서만 맞으면 통과해야 한다.
+    r = submit(client, csv_bytes(perfect_rows()))
+    assert r.status_code == 200
+
+
+def test_empty_price_rejected(client):
+    rows = perfect_rows()
+    rows[2] = (rows[2][0], "")
+    r = submit(client, csv_bytes(rows))
+    assert r.status_code == 400
+    assert r.json()["error_code"] == "bad_price"
+    assert r.json()["row"] == 4
+
+
+def test_text_price_rejected(client):
+    rows = perfect_rows()
+    rows[4] = (rows[4][0], "abc")
+    r = submit(client, csv_bytes(rows))
+    assert r.status_code == 400
+    assert r.json()["error_code"] == "bad_price"
+    assert r.json()["row"] == 6
+
+
+def test_negative_price_is_clipped_and_counted(client):
+    rows = perfect_rows()
+    rows[0] = (rows[0][0], -500)
+    rows[1] = (rows[1][0], -1)
+    r = submit(client, csv_bytes(rows))
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["negative_clipped"] == 2
+    # 0으로 클리핑됐으므로 두 행의 오차는 정답값 그대로
+    expected = math.sqrt((20299.0**2 + 13000.0**2) / 5)
+    assert math.isclose(body["rmse"], expected)
+
+
+def test_oversized_file_rejected(client):
+    big = b"id,price\n" + b"1,1\n" * (600_000)
+    assert len(big) > 2 * 1024 * 1024
+    r = submit(client, big)
+    assert r.status_code == 400
+    assert r.json()["error_code"] == "file_too_large"
+
+
+def test_non_utf8_rejected(client):
+    r = submit(client, b"\xff\xfe\x00id,price\n")
+    assert r.status_code == 400
+    assert r.json()["error_code"] == "not_utf8"
+
+
+@pytest.mark.parametrize("team", ["", "   ", "x" * 41])
+def test_bad_team_name_rejected(client, team):
+    r = submit(client, csv_bytes(perfect_rows()), team=team)
+    assert r.status_code == 400
+    assert r.json()["error_code"] == "bad_name"
+
+
+def test_quota_not_consumed_by_invalid_file(client):
+    submit(client, csv_bytes(perfect_rows(), header="wrong"))
+    q = client.get("/api/quota", params={"team": "3조"}).json()
+    assert q["used_today"] == 0
+    assert q["remaining_today"] == 3

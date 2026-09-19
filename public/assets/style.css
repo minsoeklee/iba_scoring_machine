@@ -1,0 +1,179 @@
+/* IBA Scoring Machine — 채점표처럼 읽히는 작은 도구.
+   숫자는 고정폭, 표는 선으로만, 강조색은 하나. */
+
+:root {
+  --bg: #fbfaf7;
+  --ink: #1b1b1a;
+  --muted: #6b6a66;
+  --line: #d9d6cf;
+  --line-strong: #1b1b1a;
+  --accent: #b5321f;
+  --accent-ink: #ffffff;
+  --ok: #1f6f3f;
+  --warn: #9a6400;
+  --panel: #ffffff;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --maxw: 880px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161615;
+    --ink: #ecebe6;
+    --muted: #9c9a94;
+    --line: #333230;
+    --line-strong: #ecebe6;
+    --accent: #e0553f;
+    --accent-ink: #161615;
+    --ok: #5cc07f;
+    --warn: #e0b04a;
+    --panel: #1e1e1c;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+}
+a { color: inherit; }
+code, .num, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* 헤더: 사이트명 + 네 페이지 */
+.site-header {
+  border-bottom: 2px solid var(--line-strong);
+}
+.site-header .inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.brand {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.brand small { color: var(--muted); font-weight: 400; margin-left: 8px; }
+.nav { display: flex; gap: 18px; margin-left: auto; }
+.nav a { text-decoration: none; color: var(--muted); padding-bottom: 2px; }
+.nav a[aria-current="page"] { color: var(--ink); border-bottom: 2px solid var(--accent); }
+
+main {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 32px 16px 80px;
+}
+h1 { font-size: 28px; line-height: 1.25; margin: 0 0 8px; letter-spacing: -0.02em; }
+h2 { font-size: 18px; margin: 40px 0 12px; }
+h1 + p, .lead { color: var(--muted); margin-top: 0; }
+p { margin: 0 0 12px; }
+ul, ol { padding-left: 22px; }
+li { margin-bottom: 4px; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
+
+/* 정의 목록: 규칙·수치 나열 */
+dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; margin: 0; }
+dl.facts dt { color: var(--muted); }
+dl.facts dd { margin: 0; }
+
+/* 표 */
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { border-bottom: 2px solid var(--line-strong); font-weight: 600; font-size: 14px; }
+td.num, th.num { text-align: right; }
+tbody tr:first-child td { font-weight: 600; }
+.table-wrap { overflow-x: auto; }
+
+/* 폼 */
+form.stack { display: grid; gap: 16px; max-width: 520px; }
+label { display: grid; gap: 6px; font-weight: 600; font-size: 14px; }
+label .hint { font-weight: 400; color: var(--muted); }
+input[type="text"], input[type="number"] {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink);
+}
+input[type="file"] { font: inherit; }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button {
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+  background: var(--ink);
+  color: var(--bg);
+  cursor: pointer;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+button:disabled { opacity: 0.5; cursor: default; }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+/* 상태 표시 */
+.quota { color: var(--muted); font-size: 14px; min-height: 1.5em; }
+.quota strong { color: var(--ink); }
+.result { margin-top: 28px; border-top: 2px solid var(--line-strong); padding-top: 16px; }
+.result[hidden] { display: none; }
+.score { display: flex; gap: 40px; flex-wrap: wrap; margin: 8px 0 12px; }
+.score .label { color: var(--muted); font-size: 14px; }
+.score .value { font-family: var(--mono); font-size: 32px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.score .value.sub { font-size: 22px; }
+.msg-error { color: var(--accent); }
+.msg-warn { color: var(--warn); }
+.msg-ok { color: var(--ok); }
+.small { font-size: 14px; color: var(--muted); }
+
+/* 리더보드: 좁은 화면에서는 글자를 쪼개지 말고 가로 스크롤 */
+#board th, #board td, .game-log th, .game-log td { white-space: nowrap; }
+.board-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.empty { color: var(--muted); padding: 24px 0; }
+
+/* 홈 */
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin: 20px 0 8px; }
+.actions a { text-decoration: none; padding: 10px 16px; border: 1px solid var(--line-strong); border-radius: 4px; font-weight: 600; }
+.actions a.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.downloads td:first-child { white-space: nowrap; }
+
+/* 미니게임 */
+.car {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  padding: 16px 18px;
+  margin: 16px 0;
+  background: var(--panel);
+}
+.car .title { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+.car dl.facts { grid-template-columns: max-content 1fr max-content 1fr; }
+.guess-row { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+.guess-row label { flex: 1 1 200px; }
+.game-log td:first-child { color: var(--muted); }
+.game-stats { display: flex; gap: 32px; flex-wrap: wrap; margin: 16px 0; }
+.game-stats .value { font-family: var(--mono); font-size: 24px; }
+.game-stats .label { color: var(--muted); font-size: 14px; }
+
+@media (max-width: 600px) {
+  h1 { font-size: 24px; }
+  .nav { gap: 14px; margin-left: 0; width: 100%; }
+  .score { gap: 24px; }
+  .car dl.facts { grid-template-columns: max-content 1fr; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .result { animation: rise 160ms ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+}

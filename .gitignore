@@ -1,0 +1,12 @@
+# 정답 파일은 절대 커밋하지 않는다 (공개 저장소). 정답은 Neon 테이블에만 둔다.
+answer.csv
+answer*.csv
+
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+.env
+.env.*
+.vercel/
+node_modules/

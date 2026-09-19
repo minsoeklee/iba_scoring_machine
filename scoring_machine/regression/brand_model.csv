@@ -1,0 +1,196 @@
+brand,model
+audi, A1
+audi, A2
+audi, A3
+audi, A4
+audi, A5
+audi, A6
+audi, A7
+audi, A8
+audi, Q2
+audi, Q3
+audi, Q5
+audi, Q7
+audi, Q8
+audi, R8
+audi, RS3
+audi, RS4
+audi, RS5
+audi, RS6
+audi, RS7
+audi, S3
+audi, S4
+audi, S5
+audi, S8
+audi, SQ5
+audi, SQ7
+audi, TT
+bmw, 1 Series
+bmw, 2 Series
+bmw, 3 Series
+bmw, 4 Series
+bmw, 5 Series
+bmw, 6 Series
+bmw, 7 Series
+bmw, 8 Series
+bmw, M2
+bmw, M3
+bmw, M4
+bmw, M5
+bmw, M6
+bmw, X1
+bmw, X2
+bmw, X3
+bmw, X4
+bmw, X5
+bmw, X6
+bmw, X7
+bmw, Z3
+bmw, Z4
+bmw, i3
+bmw, i8
+ford, B-MAX
+ford, C-MAX
+ford, EcoSport
+ford, Edge
+ford, Escort
+ford, Fiesta
+ford, Focus
+ford, Fusion
+ford, Galaxy
+ford, Grand C-MAX
+ford, Grand Tourneo Connect
+ford, KA
+ford, Ka+
+ford, Kuga
+ford, Mondeo
+ford, Mustang
+ford, Puma
+ford, Ranger
+ford, S-MAX
+ford, Streetka
+ford, Tourneo Connect
+ford, Tourneo Custom
+ford, Transit Tourneo
+hyundi, Accent
+hyundi, Amica
+hyundi, Getz
+hyundi, I10
+hyundi, I20
+hyundi, I30
+hyundi, I40
+hyundi, I800
+hyundi, IX20
+hyundi, IX35
+hyundi, Ioniq
+hyundi, Kona
+hyundi, Santa Fe
+hyundi, Terracan
+hyundi, Tucson
+hyundi, Veloster
+merc, A Class
+merc, B Class
+merc, C Class
+merc, CL Class
+merc, CLA Class
+merc, CLC Class
+merc, CLK
+merc, CLS Class
+merc, E Class
+merc, G Class
+merc, GL Class
+merc, GLA Class
+merc, GLB Class
+merc, GLC Class
+merc, GLE Class
+merc, GLS Class
+merc, M Class
+merc, R Class
+merc, S Class
+merc, SL CLASS
+merc, SLK
+merc, V Class
+merc, X-CLASS
+merc,180
+merc,200
+merc,220
+merc,230
+skoda, Citigo
+skoda, Fabia
+skoda, Kamiq
+skoda, Karoq
+skoda, Kodiaq
+skoda, Octavia
+skoda, Rapid
+skoda, Roomster
+skoda, Scala
+skoda, Superb
+skoda, Yeti
+skoda, Yeti Outdoor
+toyota, Auris
+toyota, Avensis
+toyota, Aygo
+toyota, C-HR
+toyota, Camry
+toyota, Corolla
+toyota, GT86
+toyota, Hilux
+toyota, IQ
+toyota, Land Cruiser
+toyota, PROACE VERSO
+toyota, Prius
+toyota, RAV4
+toyota, Supra
+toyota, Urban Cruiser
+toyota, Verso
+toyota, Verso-S
+toyota, Yaris
+vauxhall, Adam
+vauxhall, Agila
+vauxhall, Ampera
+vauxhall, Antara
+vauxhall, Astra
+vauxhall, Cascada
+vauxhall, Combo Life
+vauxhall, Corsa
+vauxhall, Crossland X
+vauxhall, GTC
+vauxhall, Grandland X
+vauxhall, Insignia
+vauxhall, Kadjar
+vauxhall, Meriva
+vauxhall, Mokka
+vauxhall, Mokka X
+vauxhall, Tigra
+vauxhall, Vectra
+vauxhall, Viva
+vauxhall, Vivaro
+vauxhall, Zafira
+vauxhall, Zafira Tourer
+vw, Amarok
+vw, Arteon
+vw, Beetle
+vw, CC
+vw, Caddy
+vw, Caddy Life
+vw, Caddy Maxi
+vw, Caddy Maxi Life
+vw, California
+vw, Caravelle
+vw, Eos
+vw, Fox
+vw, Golf
+vw, Golf SV
+vw, Jetta
+vw, Passat
+vw, Polo
+vw, Scirocco
+vw, Sharan
+vw, Shuttle
+vw, T-Cross
+vw, T-Roc
+vw, Tiguan
+vw, Tiguan Allspace
+vw, Touareg
+vw, Touran
+vw, Up

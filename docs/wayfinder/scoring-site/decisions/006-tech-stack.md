@@ -1,0 +1,39 @@
+# 006 — 기술 스택 선택
+
+- Type: `research`
+- Status: `resolved`
+- Depends on: [004](004-participants-and-limits.md), [005](005-operations-and-hosting.md), [007](007-team-identity.md) — 모두 해결됨
+
+## Question
+
+Vercel / Cloudflare / Netlify 중, 아래 조건을 **무료 티어만으로** 만족하며 두 사람이 만들고 후배가 이어받을 수 있는 구성은 무엇인가?
+
+- 제출 CSV(약 0.5MB, 39,085행) 업로드를 받아 서버 측에서 `answer.csv`와 비교해 RMSE·R²를 계산하는 함수 (001·003)
+- `answer.csv`를 클라이언트에 노출하지 않는 보관 위치 (002·005)
+- 팀별 제출 기록·점수·시각을 저장하고 하루 3회 제한을 판정하는 저장소 (004)
+- 닉네임·팀명·RMSE·R² 리더보드 조회 (004)
+- 인증 없음(007: 자유 기입). 대신 운영자만 제출 기록을 삭제할 수 있는 최소 보호(예: 환경변수 관리자 키)
+
+## Why this matters now
+
+이 결정이 끝나면 맵이 완성되어 `to-spec`으로 넘어갈 수 있다. 세 플랫폼 모두 정적 호스팅은 무료지만, **무료 저장소와 함수 실행 한도**(요청 수, 실행 시간, 메모리, CPU 시간, 카드 등록 요구 여부)가 다르고 이것이 실제 선택을 가른다.
+
+## Evidence and artifacts
+
+- 채점 연산 자체는 가벼움: 39,085행 두 열을 읽어 제곱오차 평균을 내는 정도. 다만 pandas를 쓸지, 함수 런타임(Node/Workers/Python)에서 CSV 파싱을 직접 할지는 플랫폼별 런타임 제약에 달림.
+- 조사 시 확인할 항목(각 플랫폼): 서버리스/엣지 함수의 무료 한도와 요청 본문 크기 제한(0.5MB 업로드 통과 여부), 무료 KV/DB/Blob 제품과 카드 등록 요구 여부, 정적 파일을 함수에서만 읽게 하는 방법, 팀 규모(기수당 팀 수 × 하루 3회 × 프로젝트 기간)로 계산한 실제 사용량이 한도 대비 얼마나 여유 있는지.
+- 조사 결과(2026-09-19): [docs/research/scoring-site-tech-stack.md](../../../research/scoring-site-tech-stack.md) — 세 플랫폼 공식 문서 기반 비교 + 로컬 채점 벤치마크(두 파일 파싱 6–23 ms, 제출만 3–5 ms).
+
+## Conclusion
+
+(2026-09-19, 사용자 확정) 조사 문서의 추천대로 결정: **Vercel Hobby + Python(FastAPI) 함수 + Neon Postgres Free**, 정적 프론트, 저장소는 동아리 GitHub 조직의 공개 저장소(`answer.csv`는 git 밖 Neon 테이블에).
+
+- Vercel을 고른 이유: 유일하게 Python 함수를 정식 지원(노트북 채점 로직 그대로 이식), 함수 한도 300초/2 GB로 여유, 업로드 4.5 MB 한도에 0.5 MB 충분, 비상업 조건 부합.
+- Cloudflare 제외 이유: Workers Free CPU 10 ms가 0.5 MB CSV 파싱에 아슬아슬(문서·벤치마크 모두), 사실상 JS 전용.
+- Netlify 제외 이유: 월 300 크레딧 하드 리밋에 프로덕션 배포 1회 15 크레딧, 소진 시 사이트 전체 중단, Python 함수 없음, 팀원 추가 불가.
+
+## Next implications
+
+- 채점 관련 결정이 모두 해결되어 맵 완성 → `to-spec` 가능.
+- 005의 "계정 소유권"은 Vercel Hobby 기준으로 확정하면 됨: 동아리 GitHub 조직 + 공개 저장소, Vercel/Neon 계정은 동아리 공용 이메일 권장(스펙 또는 운영 문서 항목).
+- 사이트 페이지 구성(홈·채점·리더보드·미니게임)이 정해짐 → MAP Notes에 기록. 미니게임은 채점과 무관한 별도 기능이라 내용이 정해지기 전까지 Not yet specified.

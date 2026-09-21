@@ -126,6 +126,23 @@ li strong, li code { color: var(--ink); }
 .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .status.idle { color: var(--muted); }
 
+/* 홈 히어로: 네트워크 사진 배경. 글자가 있는 왼쪽을 어둡게 덮어 대비를 확보한다. */
+.hero.photo {
+  padding: 32px 30px;
+  border-color: #0b2340;
+  background:
+    linear-gradient(90deg, rgba(3, 14, 30, 0.92) 0%, rgba(3, 14, 30, 0.7) 50%, rgba(3, 14, 30, 0.25) 100%),
+    #06192f url("/assets/hero-network.jpg") center 40% / cover no-repeat;
+  color: #ffffff;
+}
+.hero.photo .lead { color: rgba(255, 255, 255, 0.78); max-width: 520px; }
+.hero.photo .status { color: #5fe0a4; }
+.hero.photo .status.idle { color: rgba(255, 255, 255, 0.6); }
+.hero.photo .btn:not(.primary) { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.28); color: #ffffff; }
+.hero.photo .btn:not(.primary) .icon { color: #ffffff; }
+.hero.photo .btn:not(.primary):hover { background: rgba(255, 255, 255, 0.18); }
+.hero.photo .btn.primary { border-color: var(--accent); }
+
 /* 버튼 */
 .actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn, button {

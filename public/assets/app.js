@@ -41,7 +41,9 @@
 
   function renderShell() {
     const here = location.pathname.replace(/index\.html$/, "");
-    const current = PAGES.find(([href]) => href === here);
+    // 개별 게임 페이지(/games/...)는 미니게임 메뉴 아래에 있는 것으로 본다.
+    const navPath = here.startsWith("/games/") ? "/minigame.html" : here;
+    const current = PAGES.find(([href]) => href === navPath);
     const title = current ? current[1] : OTHER_TITLES[here] || "";
     const nav = PAGES.map(([href, label, ic]) => {
       const cur = current && href === current[0] ? ' aria-current="page"' : "";

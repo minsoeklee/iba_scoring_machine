@@ -98,7 +98,7 @@ main { padding: 24px; width: 100%; max-width: 1200px; }
 }
 .card + .card, .stack-gap > * + * { margin-top: 20px; }
 .card-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 12px; }
-.card-head h2 { flex: 1; white-space: nowrap; }
+.card-head h1, .card-head h2 { flex: 1; white-space: nowrap; }
 .card.flush { padding: 0; overflow: hidden; }
 .card-head .more { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
 .card-head .more .icon { width: 14px; height: 14px; }
@@ -122,6 +122,7 @@ li strong, li code { color: var(--ink); }
 
 /* 히어로 */
 .hero { padding: 24px 26px; display: flex; flex-direction: column; gap: 13px; }
+.hero .card-head { margin-bottom: 0; }
 .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ok); }
 .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .status.idle { color: var(--muted); }
@@ -288,6 +289,46 @@ input[type="file"]::file-selector-button {
 .game-stats .value { font-size: 21px; font-weight: 700; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
 .game-stats .label { color: var(--muted); font-size: 12px; font-weight: 500; }
 
+/* 미니게임 목록 */
+.game-list { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.game-card {
+  display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-card);
+  overflow: hidden; color: var(--ink);
+}
+.game-card:hover { border-color: var(--accent); text-decoration: none; }
+.game-card .thumb { height: 120px; background: #0b1a2e; display: grid; place-items: center; }
+.game-card .thumb svg { height: 76px; }
+.game-card .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
+.game-card .title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+.game-card .desc { font-size: 12.5px; color: var(--ink-2); line-height: 19px; }
+.game-card .meta { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+/* 캔버스 게임 공통 */
+.game-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.game-stage { position: relative; line-height: 0; border-radius: 12px; overflow: hidden; background: #0b1a2e; flex: none; }
+.game-stage canvas { display: block; }
+.game-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background: rgba(6, 16, 32, 0.78); color: #fff; line-height: 1.5; text-align: center; padding: 20px;
+}
+.game-overlay .big { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.game-overlay .small { color: rgba(255, 255, 255, 0.72); }
+.game-side { flex: 1; min-width: 220px; max-width: 300px; display: flex; flex-direction: column; gap: 16px; }
+.game-side .game-stage { display: inline-block; }
+.game-side .game-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 0; }
+.game-side .game-stats > div:nth-child(odd) { padding-left: 0; border-left: 0; }
+.keys { display: grid; grid-template-columns: max-content 1fr; gap: 6px 12px; font-size: 12.5px; margin: 0; }
+.keys dt { margin: 0; }
+.keys dd { margin: 0; color: var(--ink-2); }
+kbd {
+  font-family: var(--mono); font-size: 11.5px;
+  display: inline-block; min-width: 22px; padding: 1px 6px; text-align: center;
+  border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--subtle); color: var(--ink);
+}
+.desktop-only-note { display: none; }
+
 @media (max-width: 1100px) {
   .cols { grid-template-columns: minmax(0, 1fr); }
 }
@@ -304,6 +345,7 @@ input[type="file"]::file-selector-button {
   .sidebar-bottom { display: none; }
   .topbar { height: 52px; padding: 0 16px; }
   .topbar-auth .who { display: none; }
+  .desktop-only-note { display: block; margin-bottom: 16px; color: var(--warn); font-size: 13px; }
   main { padding: 16px; }
   .hero { padding: 20px; }
 }

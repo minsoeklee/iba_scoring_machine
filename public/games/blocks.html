@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>블록깨기 — IBA Scoring Machine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
+  <script src="/assets/app.js" defer></script>
+  <script src="/games/blocks.js" defer></script>
+</head>
+<body>
+<main>
+<p class="desktop-only-note">키보드·마우스로 하는 게임입니다. PC에서 즐겨 주세요.</p>
+<section class="card">
+  <div class="card-head">
+    <h2>블록깨기</h2>
+    <a class="more" href="/minigame.html">미니게임 목록<i data-icon="arrow-right"></i></a>
+  </div>
+  <div class="game-layout">
+    <div class="game-stage">
+      <canvas id="board" width="640" height="480" aria-label="블록깨기 화면"></canvas>
+      <div class="game-overlay" id="overlay" hidden></div>
+    </div>
+    <div class="game-side">
+      <div class="game-stats">
+        <div><div class="label">점수</div><div class="value" id="score">0</div></div>
+        <div><div class="label">최고 기록</div><div class="value" id="best">0</div></div>
+        <div><div class="label">목숨</div><div class="value" id="lives">3</div></div>
+        <div><div class="label">스테이지</div><div class="value" id="stage">1</div></div>
+      </div>
+      <dl class="keys">
+        <dt>마우스</dt><dd>패들 이동</dd>
+        <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>패들 이동</dd>
+        <dt><kbd>Space</kbd> · 클릭</dt><dd>공 쏘기</dd>
+        <dt><kbd>P</kbd></dt><dd>일시정지</dd>
+      </dl>
+      <p class="small">위쪽 줄 블록일수록 점수가 높습니다. 블록을 모두 깨면 공이 빨라진 다음 스테이지가 시작됩니다.</p>
+    </div>
+  </div>
+</section>
+</main>
+</body>
+</html>

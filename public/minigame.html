@@ -10,132 +10,77 @@
   <link rel="stylesheet" href="/assets/style.css">
   <script src="/assets/icons.js" defer></script>
   <script src="/assets/app.js" defer></script>
-  <script src="/assets/minigame-data.js"></script>
 </head>
 <body>
 <main>
-<div class="stack-gap">
-  <section class="card hero">
-    <h1>가격 감 테스트</h1>
-    <p class="lead">train.csv에서 뽑은 중고차 한 대의 정보를 보고 가격(파운드)을 맞혀 보세요. 10대를 맞히면 당신의 RMSE가 나옵니다. 채점·리더보드와는 무관한 장난감입니다.</p>
-    <div class="game-stats">
-      <div><div class="label">진행</div><div class="value" id="progress">0 / 10</div></div>
-      <div><div class="label">내 RMSE</div><div class="value" id="myRmse">–</div></div>
-      <div><div class="label">최근 오차</div><div class="value" id="lastErr">–</div></div>
+<section class="card">
+  <div class="card-head"><h2>미니게임</h2></div>
+  <p class="lead">채점·리더보드와는 무관한 쉬어 가는 게임입니다. 최고 기록은 이 브라우저에만 저장됩니다.</p>
+</section>
+
+<div class="game-list">
+  <a class="game-card" href="/games/price.html">
+    <div class="thumb">
+      <svg viewBox="0 0 120 76" aria-hidden="true">
+        <rect x="14" y="30" width="92" height="26" rx="8" fill="#3ec7e0"/>
+        <path d="M30 30 L42 14 H78 L92 30 Z" fill="#4f7df0"/>
+        <circle cx="36" cy="58" r="9" fill="#e8eefc"/><circle cx="84" cy="58" r="9" fill="#e8eefc"/>
+        <text x="60" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="#0b1a2e">£ ?</text>
+      </svg>
     </div>
-  </section>
-
-  <section class="card">
-    <div class="car" id="car"></div>
-    <form class="guess-row" id="guessForm">
-      <label>내 예상 가격 (£)
-        <input type="number" id="guess" min="0" step="1" inputmode="numeric" autocomplete="off" required>
-      </label>
-      <button type="submit" class="primary" id="guessBtn">제출</button>
-      <button type="button" id="restart" hidden>다시 하기</button>
-    </form>
-  </section>
-
-  <section id="summary" class="card result" hidden></section>
-
-  <section class="card flush">
-    <div class="card-head"><h2>기록</h2></div>
-    <div class="table-wrap">
-      <table class="game-log">
-        <thead><tr><th>#</th><th>차량</th><th class="num">내 예상</th><th class="num">실제</th><th class="num">오차</th></tr></thead>
-        <tbody id="log"></tbody>
-      </table>
+    <div class="body">
+      <span class="title">가격 감 테스트</span>
+      <span class="desc">train.csv의 중고차 10대를 보고 가격을 맞혀 내 RMSE를 확인합니다.</span>
+      <span class="meta">10대 · 약 3분</span>
     </div>
-  </section>
+  </a>
+
+  <a class="game-card" href="/games/tetris.html">
+    <div class="thumb">
+      <svg viewBox="0 0 120 76" aria-hidden="true">
+        <g stroke="#0b1a2e" stroke-width="2">
+          <rect x="24" y="52" width="16" height="16" fill="#4f7df0"/><rect x="40" y="52" width="16" height="16" fill="#4f7df0"/><rect x="56" y="52" width="16" height="16" fill="#4f7df0"/><rect x="24" y="36" width="16" height="16" fill="#4f7df0"/>
+          <rect x="72" y="52" width="16" height="16" fill="#f2c94c"/><rect x="88" y="52" width="16" height="16" fill="#f2c94c"/><rect x="72" y="36" width="16" height="16" fill="#f2c94c"/><rect x="88" y="36" width="16" height="16" fill="#f2c94c"/>
+          <rect x="48" y="4" width="16" height="16" fill="#a77bf3"/><rect x="32" y="20" width="16" height="16" fill="#a77bf3"/><rect x="48" y="20" width="16" height="16" fill="#a77bf3"/><rect x="64" y="20" width="16" height="16" fill="#a77bf3"/>
+        </g>
+      </svg>
+    </div>
+    <div class="body">
+      <span class="title">테트리스</span>
+      <span class="desc">떨어지는 블록을 돌리고 쌓아 줄을 없앱니다. 10줄마다 빨라집니다.</span>
+      <span class="meta" data-best="iba.best.tetris">키보드</span>
+    </div>
+  </a>
+
+  <a class="game-card" href="/games/blocks.html">
+    <div class="thumb">
+      <svg viewBox="0 0 120 76" aria-hidden="true">
+        <g>
+          <rect x="8" y="6" width="20" height="8" rx="2" fill="#ef6b6b"/><rect x="31" y="6" width="20" height="8" rx="2" fill="#ef6b6b"/><rect x="54" y="6" width="20" height="8" rx="2" fill="#ef6b6b"/><rect x="77" y="6" width="20" height="8" rx="2" fill="#ef6b6b"/><rect x="100" y="6" width="12" height="8" rx="2" fill="#ef6b6b"/>
+          <rect x="8" y="17" width="20" height="8" rx="2" fill="#f2c94c"/><rect x="54" y="17" width="20" height="8" rx="2" fill="#f2c94c"/><rect x="77" y="17" width="20" height="8" rx="2" fill="#f2c94c"/>
+          <rect x="31" y="28" width="20" height="8" rx="2" fill="#3ec7e0"/><rect x="77" y="28" width="20" height="8" rx="2" fill="#3ec7e0"/><rect x="100" y="28" width="12" height="8" rx="2" fill="#3ec7e0"/>
+        </g>
+        <circle cx="58" cy="50" r="4" fill="#fff"/>
+        <rect x="42" y="64" width="34" height="6" rx="3" fill="#e8eefc"/>
+      </svg>
+    </div>
+    <div class="body">
+      <span class="title">블록깨기</span>
+      <span class="desc">패들로 공을 튕겨 블록을 모두 깹니다. 스테이지마다 공이 빨라집니다.</span>
+      <span class="meta" data-best="iba.best.blocks">마우스 · 키보드</span>
+    </div>
+  </a>
 </div>
 </main>
 
 <script>
-(function () {
-  const ROUNDS = 10;
-  const data = window.CAR_SAMPLE || [];
-  const carEl = document.getElementById("car");
-  const form = document.getElementById("guessForm");
-  const guessEl = document.getElementById("guess");
-  const guessBtn = document.getElementById("guessBtn");
-  const restartBtn = document.getElementById("restart");
-  const logEl = document.getElementById("log");
-  const summaryEl = document.getElementById("summary");
-  const progressEl = document.getElementById("progress");
-  const myRmseEl = document.getElementById("myRmse");
-  const lastErrEl = document.getElementById("lastErr");
-
-  const fuelKo = { Petrol: "휘발유", Diesel: "경유", Hybrid: "하이브리드", Electric: "전기", Other: "기타" };
-  const brandKo = { audi: "Audi", bmw: "BMW", merc: "Mercedes", vw: "Volkswagen", ford: "Ford", toyota: "Toyota", hyundi: "Hyundai", skoda: "Skoda", vauxhall: "Vauxhall", focus: "Ford Focus", cclass: "Mercedes C-Class" };
-
-  let deck = [], round = 0, sqErrSum = 0;
-  const int = (v) => v.toLocaleString("ko-KR");
-
-  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-
-  function title(c) { return `${brandKo[c.brand] || c.brand} ${c.model}`; }
-
-  function renderCar(c) {
-    carEl.innerHTML = `
-      <p class="title">${title(c)} <span class="small">(${c.year})</span></p>
-      <dl class="facts">
-        <dt>주행거리</dt><dd>${int(c.mileage)} mi</dd>
-        <dt>연료</dt><dd>${fuelKo[c.fuelType] || c.fuelType}</dd>
-        <dt>변속기</dt><dd>${c.transmission}</dd>
-        <dt>배기량</dt><dd>${c.engineSize.toFixed(1)} L</dd>
-        <dt>연비</dt><dd>${c.mpg} mpg</dd>
-      </dl>`;
-  }
-
-  function start() {
-    deck = shuffle(data.slice()).slice(0, ROUNDS);
-    round = 0; sqErrSum = 0;
-    logEl.innerHTML = ""; summaryEl.hidden = true; restartBtn.hidden = true;
-    guessEl.disabled = false; guessBtn.disabled = false; guessEl.value = "";
-    myRmseEl.textContent = "–"; lastErrEl.textContent = "–";
-    progressEl.textContent = `0 / ${ROUNDS}`;
-    renderCar(deck[0]);
-    guessEl.focus();
-  }
-
-  function finish() {
-    const rmse = Math.sqrt(sqErrSum / ROUNDS);
-    let verdict;
-    if (rmse < 2500) verdict = "딜러급. 모델보다 정확할지도.";
-    else if (rmse < 4500) verdict = "괜찮은 감. 베이스라인 DecisionTree는 이 정도 나옵니다.";
-    else if (rmse < 8000) verdict = "평균적. 주행거리와 연식을 더 보세요.";
-    else if (rmse < 13190) verdict = "sample_submission(무작위 값, 13,190)보다는 낫습니다.";
-    else verdict = "무작위 값(sample_submission, 13,190)보다 못했습니다. 연식·주행거리부터 다시 보세요.";
-    summaryEl.hidden = false;
-    summaryEl.innerHTML = `<p><strong>10대 완료</strong></p><div class="score"><div><div class="label">내 RMSE</div><div class="value">${rmse.toLocaleString("ko-KR", { maximumFractionDigits: 0 })}</div></div></div><p>${verdict}</p>`;
-    guessEl.disabled = true; guessBtn.disabled = true; restartBtn.hidden = false;
-  }
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    if (round >= ROUNDS) return;
-    const guess = Number(guessEl.value);
-    if (!Number.isFinite(guess) || guess < 0) return;
-    const c = deck[round];
-    const err = guess - c.price;
-    sqErrSum += err * err;
-    round += 1;
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${round}</td><td>${title(c)} (${c.year})</td><td class="num">${int(guess)}</td><td class="num">${int(c.price)}</td><td class="num">${err > 0 ? "+" : ""}${int(err)}</td>`;
-    logEl.prepend(tr);
-    progressEl.textContent = `${round} / ${ROUNDS}`;
-    myRmseEl.textContent = Math.sqrt(sqErrSum / round).toLocaleString("ko-KR", { maximumFractionDigits: 0 });
-    lastErrEl.textContent = `${err > 0 ? "+" : ""}${int(err)}`;
-    guessEl.value = "";
-    if (round >= ROUNDS) finish(); else { renderCar(deck[round]); guessEl.focus(); }
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("[data-best]").forEach((el) => {
+    let best = 0;
+    try { best = Number(localStorage.getItem(el.dataset.best)) || 0; } catch (_) {}
+    if (best > 0) el.textContent += ` · 최고 기록 ${best.toLocaleString("ko-KR")}점`;
   });
-
-  restartBtn.addEventListener("click", start);
-  document.addEventListener("DOMContentLoaded", () => {
-    if (data.length < ROUNDS) { carEl.textContent = "데이터를 불러오지 못했습니다."; return; }
-    start();
-  });
-})();
+});
 </script>
 </body>
 </html>

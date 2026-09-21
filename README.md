@@ -34,7 +34,8 @@ scoring/             # 채점 도메인 로직 (프레임워크·DB 무관)
   teams.py           #   팀명·닉네임 정규화
   clock.py           #   KST 하루 경계, 일일 한도
 public/              # 정적 사이트 (Vercel CDN이 그대로 서빙)
-  index.html, submit.html, leaderboard.html, minigame.html, login.html, signup.html
+  index.html, submit.html, leaderboard.html, minigame.html(게임 목록), login.html, signup.html
+  games/             #   미니게임: price(가격 감 테스트), tetris, blocks(블록깨기). 브라우저에서만 동작
   assets/            #   style.css, app.js(셸·공통), icons.js, contest.js(대회 일정·공지), minigame-data.js
   data/              #   train/test/sample_submission/brand_model.csv (후배 배포용)
 scripts/             # 운영 스크립트: schema.sql, load_answers.py, reset_season.py

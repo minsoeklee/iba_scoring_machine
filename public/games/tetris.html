@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>테트리스 — IBA Scoring Machine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
+  <script src="/assets/app.js" defer></script>
+  <script src="/games/tetris.js" defer></script>
+</head>
+<body>
+<main>
+<p class="desktop-only-note">키보드로 하는 게임입니다. PC에서 즐겨 주세요.</p>
+<section class="card">
+  <div class="card-head">
+    <h2>테트리스</h2>
+    <a class="more" href="/minigame.html">미니게임 목록<i data-icon="arrow-right"></i></a>
+  </div>
+  <div class="game-layout">
+    <div class="game-stage">
+      <canvas id="board" width="280" height="560" aria-label="테트리스 보드"></canvas>
+      <div class="game-overlay" id="overlay" hidden></div>
+    </div>
+    <div class="game-side">
+      <div class="game-stats">
+        <div><div class="label">점수</div><div class="value" id="score">0</div></div>
+        <div><div class="label">최고 기록</div><div class="value" id="best">0</div></div>
+        <div><div class="label">줄</div><div class="value" id="lines">0</div></div>
+        <div><div class="label">레벨</div><div class="value" id="level">1</div></div>
+      </div>
+      <div>
+        <p class="small">다음 블록</p>
+        <div class="game-stage"><canvas id="next" width="110" height="88"></canvas></div>
+      </div>
+      <dl class="keys">
+        <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>이동</dd>
+        <dt><kbd>↑</kbd> <kbd>X</kbd></dt><dd>회전</dd>
+        <dt><kbd>↓</kbd></dt><dd>빠르게 내리기</dd>
+        <dt><kbd>Space</kbd></dt><dd>바로 떨어뜨리기</dd>
+        <dt><kbd>P</kbd></dt><dd>일시정지</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+</main>
+</body>
+</html>

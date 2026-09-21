@@ -96,6 +96,15 @@
       const p = (n) => String(n).padStart(2, "0");
       return `${d.getMonth() + 1}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
     },
+    // "방금 전", "12분 전", "3시간 전", "2일 전". 일주일이 넘으면 날짜로 쓴다.
+    ago: (iso) => {
+      const min = Math.floor((Date.now() - new Date(iso)) / 60000);
+      if (min < 1) return "방금 전";
+      if (min < 60) return `${min}분 전`;
+      if (min < 60 * 24) return `${Math.floor(min / 60)}시간 전`;
+      if (min < 60 * 24 * 7) return `${Math.floor(min / (60 * 24))}일 전`;
+      return fmt.time(iso);
+    },
   };
 
   // 리더보드 표의 <tr>들. myTeam과 같은 팀 행은 강조한다.
@@ -109,7 +118,7 @@
         <td><div class="team"><span class="avatar">${teamIcon}</span><div><div class="name">${esc(row.team)}${mine ? ' <span class="tag">우리 팀</span>' : ""}</div><div class="sub">${esc(row.nickname)}</div></div></div></td>
         <td class="num score-main">${fmt.rmse(row.rmse)}</td>
         <td class="num soft">${fmt.r2(row.r2)}</td>
-        <td class="num faint">${fmt.time(row.submitted_at)}</td>
+        <td class="num faint" title="${fmt.time(row.submitted_at)}">${fmt.ago(row.submitted_at)}</td>
       </tr>`;
     }).join("");
   }

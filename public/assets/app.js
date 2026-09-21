@@ -82,7 +82,7 @@
         location.reload();
       });
     } else {
-      card.innerHTML = `<a class="me" href="${authLink("login")}"><span class="avatar">${icon("user")}</span><span><div class="name">로그인하지 않음</div><div class="sub">로그인하면 제출할 수 있습니다</div></span></a>`;
+      card.innerHTML = `<a class="me" href="${authLink("login")}"><span class="avatar">${icon("user")}</span><span class="name">로그인</span></a>`;
       bar.innerHTML = `<a class="btn sm" href="${authLink("login")}">로그인</a><a class="btn sm primary" href="${authLink("signup")}">회원가입</a>`;
     }
   }
@@ -123,6 +123,12 @@
     }).join("");
   }
 
-  window.IBA = { icon, esc, fmt, api, me, nextPath, authLink, boardRows };
+  // 탭이 보이는 동안 ms마다 fn을 부른다. 숨겨졌던 탭으로 돌아오면 바로 한 번 부른다.
+  function refreshEvery(fn, ms) {
+    setInterval(() => { if (!document.hidden) fn(); }, ms);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) fn(); });
+  }
+
+  window.IBA = { icon, esc, fmt, api, me, nextPath, authLink, boardRows, refreshEvery };
   document.addEventListener("DOMContentLoaded", renderShell);
 })();

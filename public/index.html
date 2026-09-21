@@ -176,7 +176,11 @@
     foot.hidden = false;
   }
 
-  document.addEventListener("DOMContentLoaded", () => { render(); loadBoard(); });
+  document.addEventListener("DOMContentLoaded", () => {
+    render();
+    loadBoard();
+    window.IBA.refreshEvery(loadBoard, 60000);
+  });
 })();
 </script>
 </body>

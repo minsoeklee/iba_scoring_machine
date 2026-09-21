@@ -56,11 +56,14 @@
     table.hidden = !hasRows;
     empty.hidden = hasRows;
     const now = new Date();
-    meta.textContent = `${rows.length}팀 · ${f.time(now.toISOString())} 기준`;
+    meta.textContent = `${rows.length}팀 · ${f.time(now.toISOString())} 기준 · 1분마다 자동 갱신`;
   }
 
   btn.addEventListener("click", load);
-  document.addEventListener("DOMContentLoaded", load);
+  document.addEventListener("DOMContentLoaded", () => {
+    load();
+    window.IBA.refreshEvery(load, 60000);
+  });
 })();
 </script>
 </body>

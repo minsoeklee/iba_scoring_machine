@@ -43,25 +43,15 @@
   const table = document.getElementById("board");
   const btn = document.getElementById("refresh");
 
-  function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
-
   async function load() {
     btn.disabled = true;
     meta.textContent = "불러오는 중…";
-    const r = await window.IBA.api("/api/leaderboard");
+    const [r, user] = await Promise.all([window.IBA.api("/api/leaderboard"), window.IBA.me]);
     btn.disabled = false;
     if (!r.ok) { meta.textContent = `불러오지 못했습니다 (HTTP ${r.status})`; return; }
     const f = window.IBA.fmt;
     const rows = r.body;
-    const teamIcon = window.IBA.icon("users");
-    tbody.innerHTML = rows.map((row) => `
-      <tr>
-        <td><span class="rank-badge${row.rank === 1 ? " first" : ""}">${row.rank}</span></td>
-        <td><div class="team"><span class="avatar">${teamIcon}</span><div><div class="name">${esc(row.team)}</div><div class="sub">${esc(row.nickname)}</div></div></div></td>
-        <td class="num score-main">${f.rmse(row.rmse)}</td>
-        <td class="num soft">${f.r2(row.r2)}</td>
-        <td class="num faint">${f.time(row.submitted_at)}</td>
-      </tr>`).join("");
+    tbody.innerHTML = window.IBA.boardRows(rows, user && user.team);
     const hasRows = rows.length > 0;
     table.hidden = !hasRows;
     empty.hidden = hasRows;

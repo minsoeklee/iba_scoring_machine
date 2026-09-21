@@ -1,4 +1,4 @@
-from tests.conftest import ADMIN, ANSWER_ROWS, csv_bytes, perfect_rows, submit
+from tests.conftest import ADMIN, ANSWER_ROWS, csv_bytes, perfect_rows, quota, submit
 
 
 def offset_rows(delta: float):
@@ -44,7 +44,7 @@ def test_quota_resets_at_kst_midnight(client, clock):
 
 def test_quota_endpoint_reports_usage(client):
     submit(client, csv_bytes(perfect_rows()))
-    q = client.get("/api/quota", params={"team": "3조"}).json()
+    q = quota(client).json()
     assert q == {
         "used_today": 1,
         "remaining_today": 2,
@@ -97,7 +97,7 @@ def test_admin_delete_restores_quota_and_removes_from_leaderboard(client):
     r = client.delete(f"/api/submissions/{subs[0]['id']}", headers=ADMIN)
     assert r.status_code == 200
 
-    assert client.get("/api/quota", params={"team": "A"}).json()["remaining_today"] == 1
+    assert quota(client, "A").json()["remaining_today"] == 1
     subs = client.get("/api/submissions", params={"team": "A"}, headers=ADMIN).json()
     assert subs[0]["deleted_at"] is not None
 

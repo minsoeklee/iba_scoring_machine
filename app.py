@@ -1,9 +1,13 @@
 """채점 사이트 API. Vercel Python 런타임이 이 파일의 `app`을 찾아 실행한다.
 
 엔드포인트 (스펙 "API 계약"):
-- POST   /api/submit                 팀명·닉네임·CSV → 채점·기록
+- POST   /api/signup                 가입(아이디·비밀번호·닉네임·팀명) → 세션 쿠키
+- POST   /api/login                  로그인 → 세션 쿠키
+- POST   /api/logout                 세션 쿠키 삭제
+- GET    /api/me                     로그인한 사용자 (로그인하지 않았으면 null)
+- POST   /api/submit                 (로그인) CSV → 채점·기록
 - GET    /api/leaderboard            팀별 최고 기록
-- GET    /api/quota?team=            오늘 남은 횟수
+- GET    /api/quota                  (로그인) 우리 팀 오늘 남은 횟수
 - GET    /api/submissions?team=      (관리자) 팀 제출 목록
 - DELETE /api/submissions/{id}       (관리자) 소프트 삭제
 
@@ -18,14 +22,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
+from fastapi import Cookie, Depends, FastAPI, File, Header, HTTPException, Request, Response, UploadFile
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
+import auth
 from scoring import clock
 from scoring.metrics import score
 from scoring.parse import SubmissionError, parse_submission
 from scoring.teams import NameError_, clean_nickname, clean_team_display, normalize_team
-from store import Answers, PostgresStore, Store, Submission
+from store import Answers, DuplicateUsername, PostgresStore, Store, Submission, User
 
 app = FastAPI(title="IBA Scoring Machine", docs_url=None, redoc_url=None)
 
@@ -72,7 +78,40 @@ def require_admin(x_admin_key: str | None = Header(default=None)) -> None:
         raise HTTPException(status_code=401, detail="관리자 키가 올바르지 않습니다.")
 
 
+def current_user(
+    store: Store = Depends(get_store),
+    iba_session: str | None = Cookie(default=None),
+) -> User | None:
+    user_id = auth.read_session(iba_session)
+    return store.get_user(user_id) if user_id is not None else None
+
+
+def require_user(user: User | None = Depends(current_user)) -> User:
+    if user is None:
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
+    return user
+
+
 # --- 응답 도우미 ---------------------------------------------------------------
+
+
+def _user_body(u: User) -> dict:
+    return {"username": u.username, "nickname": u.nickname, "team": u.team_display}
+
+
+def _set_session(response: Response, u: User) -> None:
+    response.set_cookie(
+        auth.SESSION_COOKIE,
+        auth.make_session(u.id),
+        max_age=auth.SESSION_TTL,
+        httponly=True,
+        samesite="lax",
+        secure=bool(os.environ.get("VERCEL")),
+    )
+
+
+def _bad_request(code: str, message: str) -> JSONResponse:
+    return JSONResponse(status_code=400, content={"error_code": code, "message": message})
 
 
 def _quota_body(store: Store, team_key: str, now: datetime) -> dict:
@@ -119,22 +158,88 @@ def _submission_row(s: Submission) -> dict:
 # --- 엔드포인트 ----------------------------------------------------------------
 
 
+class SignupBody(BaseModel):
+    username: str
+    password: str
+    nickname: str
+    team: str
+
+
+class LoginBody(BaseModel):
+    username: str
+    password: str
+
+
+@app.post("/api/signup")
+def signup(
+    body: SignupBody,
+    response: Response,
+    store: Store = Depends(get_store),
+    now_fn: Callable[[], datetime] = Depends(get_now),
+):
+    try:
+        username = auth.clean_username(body.username)
+        auth.check_password_rules(body.password)
+        nickname = clean_nickname(body.nickname)
+        team_key = normalize_team(body.team)
+        team_display = clean_team_display(body.team)
+    except auth.AccountError as e:
+        return _bad_request("bad_account", str(e))
+    except NameError_ as e:
+        return _bad_request("bad_name", str(e))
+
+    # 같은 팀의 첫 표기를 유지한다(리더보드 표기 일관성).
+    user = User(
+        id=0,
+        username=username,
+        password_hash=auth.hash_password(body.password),
+        nickname=nickname,
+        team_key=team_key,
+        team_display=store.first_team_display(team_key) or team_display,
+        created_at=now_fn(),
+    )
+    try:
+        store.create_user(user)
+    except DuplicateUsername:
+        return JSONResponse(
+            status_code=409, content={"error_code": "username_taken", "message": "이미 쓰이는 아이디입니다."}
+        )
+    _set_session(response, user)
+    return _user_body(user)
+
+
+@app.post("/api/login")
+def login(body: LoginBody, response: Response, store: Store = Depends(get_store)):
+    user = store.get_user_by_username(body.username.strip().lower())
+    if user is None or not auth.verify_password(body.password, user.password_hash):
+        return JSONResponse(
+            status_code=401,
+            content={"error_code": "bad_login", "message": "아이디 또는 비밀번호가 올바르지 않습니다."},
+        )
+    _set_session(response, user)
+    return _user_body(user)
+
+
+@app.post("/api/logout")
+def logout(response: Response):
+    response.delete_cookie(auth.SESSION_COOKIE)
+    return {"ok": True}
+
+
+@app.get("/api/me")
+def me(user: User | None = Depends(current_user)):
+    return _user_body(user) if user else None
+
+
 @app.post("/api/submit")
 async def submit(
-    team: str = Form(...),
-    nickname: str = Form(...),
     file: UploadFile = File(...),
+    user: User = Depends(require_user),
     store: Store = Depends(get_store),
     now_fn: Callable[[], datetime] = Depends(get_now),
     answers: Answers = Depends(get_answers),
 ):
-    try:
-        team_key = normalize_team(team)
-        team_display = clean_team_display(team)
-        nick = clean_nickname(nickname)
-    except NameError_ as e:
-        return JSONResponse(status_code=400, content={"error_code": "bad_name", "message": str(e)})
-
+    team_key = user.team_key
     now = now_fn()
     quota = _quota_body(store, team_key, now)
     if quota["remaining_today"] <= 0:
@@ -155,13 +260,11 @@ async def submit(
 
     result = score(answers.prices, parsed.prices)
 
-    # 같은 팀의 첫 표기를 유지한다(리더보드 표기 일관성).
-    display = store.first_team_display(team_key) or team_display
     record = Submission(
         id=0,
         team_key=team_key,
-        team_display=display,
-        nickname=nick,
+        team_display=user.team_display,
+        nickname=user.nickname,
         rmse=result.rmse,
         r2=result.r2,
         negative_clipped=result.negative_clipped,
@@ -176,7 +279,7 @@ async def submit(
         "remaining_today": quota["remaining_today"] - 1,
         "resets_at": quota["resets_at"],
         "rank": _team_rank(store, team_key),
-        "team": display,
+        "team": user.team_display,
     }
 
 
@@ -186,12 +289,12 @@ def leaderboard(store: Store = Depends(get_store)):
 
 
 @app.get("/api/quota")
-def quota(team: str, store: Store = Depends(get_store), now_fn: Callable[[], datetime] = Depends(get_now)):
-    try:
-        team_key = normalize_team(team)
-    except NameError_ as e:
-        return JSONResponse(status_code=400, content={"error_code": "bad_name", "message": str(e)})
-    body = _quota_body(store, team_key, now_fn())
+def quota(
+    user: User = Depends(require_user),
+    store: Store = Depends(get_store),
+    now_fn: Callable[[], datetime] = Depends(get_now),
+):
+    body = _quota_body(store, user.team_key, now_fn())
     body["limit"] = clock.DAILY_LIMIT
     return body
 

@@ -80,9 +80,12 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--subtle); b
   background: var(--panel);
   border-bottom: 1px solid var(--line);
 }
-.topbar .page { font-size: 15px; font-weight: 600; }
-.topbar .icon { width: 14px; height: 14px; color: var(--muted); }
+.topbar .where { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+.topbar .page { font-size: 15px; font-weight: 600; white-space: nowrap; }
+.topbar .icon { width: 14px; height: 14px; color: var(--muted); flex: none; }
 .topbar .sub { font-size: 13px; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar-auth { display: flex; align-items: center; gap: 8px; flex: none; }
+.topbar-auth .who { font-size: 13px; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
 
 main { padding: 24px; width: 100%; max-width: 1200px; }
 
@@ -97,6 +100,8 @@ main { padding: 24px; width: 100%; max-width: 1200px; }
 .card-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-bottom: 12px; }
 .card-head h2 { flex: 1; white-space: nowrap; }
 .card.flush { padding: 0; overflow: hidden; }
+.card-head .more { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.card-head .more .icon { width: 14px; height: 14px; }
 .card.flush > .card-head { padding: 16px 20px 12px; margin: 0; }
 .card-foot { padding: 11px 20px; font-size: 12px; color: var(--muted); }
 
@@ -137,7 +142,8 @@ li strong, li code { color: var(--ink); }
 .btn.primary, button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); padding: 0 18px; }
 .btn.primary .icon, button.primary .icon { color: var(--accent-ink); }
 .btn.primary:hover, button.primary:hover { background: #2749c7; }
-.btn.block { width: 100%; height: 40px; font-size: 13px; }
+.btn.block, button.block { width: 100%; height: 40px; font-size: 13px; }
+.btn.sm, button.sm { height: 34px; padding: 0 12px; font-size: 13px; }
 button.ghost { height: 30px; padding: 0 12px; border-radius: 15px; font-size: 12.5px; color: var(--ink-2); }
 button.ghost .icon { width: 13px; height: 13px; color: var(--muted); }
 button:disabled { opacity: 0.5; cursor: default; }
@@ -205,17 +211,24 @@ td.num { font-variant-numeric: tabular-nums; }
 .team .avatar .icon { width: 15px; height: 15px; }
 .team .name { font-size: 13.5px; font-weight: 600; line-height: 1.35; }
 .team .sub { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+tr.mine td { background: #f5f7fe; }
+.tag { display: inline-flex; align-items: center; height: 19px; padding: 0 6px; margin-left: 4px; border: 1px solid var(--accent); border-radius: 5px; font-size: 10.5px; font-weight: 600; color: var(--accent); vertical-align: 1px; }
 td.score-main { font-size: 14.5px; font-weight: 700; letter-spacing: -0.2px; color: var(--ink); }
 td.soft { color: var(--ink-2); font-size: 13px; }
 td.faint { color: var(--muted); font-size: 12.5px; }
 .board-meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
 .empty { color: var(--muted); padding: 24px 20px; margin: 0; }
 
+/* 로그인·회원가입 */
+.auth-card { max-width: 420px; margin: 24px auto 0; padding: 28px; }
+.auth-card h1 { margin-bottom: 6px; }
+.auth-card .switch { margin-top: 16px; font-size: 13px; color: var(--ink-2); text-align: center; }
+
 /* 폼 */
 form.stack { display: grid; gap: 16px; }
 label { display: grid; gap: 6px; font-weight: 600; font-size: 13px; }
 label .hint { font-weight: 400; font-size: 12px; color: var(--muted); }
-input[type="text"], input[type="number"] {
+input[type="text"], input[type="password"], input[type="number"] {
   font: inherit; font-size: 14px;
   height: 40px; padding: 0 12px;
   border: 1px solid var(--line);
@@ -273,6 +286,7 @@ input[type="file"]::file-selector-button {
   .nav a .icon { width: 16px; height: 16px; }
   .sidebar-bottom { display: none; }
   .topbar { height: 52px; padding: 0 16px; }
+  .topbar-auth .who { display: none; }
   main { padding: 16px; }
   .hero { padding: 20px; }
 }

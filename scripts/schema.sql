@@ -6,10 +6,20 @@ CREATE TABLE IF NOT EXISTS answers (
     price   DOUBLE PRECISION NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS users (
+    id               BIGSERIAL PRIMARY KEY,
+    username         TEXT NOT NULL UNIQUE, -- 로그인 아이디 (소문자)
+    password_hash    TEXT NOT NULL,        -- pbkdf2_sha256$반복$솔트$해시
+    nickname         TEXT NOT NULL,
+    team_key         TEXT NOT NULL,        -- 정규화된 팀명
+    team_display     TEXT NOT NULL,        -- 그 팀으로 처음 가입한 사람의 표기
+    created_at       TIMESTAMPTZ NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS submissions (
     id               BIGSERIAL PRIMARY KEY,
     team_key         TEXT NOT NULL,       -- 정규화된 팀명 (하루 3회 판정·리더보드 그룹 기준)
-    team_display     TEXT NOT NULL,       -- 처음 입력된 표기
+    team_display     TEXT NOT NULL,       -- 제출자 팀의 표기 (users.team_display)
     nickname         TEXT NOT NULL,
     rmse             DOUBLE PRECISION NOT NULL,
     r2               DOUBLE PRECISION NOT NULL,

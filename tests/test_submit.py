@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from tests.conftest import ANSWER_ROWS, csv_bytes, perfect_rows, submit
+from tests.conftest import ANSWER_ROWS, csv_bytes, perfect_rows, quota, submit
 
 
 def test_perfect_submission_scores_zero_rmse(client):
@@ -107,15 +107,8 @@ def test_non_utf8_rejected(client):
     assert r.json()["error_code"] == "not_utf8"
 
 
-@pytest.mark.parametrize("team", ["", "   ", "x" * 41])
-def test_bad_team_name_rejected(client, team):
-    r = submit(client, csv_bytes(perfect_rows()), team=team)
-    assert r.status_code == 400
-    assert r.json()["error_code"] == "bad_name"
-
-
 def test_quota_not_consumed_by_invalid_file(client):
     submit(client, csv_bytes(perfect_rows(), header="wrong"))
-    q = client.get("/api/quota", params={"team": "3조"}).json()
+    q = quota(client).json()
     assert q["used_today"] == 0
     assert q["remaining_today"] == 3

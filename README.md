@@ -17,7 +17,7 @@
 
 - 제출: `sample_submission.csv`와 같은 `id,price` CSV. 코드 실행 없음.
 - 채점: **행 순서 기준**(test.csv의 id가 고유하지 않음). RMSE가 순위 기준, R²는 보조.
-- 참가: 로그인 없이 팀명·닉네임 자유 기입. 팀당 하루 3회(KST 자정 초기화).
+- 참가: 아이디·비밀번호로 가입하고, 가입 때 적은 팀명으로 팀이 묶인다. 제출만 로그인 필요. 팀당 하루 3회(KST 자정 초기화).
 - 리더보드: 팀별 최고 기록 1건 — 닉네임·팀명·RMSE·R².
 - 스택: Vercel Hobby + Python(FastAPI) + Neon Postgres Free + 정적 프론트. 비용 0원.
 - 페이지: 홈 / 채점 / 리더보드 / 미니게임(순수 프론트).
@@ -26,6 +26,7 @@
 
 ```
 app.py               # FastAPI 앱 (Vercel Python 런타임 진입점). /api/* 엔드포인트
+auth.py              # 비밀번호 해시(PBKDF2), 서명 쿠키 세션
 store.py             # 저장소 계층: PostgresStore(Neon) / MemoryStore(테스트·로컬)
 scoring/             # 채점 도메인 로직 (프레임워크·DB 무관)
   parse.py           #   제출 CSV 검증·파싱
@@ -33,7 +34,7 @@ scoring/             # 채점 도메인 로직 (프레임워크·DB 무관)
   teams.py           #   팀명·닉네임 정규화
   clock.py           #   KST 하루 경계, 일일 한도
 public/              # 정적 사이트 (Vercel CDN이 그대로 서빙)
-  index.html, submit.html, leaderboard.html, minigame.html
+  index.html, submit.html, leaderboard.html, minigame.html, login.html, signup.html
   assets/            #   style.css, app.js(셸·공통), icons.js, contest.js(대회 일정·공지), minigame-data.js
   data/              #   train/test/sample_submission/brand_model.csv (후배 배포용)
 scripts/             # 운영 스크립트: schema.sql, load_answers.py, reset_season.py
@@ -51,7 +52,7 @@ uv venv --python 3.12 .venv && uv pip install -r requirements-dev.txt
 DB 없이 돌리려면 정답 CSV 경로만 넘긴다(제출 기록은 메모리에만, 재시작하면 사라짐):
 
 ```bash
-DEV_ANSWER_CSV=/path/to/answer.csv ADMIN_KEY=dev .venv/bin/uvicorn app:app --port 8765
+DEV_ANSWER_CSV=/path/to/answer.csv ADMIN_KEY=dev SESSION_SECRET=dev .venv/bin/uvicorn app:app --port 8765
 ```
 
 테스트:
@@ -71,7 +72,7 @@ ANSWER_CSV=/path/to/answer.csv .venv/bin/pytest tests/test_real_data.py
 1. Neon에서 무료 프로젝트를 만들고 연결 문자열을 받는다.
 2. 스키마 생성: `psql "$DATABASE_URL" -f scripts/schema.sql`
 3. 정답 적재: `DATABASE_URL=... .venv/bin/python scripts/load_answers.py /path/to/answer.csv`
-4. Vercel에서 이 저장소를 가져오고 환경변수 두 개를 넣는다: `DATABASE_URL`, `ADMIN_KEY`(긴 무작위 문자열).
+4. Vercel에서 이 저장소를 가져오고 환경변수 세 개를 넣는다: `DATABASE_URL`, `ADMIN_KEY`, `SESSION_SECRET`(둘 다 긴 무작위 문자열, 서로 다르게). `SESSION_SECRET`을 바꾸면 모든 사용자가 로그아웃된다.
 5. 배포 후 확인: `/api/health`, 공개 저장소·정적 경로에 `answer.csv`가 없는지, 첫 요청 소요 시간.
 
 ## 운영

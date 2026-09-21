@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>로그인 — IBA Scoring Machine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+<main>
+<section class="card auth-card">
+  <h1>로그인</h1>
+  <p class="lead">모델을 제출하려면 로그인하세요.</p>
+  <form class="stack" id="form" novalidate>
+    <label>아이디
+      <input type="text" name="username" autocomplete="username" autocapitalize="off" required>
+    </label>
+    <label>비밀번호
+      <input type="password" name="password" autocomplete="current-password" required>
+    </label>
+    <p class="msg-error" id="error" hidden></p>
+    <button type="submit" class="primary block" id="submitBtn">로그인</button>
+  </form>
+  <p class="switch">계정이 없나요? <a id="toSignup" href="/signup.html">회원가입</a></p>
+</section>
+</main>
+
+<script>
+(function () {
+  const form = document.getElementById("form");
+  const errorEl = document.getElementById("error");
+  const btn = document.getElementById("submitBtn");
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("toSignup").href = "/signup.html" + location.search;
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const body = { username: form.username.value, password: form.password.value };
+    btn.disabled = true;
+    errorEl.hidden = true;
+    const r = await window.IBA.api("/api/login", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+    btn.disabled = false;
+    if (r.ok) { location.href = window.IBA.nextPath(); return; }
+    errorEl.textContent = (r.body && r.body.message) || `로그인하지 못했습니다 (HTTP ${r.status})`;
+    errorEl.hidden = false;
+  });
+})();
+</script>
+</body>
+</html>

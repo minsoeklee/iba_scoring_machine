@@ -3,6 +3,7 @@
 두 구현은 같은 규칙을 지킨다:
 - 삭제된 제출(deleted_at IS NOT NULL)은 리더보드·오늘 횟수·순위 계산에서 제외한다.
 - 리더보드는 팀별 최고 기록 1건: RMSE 오름차순, 같으면 R² 내림차순, 같으면 먼저 제출한 쪽.
+- 아이디(username)는 중복될 수 없다. 팀 표기는 그 팀으로 처음 가입한 사람의 표기를 따른다.
 """
 
 from __future__ import annotations
@@ -17,6 +18,21 @@ from typing import Protocol
 class Answers:
     ids: list[int]
     prices: list[float]
+
+
+class DuplicateUsername(Exception):
+    pass
+
+
+@dataclass
+class User:
+    id: int
+    username: str
+    password_hash: str
+    nickname: str
+    team_key: str
+    team_display: str
+    created_at: datetime
 
 
 @dataclass
@@ -68,8 +84,11 @@ def _rank(rows: list[Submission]) -> list[LeaderboardRow]:
 
 class Store(Protocol):
     def load_answers(self) -> Answers: ...
-    def count_submissions_between(self, team_key: str, start: datetime, end: datetime) -> int: ...
+    def create_user(self, u: User) -> int: ...
+    def get_user(self, user_id: int) -> User | None: ...
+    def get_user_by_username(self, username: str) -> User | None: ...
     def first_team_display(self, team_key: str) -> str | None: ...
+    def count_submissions_between(self, team_key: str, start: datetime, end: datetime) -> int: ...
     def insert_submission(self, s: Submission) -> int: ...
     def leaderboard(self) -> list[LeaderboardRow]: ...
     def list_submissions(self, team_key: str) -> list[Submission]: ...
@@ -80,9 +99,26 @@ class MemoryStore:
     def __init__(self, answers: Answers):
         self._answers = answers
         self._rows: list[Submission] = []
+        self._users: list[User] = []
 
     def load_answers(self) -> Answers:
         return self._answers
+
+    def create_user(self, u: User) -> int:
+        if self.get_user_by_username(u.username):
+            raise DuplicateUsername(u.username)
+        u.id = len(self._users) + 1
+        self._users.append(u)
+        return u.id
+
+    def get_user(self, user_id: int) -> User | None:
+        return next((u for u in self._users if u.id == user_id), None)
+
+    def get_user_by_username(self, username: str) -> User | None:
+        return next((u for u in self._users if u.username == username), None)
+
+    def first_team_display(self, team_key: str) -> str | None:
+        return next((u.team_display for u in self._users if u.team_key == team_key), None)
 
     def count_submissions_between(self, team_key: str, start: datetime, end: datetime) -> int:
         return sum(
@@ -90,12 +126,6 @@ class MemoryStore:
             for s in self._rows
             if s.team_key == team_key and s.deleted_at is None and start <= s.submitted_at < end
         )
-
-    def first_team_display(self, team_key: str) -> str | None:
-        for s in self._rows:
-            if s.team_key == team_key:
-                return s.team_display
-        return None
 
     def insert_submission(self, s: Submission) -> int:
         s.id = len(self._rows) + 1
@@ -141,10 +171,43 @@ class PostgresStore:
             ).fetchone()
         return int(row[0])
 
+    def create_user(self, u: User) -> int:
+        import psycopg
+
+        try:
+            with self._connect() as conn:
+                row = conn.execute(
+                    "INSERT INTO users (username, password_hash, nickname, team_key, team_display, created_at) "
+                    "VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
+                    (u.username, u.password_hash, u.nickname, u.team_key, u.team_display, u.created_at),
+                ).fetchone()
+                conn.commit()
+        except psycopg.errors.UniqueViolation as e:
+            raise DuplicateUsername(u.username) from e
+        u.id = int(row[0])
+        return u.id
+
+    def _one_user(self, where: str, value) -> User | None:
+        with self._connect() as conn:
+            r = conn.execute(
+                "SELECT id, username, password_hash, nickname, team_key, team_display, created_at "
+                f"FROM users WHERE {where} = %s",
+                (value,),
+            ).fetchone()
+        if r is None:
+            return None
+        return User(int(r[0]), r[1], r[2], r[3], r[4], r[5], r[6])
+
+    def get_user(self, user_id: int) -> User | None:
+        return self._one_user("id", user_id)
+
+    def get_user_by_username(self, username: str) -> User | None:
+        return self._one_user("username", username)
+
     def first_team_display(self, team_key: str) -> str | None:
         with self._connect() as conn:
             row = conn.execute(
-                "SELECT team_display FROM submissions WHERE team_key = %s ORDER BY id LIMIT 1",
+                "SELECT team_display FROM users WHERE team_key = %s ORDER BY id LIMIT 1",
                 (team_key,),
             ).fetchone()
         return row[0] if row else None

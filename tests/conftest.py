@@ -3,18 +3,21 @@
 고정 입력 두 개(스펙 "Validation Decisions"):
 - public/data/sample_submission.csv → RMSE ≈ 13,189.79, R² ≈ -0.79
 - 정답 자체를 제출 → RMSE 0, R² 1
+제출은 로그인이 필요하므로 submit()은 (팀, 닉네임)마다 계정을 하나 만들어 로그인한 뒤 제출한다.
 정답 파일은 저장소에 없으므로, 테스트는 작은 합성 정답(ANSWER_ROWS)으로 파싱·제한·리더보드를 검사하고,
 실제 answer.csv가 있는 환경에서만 sample_submission 기준값 테스트를 돌린다.
 """
 
 from __future__ import annotations
 
+import hashlib
 import os
 from datetime import datetime, timedelta, timezone
 
 import pytest
 from fastapi.testclient import TestClient
 
+import auth
 from app import app
 from store import Answers, MemoryStore
 
@@ -46,6 +49,8 @@ def store():
 @pytest.fixture
 def client(store, clock, monkeypatch):
     monkeypatch.setenv("ADMIN_KEY", "test-admin-key")
+    monkeypatch.setenv("SESSION_SECRET", "test-session-secret")
+    monkeypatch.setattr(auth, "PBKDF2_ITERATIONS", 1000)  # 테스트 속도용
     app.state.store = store
     app.state.now = clock
     app.state.answers = None
@@ -59,12 +64,32 @@ def csv_bytes(rows: list[tuple], header: str = "id,price") -> bytes:
     return ("\n".join(lines) + "\n").encode("utf-8")
 
 
-def submit(client: TestClient, data: bytes, team: str = "3조", nickname: str = "민석"):
+PASSWORD = "password123"
+
+
+def signup(client: TestClient, username: str, team: str = "3조", nickname: str = "민석", password: str = PASSWORD):
     return client.post(
-        "/api/submit",
-        data={"team": team, "nickname": nickname},
-        files={"file": ("submit.csv", data, "text/csv")},
+        "/api/signup", json={"username": username, "password": password, "nickname": nickname, "team": team}
     )
+
+
+def login_as(client: TestClient, team: str = "3조", nickname: str = "민석") -> None:
+    """(팀, 닉네임)마다 계정 하나. 없으면 가입하고, 있으면 로그인해 세션 쿠키를 바꾼다."""
+    username = "u" + hashlib.sha1(f"{team}|{nickname}".encode()).hexdigest()[:12]
+    r = signup(client, username, team=team, nickname=nickname)
+    if r.status_code == 409:
+        r = client.post("/api/login", json={"username": username, "password": PASSWORD})
+    assert r.status_code == 200, r.text
+
+
+def submit(client: TestClient, data: bytes, team: str = "3조", nickname: str = "민석"):
+    login_as(client, team, nickname)
+    return client.post("/api/submit", files={"file": ("submit.csv", data, "text/csv")})
+
+
+def quota(client: TestClient, team: str = "3조"):
+    login_as(client, team)
+    return client.get("/api/quota")
 
 
 def perfect_rows():

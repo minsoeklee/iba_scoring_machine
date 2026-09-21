@@ -26,6 +26,23 @@
       </div>
     </section>
 
+    <section class="card flush">
+      <div class="card-head">
+        <h2>실시간 리더보드</h2>
+        <a class="more" href="/leaderboard.html">전체 순위 보기<i data-icon="arrow-right"></i></a>
+      </div>
+      <div class="table-wrap">
+        <table id="board" hidden>
+          <thead>
+            <tr><th>순위</th><th>팀</th><th class="num">점수 (RMSE)</th><th class="num">R²</th><th class="num">제출 시각</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="empty" id="boardEmpty">불러오는 중…</p>
+      <div class="card-foot" id="boardFoot" hidden></div>
+    </section>
+
     <section class="card">
       <div class="card-head"><h2>과제</h2></div>
       <p class="lead">영국 중고차 거래 데이터로 차량 가격(<code>price</code>, 파운드)을 예측하는 회귀 모델을 만듭니다. <code>train.csv</code>로 학습하고, <code>test.csv</code>의 각 차량에 대한 예측 가격을 제출합니다.</p>
@@ -60,9 +77,9 @@
       <ul>
         <li>형식은 <code>sample_submission.csv</code>와 동일: 헤더 <code>id,price</code>, 데이터 39,085행, test.csv와 같은 순서.</li>
         <li>팀당 <strong>하루 3회</strong>. 한국 시간 자정에 초기화됩니다. 형식 오류로 거부된 제출은 횟수에 들어가지 않습니다.</li>
-        <li>로그인은 없습니다. 팀명과 닉네임을 직접 입력합니다. 팀명은 공백·대소문자를 무시하고 같은 팀으로 봅니다.</li>
+        <li>제출하려면 로그인해야 합니다. 가입할 때 같은 팀명을 적은 사람끼리 한 팀이 되며, 팀명은 공백·대소문자를 무시하고 비교합니다.</li>
         <li>리더보드에는 팀별 최고 기록 한 건이 올라갑니다. 실험 제출을 두려워하지 마세요.</li>
-        <li>다른 팀 이름으로 제출하지 마세요. 그 팀의 오늘 횟수가 줄어듭니다.</li>
+        <li>가입할 때 다른 팀의 팀명을 적지 마세요. 그 팀과 하루 제출 횟수를 나눠 쓰게 됩니다.</li>
       </ul>
 
       <h3>시작 코드</h3>
@@ -134,7 +151,32 @@
       `<li><div><div class="t">${esc(n.title)}</div><div class="d">${n.date.replaceAll("-", ".")}</div></div></li>`).join("");
   }
 
-  document.addEventListener("DOMContentLoaded", render);
+  const TOP = 5;
+
+  async function loadBoard() {
+    const [r, user] = await Promise.all([window.IBA.api("/api/leaderboard"), window.IBA.me]);
+    const emptyEl = document.getElementById("boardEmpty");
+    if (!r.ok) { emptyEl.textContent = `리더보드를 불러오지 못했습니다 (HTTP ${r.status})`; return; }
+    const rows = r.body;
+    if (rows.length === 0) {
+      emptyEl.innerHTML = '아직 제출이 없습니다. <a href="/submit.html">첫 제출</a>을 해보세요.';
+      return;
+    }
+    const myTeam = user && user.team;
+    const shown = rows.slice(0, TOP);
+    const mine = rows.find((row) => row.team === myTeam);
+    if (mine && mine.rank > TOP) shown.push(mine);
+    document.querySelector("#board tbody").innerHTML = window.IBA.boardRows(shown, myTeam);
+    document.getElementById("board").hidden = false;
+    emptyEl.hidden = true;
+    const foot = document.getElementById("boardFoot");
+    foot.textContent = rows.length > TOP
+      ? `전체 ${rows.length}팀 중 상위 ${TOP}팀${mine && mine.rank > TOP ? "과 우리 팀" : ""} 순위입니다. RMSE가 낮을수록 높은 순위입니다.`
+      : `전체 ${rows.length}팀 순위입니다. RMSE가 낮을수록 높은 순위입니다.`;
+    foot.hidden = false;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => { render(); loadBoard(); });
 })();
 </script>
 </body>

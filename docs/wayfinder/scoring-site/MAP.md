@@ -38,7 +38,7 @@ Status: `ready`, `blocked`, `in-progress`, `resolved`, or `out-of-scope`.
 - [공식 평가 지표](decisions/003-metrics.md): RMSE(주, 순위 기준)와 R²(보조)를 함께 계산·표시. 음수·결측 처리와 동점 규칙은 스펙 단계에서.
 - [참가자·제출 제한](decisions/004-participants-and-limits.md): 팀당 하루 3회. 리더보드는 닉네임·팀명·RMSE·R². 팀 식별 방식은 007로 분리.
 - [운영·호스팅](decisions/005-operations-and-hosting.md): 별도 사이트, 비용 0원, Vercel/Cloudflare/Netlify 중 택일(006에서 비교).
-- [팀 식별](decisions/007-team-identity.md): 자유 기입(로그인 없음). 하루 3회는 팀명 문자열 기준, 우회는 신뢰로 막음. 운영자용 삭제 수단은 필요.
+- [팀 식별](decisions/007-team-identity.md): 자체 계정(아이디·비밀번호). 가입 때 팀명을 적고, 제출만 로그인 필요. 하루 3회는 팀 단위, 남의 팀명으로 가입하는 것은 신뢰로 막음. 운영자용 삭제 수단은 필요.
 - [기술 스택](decisions/006-tech-stack.md): Vercel Hobby + Python(FastAPI) 함수 + Neon Postgres Free + 정적 프론트. 저장소는 동아리 GitHub 조직 공개 저장소, `answer.csv`는 Neon 테이블에. 근거: [조사 문서](../../research/scoring-site-tech-stack.md).
 
 ## Not yet specified

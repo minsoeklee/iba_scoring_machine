@@ -4,55 +4,138 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IBA Scoring Machine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
   <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
+  <script src="/assets/contest.js" defer></script>
   <script src="/assets/app.js" defer></script>
 </head>
 <body>
 <main>
-  <h1>중고차 가격 예측 프로젝트 채점</h1>
-  <p>팀이 만든 회귀 모델의 예측 결과를 올리면 바로 RMSE와 R²를 계산해 리더보드에 올립니다.</p>
+<div class="cols">
+  <div>
+    <section class="card hero">
+      <span class="status idle" id="status">대회 일정 확인 중</span>
+      <h1>중고차 가격 예측 프로젝트 채점</h1>
+      <p class="lead">팀이 만든 회귀 모델의 예측 결과를 올리면 바로 RMSE와 R²를 계산해 리더보드에 올립니다.</p>
+      <div class="actions">
+        <a class="btn primary" href="/submit.html"><i data-icon="upload"></i>모델 제출하기</a>
+        <a class="btn" href="#rules"><i data-icon="book-open"></i>참가 규정 보기</a>
+      </div>
+    </section>
 
-  <div class="actions">
-    <a class="primary" href="/submit.html">채점 받기</a>
-    <a href="/leaderboard.html">리더보드 보기</a>
+    <section class="card">
+      <div class="card-head"><h2>과제</h2></div>
+      <p class="lead">영국 중고차 거래 데이터로 차량 가격(<code>price</code>, 파운드)을 예측하는 회귀 모델을 만듭니다. <code>train.csv</code>로 학습하고, <code>test.csv</code>의 각 차량에 대한 예측 가격을 제출합니다.</p>
+    </section>
+
+    <section class="card flush" id="data">
+      <div class="card-head"><h2>데이터</h2></div>
+      <div class="table-wrap">
+      <table class="downloads">
+        <thead><tr><th>파일</th><th>내용</th><th class="num">행</th></tr></thead>
+        <tbody>
+          <tr><td><a href="/data/train.csv" download>train.csv</a></td><td>학습 데이터. <code>brand, model, year, transmission, mileage, fuelType, tax, mpg, engineSize, price</code>. <code>mileage</code>·<code>tax</code>·<code>mpg</code>에 결측이 있습니다.</td><td class="num">58,627</td></tr>
+          <tr><td><a href="/data/test.csv" download>test.csv</a></td><td>예측 대상. <code>id</code> + 위와 같은 특성, <code>price</code> 없음. 결측 없음.</td><td class="num">39,085</td></tr>
+          <tr><td><a href="/data/sample_submission.csv" download>sample_submission.csv</a></td><td>제출 형식 예시. <code>id,price</code> 두 열, test.csv와 같은 순서. price는 무작위 값입니다.</td><td class="num">39,085</td></tr>
+          <tr><td><a href="/data/brand_model.csv" download>brand_model.csv</a></td><td><code>brand</code>·<code>model</code>의 전체 클래스 목록. 인코더를 fit할 때 쓰면 train에 없는 model도 처리할 수 있습니다.</td><td class="num">195</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="card-foot">⚠ test.csv의 id는 고유하지 않습니다(39,085행 중 고유값 31,573개). 채점은 id가 아니라 행 순서로 이루어지므로 제출 파일의 행 순서를 바꾸지 마세요.</div>
+    </section>
+
+    <section class="card" id="rules">
+      <div class="card-head"><h2>채점 방식</h2></div>
+      <dl class="facts">
+        <dt>주 지표</dt><dd><strong>RMSE</strong>: 리더보드 순위 기준. 낮을수록 좋음.</dd>
+        <dt>보조 지표</dt><dd><strong>R²</strong>: 참고용. 1에 가까울수록 좋음.</dd>
+        <dt>음수 예측</dt><dd>0으로 바꿔 채점하고 몇 건이었는지 알려줍니다.</dd>
+        <dt>기준선</dt><dd>sample_submission.csv를 그대로 내면 RMSE 13,189.79 (아무것도 안 한 점수).</dd>
+      </dl>
+
+      <h3>제출 규칙</h3>
+      <ul>
+        <li>형식은 <code>sample_submission.csv</code>와 동일: 헤더 <code>id,price</code>, 데이터 39,085행, test.csv와 같은 순서.</li>
+        <li>팀당 <strong>하루 3회</strong>. 한국 시간 자정에 초기화됩니다. 형식 오류로 거부된 제출은 횟수에 들어가지 않습니다.</li>
+        <li>로그인은 없습니다. 팀명과 닉네임을 직접 입력합니다. 팀명은 공백·대소문자를 무시하고 같은 팀으로 봅니다.</li>
+        <li>리더보드에는 팀별 최고 기록 한 건이 올라갑니다. 실험 제출을 두려워하지 마세요.</li>
+        <li>다른 팀 이름으로 제출하지 마세요. 그 팀의 오늘 횟수가 줄어듭니다.</li>
+      </ul>
+
+      <h3>시작 코드</h3>
+      <p class="lead">저장소의 <code>scoring_machine/regression/IBA_reg_comp_BASELINE.ipynb</code>에 데이터 로드 → 인코딩 → DecisionTreeRegressor → 제출 파일 생성까지의 베이스라인이 있습니다.</p>
+    </section>
   </div>
 
-  <h2>과제</h2>
-  <p>영국 중고차 거래 데이터로 차량 가격(<code>price</code>, 파운드)을 예측하는 회귀 모델을 만듭니다. <code>train.csv</code>로 학습하고, <code>test.csv</code>의 각 차량에 대한 예측 가격을 제출합니다.</p>
+  <div>
+    <section class="card">
+      <div class="card-head"><h2>대회 정보</h2></div>
+      <span class="chip">회귀 · 중고차 가격 예측</span>
+      <p class="info-title">중고차 가격 예측 챌린지</p>
+      <p class="info-desc">영국 중고차 거래 데이터로 차량 가격을 예측하는 모델을 만들어 예측 결과를 제출합니다.</p>
+      <div class="progress" id="progress" hidden>
+        <div class="row"><span>대회 진행률</span><span id="progressText"></span></div>
+        <div class="bar"><i id="progressBar"></i></div>
+      </div>
+      <ul class="kv">
+        <li><i data-icon="calendar"></i><span class="k">기간</span><span class="v" id="period">–</span></li>
+        <li><i data-icon="database"></i><span class="k">데이터셋</span><span class="v">train 58,627 · test 39,085행</span></li>
+        <li><i data-icon="target"></i><span class="k">평가 기준</span><span class="v">RMSE (파운드)</span></li>
+      </ul>
+      <a class="btn block" href="#data"><i data-icon="download"></i>데이터셋 내려받기</a>
+    </section>
 
-  <h2>데이터</h2>
-  <div class="table-wrap">
-  <table class="downloads">
-    <thead><tr><th>파일</th><th>내용</th><th class="num">행</th></tr></thead>
-    <tbody>
-      <tr><td><a href="/data/train.csv" download>train.csv</a></td><td>학습 데이터. <code>brand, model, year, transmission, mileage, fuelType, tax, mpg, engineSize, price</code>. <code>mileage</code>·<code>tax</code>·<code>mpg</code>에 결측이 있습니다.</td><td class="num">58,627</td></tr>
-      <tr><td><a href="/data/test.csv" download>test.csv</a></td><td>예측 대상. <code>id</code> + 위와 같은 특성, <code>price</code> 없음. 결측 없음.</td><td class="num">39,085</td></tr>
-      <tr><td><a href="/data/sample_submission.csv" download>sample_submission.csv</a></td><td>제출 형식 예시. <code>id,price</code> 두 열, test.csv와 같은 순서. price는 무작위 값입니다.</td><td class="num">39,085</td></tr>
-      <tr><td><a href="/data/brand_model.csv" download>brand_model.csv</a></td><td><code>brand</code>·<code>model</code>의 전체 클래스 목록. 인코더를 fit할 때 쓰면 train에 없는 model도 처리할 수 있습니다.</td><td class="num">195</td></tr>
-    </tbody>
-  </table>
+    <section class="card">
+      <div class="card-head"><h2>공지사항</h2></div>
+      <ul class="notices" id="notices"></ul>
+    </section>
   </div>
-  <p class="small">⚠ <code>test.csv</code>의 <code>id</code>는 고유하지 않습니다(39,085행 중 고유값 31,573개). 채점은 id가 아니라 <strong>행 순서</strong>로 이루어지므로 제출 파일의 행 순서를 바꾸지 마세요.</p>
-
-  <h2>채점 방식</h2>
-  <dl class="facts">
-    <dt>주 지표</dt><dd><strong>RMSE</strong> — 리더보드 순위 기준. 낮을수록 좋음.</dd>
-    <dt>보조 지표</dt><dd><strong>R²</strong> — 참고용. 1에 가까울수록 좋음.</dd>
-    <dt>음수 예측</dt><dd>0으로 바꿔 채점하고 몇 건이었는지 알려줍니다.</dd>
-    <dt>기준선</dt><dd>sample_submission.csv를 그대로 내면 RMSE 13,189.79 (아무것도 안 한 점수).</dd>
-  </dl>
-
-  <h2>제출 규칙</h2>
-  <ul>
-    <li>형식은 <code>sample_submission.csv</code>와 동일: 헤더 <code>id,price</code>, 데이터 39,085행, test.csv와 같은 순서.</li>
-    <li>팀당 <strong>하루 3회</strong>. 한국 시간 자정에 초기화됩니다. 형식 오류로 거부된 제출은 횟수에 들어가지 않습니다.</li>
-    <li>로그인은 없습니다. 팀명과 닉네임을 직접 입력합니다. 팀명은 공백·대소문자를 무시하고 같은 팀으로 봅니다.</li>
-    <li>리더보드에는 팀별 최고 기록 한 건이 올라갑니다. 실험 제출을 두려워하지 마세요.</li>
-    <li>다른 팀 이름으로 제출하지 마세요. 그 팀의 오늘 횟수가 줄어듭니다.</li>
-  </ul>
-
-  <h2>시작 코드</h2>
-  <p>저장소의 <code>scoring_machine/regression/IBA_reg_comp_BASELINE.ipynb</code>에 데이터 로드 → 인코딩 → DecisionTreeRegressor → 제출 파일 생성까지의 베이스라인이 있습니다.</p>
+</div>
 </main>
+
+<script>
+(function () {
+  const DAY = 86400000;
+  const WEEK = "일월화수목금토";
+  const kstDate = (s) => new Date(s + "T00:00:00+09:00");
+  const label = (s) => {
+    const d = new Date(s + "T00:00:00Z");
+    return `${String(d.getUTCMonth() + 1).padStart(2, "0")}.${String(d.getUTCDate()).padStart(2, "0")} (${WEEK[d.getUTCDay()]})`;
+  };
+  function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  function render() {
+    const c = window.CONTEST;
+    if (!c) return;
+    const statusEl = document.getElementById("status");
+    const start = kstDate(c.start), end = kstDate(c.end);
+    const total = Math.round((end - start) / DAY) + 1;
+    const day = Math.floor((Date.now() - start) / DAY) + 1;  // 오늘이 대회 며칠째인지(KST)
+
+    document.getElementById("period").textContent = `${label(c.start)} ~ ${label(c.end)}`;
+
+    if (day < 1) {
+      statusEl.textContent = `대회 시작 전 · ${1 - day}일 뒤 시작`;
+    } else if (day > total) {
+      statusEl.textContent = "대회 종료";
+    } else {
+      const left = total - day;
+      statusEl.classList.remove("idle");
+      statusEl.textContent = left === 0 ? "대회 진행 중 · 오늘 마감" : `대회 진행 중 · 마감까지 ${left}일 남음`;
+      document.getElementById("progress").hidden = false;
+      document.getElementById("progressText").textContent = `${day}일 차 / ${total}일`;
+      document.getElementById("progressBar").style.width = `${(day / total) * 100}%`;
+    }
+
+    document.getElementById("notices").innerHTML = c.notices.map((n) =>
+      `<li><div><div class="t">${esc(n.title)}</div><div class="d">${n.date.replaceAll("-", ".")}</div></div></li>`).join("");
+  }
+
+  document.addEventListener("DOMContentLoaded", render);
+})();
+</script>
 </body>
 </html>

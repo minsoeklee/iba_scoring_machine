@@ -34,7 +34,7 @@ scoring/             # 채점 도메인 로직 (프레임워크·DB 무관)
   clock.py           #   KST 하루 경계, 일일 한도
 public/              # 정적 사이트 (Vercel CDN이 그대로 서빙)
   index.html, submit.html, leaderboard.html, minigame.html
-  assets/            #   style.css, app.js, minigame-data.js
+  assets/            #   style.css, app.js(셸·공통), icons.js, contest.js(대회 일정·공지), minigame-data.js
   data/              #   train/test/sample_submission/brand_model.csv (후배 배포용)
 scripts/             # 운영 스크립트: schema.sql, load_answers.py, reset_season.py
 tests/               # pytest (API 레벨)
@@ -88,7 +88,7 @@ curl -H "X-Admin-Key: $ADMIN_KEY" --get --data-urlencode "team=3조" https://<�
 curl -X DELETE -H "X-Admin-Key: $ADMIN_KEY" https://<도메인>/api/submissions/<id>
 ```
 
-기수 교체: `scripts/reset_season.py --yes`로 제출 기록을 비우고, 새 정답을 `load_answers.py`로 적재하고, `public/data/`의 CSV를 바꿔 배포한다.
+기수 교체: `scripts/reset_season.py --yes`로 제출 기록을 비우고, 새 정답을 `load_answers.py`로 적재하고, `public/data/`의 CSV와 `public/assets/contest.js`의 대회 기간·공지사항을 바꿔 배포한다.
 
 ## 정답 파일 주의
 

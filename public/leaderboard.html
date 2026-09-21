@@ -4,28 +4,35 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>리더보드 — IBA Scoring Machine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
   <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
   <script src="/assets/app.js" defer></script>
 </head>
 <body>
 <main>
-  <h1>리더보드</h1>
-  <p>팀별 최고 기록. RMSE 오름차순, 같으면 R²가 높은 쪽, 그다음 먼저 제출한 쪽.</p>
-
-  <div class="board-meta">
-    <span class="small" id="meta">불러오는 중…</span>
-    <button class="ghost" id="refresh" type="button">새로고침</button>
+<section class="card flush">
+  <div class="card-head">
+    <h2>실시간 리더보드</h2>
+    <div class="board-meta">
+      <span id="meta">불러오는 중…</span>
+      <button class="ghost" id="refresh" type="button"><i data-icon="refresh-cw"></i>새로고침</button>
+    </div>
   </div>
 
   <div class="table-wrap">
     <table id="board">
       <thead>
-        <tr><th class="num">#</th><th>팀</th><th>닉네임</th><th class="num">RMSE</th><th class="num">R²</th><th>제출 시각</th></tr>
+        <tr><th>순위</th><th>팀</th><th class="num">점수 (RMSE)</th><th class="num">R²</th><th class="num">제출 시각</th></tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
   <p class="empty" id="empty" hidden>아직 제출이 없습니다. <a href="/submit.html">첫 제출</a>을 해보세요.</p>
+  <div class="card-foot">팀별 최고 기록입니다. RMSE가 낮을수록 높은 순위이고, 같으면 R²가 높은 쪽, 그다음 먼저 제출한 쪽이 앞섭니다.</div>
+</section>
 </main>
 
 <script>
@@ -46,14 +53,14 @@
     if (!r.ok) { meta.textContent = `불러오지 못했습니다 (HTTP ${r.status})`; return; }
     const f = window.IBA.fmt;
     const rows = r.body;
+    const teamIcon = window.IBA.icon("users");
     tbody.innerHTML = rows.map((row) => `
       <tr>
-        <td class="num">${row.rank}</td>
-        <td>${esc(row.team)}</td>
-        <td>${esc(row.nickname)}</td>
-        <td class="num">${f.rmse(row.rmse)}</td>
-        <td class="num">${f.r2(row.r2)}</td>
-        <td class="mono">${f.time(row.submitted_at)}</td>
+        <td><span class="rank-badge${row.rank === 1 ? " first" : ""}">${row.rank}</span></td>
+        <td><div class="team"><span class="avatar">${teamIcon}</span><div><div class="name">${esc(row.team)}</div><div class="sub">${esc(row.nickname)}</div></div></div></td>
+        <td class="num score-main">${f.rmse(row.rmse)}</td>
+        <td class="num soft">${f.r2(row.r2)}</td>
+        <td class="num faint">${f.time(row.submitted_at)}</td>
       </tr>`).join("");
     const hasRows = rows.length > 0;
     table.hidden = !hasRows;

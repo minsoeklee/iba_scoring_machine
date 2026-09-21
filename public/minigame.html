@@ -4,40 +4,50 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>미니게임 — IBA Scoring Machine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
   <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
   <script src="/assets/app.js" defer></script>
   <script src="/assets/minigame-data.js"></script>
 </head>
 <body>
 <main>
-  <h1>가격 감 테스트</h1>
-  <p>train.csv에서 뽑은 중고차 한 대의 정보를 보고 가격(파운드)을 맞혀 보세요. 10대를 맞히면 당신의 RMSE가 나옵니다. 채점·리더보드와는 무관한 장난감입니다.</p>
+<div class="stack-gap">
+  <section class="card hero">
+    <h1>가격 감 테스트</h1>
+    <p class="lead">train.csv에서 뽑은 중고차 한 대의 정보를 보고 가격(파운드)을 맞혀 보세요. 10대를 맞히면 당신의 RMSE가 나옵니다. 채점·리더보드와는 무관한 장난감입니다.</p>
+    <div class="game-stats">
+      <div><div class="label">진행</div><div class="value" id="progress">0 / 10</div></div>
+      <div><div class="label">내 RMSE</div><div class="value" id="myRmse">–</div></div>
+      <div><div class="label">최근 오차</div><div class="value" id="lastErr">–</div></div>
+    </div>
+  </section>
 
-  <div class="game-stats">
-    <div><div class="label">진행</div><div class="value" id="progress">0 / 10</div></div>
-    <div><div class="label">내 RMSE</div><div class="value" id="myRmse">–</div></div>
-    <div><div class="label">최근 오차</div><div class="value" id="lastErr">–</div></div>
-  </div>
+  <section class="card">
+    <div class="car" id="car"></div>
+    <form class="guess-row" id="guessForm">
+      <label>내 예상 가격 (£)
+        <input type="number" id="guess" min="0" step="1" inputmode="numeric" autocomplete="off" required>
+      </label>
+      <button type="submit" class="primary" id="guessBtn">제출</button>
+      <button type="button" id="restart" hidden>다시 하기</button>
+    </form>
+  </section>
 
-  <section class="car" id="car"></section>
+  <section id="summary" class="card result" hidden></section>
 
-  <form class="guess-row" id="guessForm">
-    <label>내 예상 가격 (£)
-      <input type="number" id="guess" min="0" step="1" inputmode="numeric" autocomplete="off" required>
-    </label>
-    <button type="submit" class="primary" id="guessBtn">제출</button>
-    <button type="button" class="ghost" id="restart" hidden>다시 하기</button>
-  </form>
-
-  <section id="summary" class="result" hidden></section>
-
-  <h2>기록</h2>
-  <div class="table-wrap">
-    <table class="game-log">
-      <thead><tr><th>#</th><th>차량</th><th class="num">내 예상</th><th class="num">실제</th><th class="num">오차</th></tr></thead>
-      <tbody id="log"></tbody>
-    </table>
-  </div>
+  <section class="card flush">
+    <div class="card-head"><h2>기록</h2></div>
+    <div class="table-wrap">
+      <table class="game-log">
+        <thead><tr><th>#</th><th>차량</th><th class="num">내 예상</th><th class="num">실제</th><th class="num">오차</th></tr></thead>
+        <tbody id="log"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
 </main>
 
 <script>

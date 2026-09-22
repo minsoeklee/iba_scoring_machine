@@ -178,6 +178,7 @@
     updateStats();
     draw();
     showOverlay("게임 오버", `${score.toLocaleString("ko-KR")}점 · ${stage}스테이지${score > best ? " · 최고 기록!" : ""}`, "다시 하기");
+    window.IBA.reportScore("blocks", score, overlay);
   }
 
   function setPaused(paused) {
@@ -230,5 +231,6 @@
     updateStats();
     draw();
     showOverlay("블록깨기", "공을 튕겨 블록을 모두 깨세요. 목숨은 3개입니다.", "시작하기");
+    window.IBA.gameBoard("blocks");
   });
 })();

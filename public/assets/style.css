@@ -216,7 +216,7 @@ td.num { font-variant-numeric: tabular-nums; }
 .card:not(.flush) .table-wrap { margin: 0 -20px; }
 
 /* 리더보드 */
-#board th, #board td, .game-log th, .game-log td { white-space: nowrap; }
+#board th, #board td, #gameBoard th, #gameBoard td { white-space: nowrap; }
 .rank-badge {
   width: 24px; height: 24px; border-radius: 50%;
   display: inline-grid; place-items: center;
@@ -278,11 +278,6 @@ input[type="file"]::file-selector-button {
 .msg-ok { color: var(--ok); }
 
 /* 미니게임 */
-.car .title { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; margin: 0 0 12px; }
-.car dl.facts { grid-template-columns: max-content 1fr max-content 1fr; font-size: 13px; }
-.guess-row { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; margin-top: 16px; }
-.guess-row label { flex: 1 1 200px; }
-.game-log td:first-child { color: var(--muted); }
 .game-stats { display: flex; flex-wrap: wrap; }
 .game-stats > div { padding: 2px 20px; border-left: 1px solid var(--line-soft); }
 .game-stats > div:first-child { padding-left: 0; border-left: 0; }
@@ -328,6 +323,7 @@ kbd {
   border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--subtle); color: var(--ink);
 }
 .desktop-only-note { display: none; }
+.time-bar { margin-top: 10px; }
 
 @media (max-width: 1100px) {
   .cols { grid-template-columns: minmax(0, 1fr); }
@@ -354,7 +350,6 @@ kbd {
   .nav a span { display: none; }
   .nav a[aria-current="page"] span { display: inline; }
   .score > div, .game-stats > div { padding: 2px 14px; }
-  .car dl.facts { grid-template-columns: max-content 1fr; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

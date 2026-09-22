@@ -3,6 +3,7 @@
 두 구현은 같은 규칙을 지킨다:
 - 삭제된 제출(deleted_at IS NOT NULL)은 리더보드·오늘 횟수·순위 계산에서 제외한다.
 - 리더보드는 팀별 최고 기록 1건: RMSE 오름차순, 같으면 R² 내림차순, 같으면 먼저 제출한 쪽.
+- 미니게임 순위도 팀별 최고 점수 1건: 점수 내림차순, 같으면 먼저 기록한 쪽.
 - 아이디(username)는 중복될 수 없다. 팀 표기는 그 팀으로 처음 가입한 사람의 표기를 따른다.
 """
 
@@ -59,6 +60,40 @@ class LeaderboardRow:
     team_key: str = field(repr=False)
 
 
+@dataclass
+class GameScore:
+    id: int
+    game: str
+    team_key: str
+    team_display: str
+    nickname: str
+    score: int
+    played_at: datetime
+
+
+@dataclass(frozen=True)
+class GameRow:
+    rank: int
+    team: str
+    nickname: str
+    score: int
+    played_at: datetime
+    team_key: str = field(repr=False)
+
+
+def _rank_game(rows: list[GameScore]) -> list[GameRow]:
+    best: dict[str, GameScore] = {}
+    for s in rows:
+        cur = best.get(s.team_key)
+        if cur is None or (-s.score, s.played_at) < (-cur.score, cur.played_at):
+            best[s.team_key] = s
+    ordered = sorted(best.values(), key=lambda s: (-s.score, s.played_at))
+    return [
+        GameRow(rank=i + 1, team=s.team_display, nickname=s.nickname, score=s.score, played_at=s.played_at, team_key=s.team_key)
+        for i, s in enumerate(ordered)
+    ]
+
+
 def _rank(rows: list[Submission]) -> list[LeaderboardRow]:
     best: dict[str, Submission] = {}
     for s in rows:
@@ -93,6 +128,8 @@ class Store(Protocol):
     def leaderboard(self) -> list[LeaderboardRow]: ...
     def list_submissions(self, team_key: str) -> list[Submission]: ...
     def soft_delete(self, submission_id: int, now: datetime) -> bool: ...
+    def insert_game_score(self, s: GameScore) -> int: ...
+    def game_leaderboard(self, game: str) -> list[GameRow]: ...
 
 
 class MemoryStore:
@@ -100,6 +137,7 @@ class MemoryStore:
         self._answers = answers
         self._rows: list[Submission] = []
         self._users: list[User] = []
+        self._game_scores: list[GameScore] = []
 
     def load_answers(self) -> Answers:
         return self._answers
@@ -144,6 +182,14 @@ class MemoryStore:
                 s.deleted_at = now
                 return True
         return False
+
+    def insert_game_score(self, s: GameScore) -> int:
+        s.id = len(self._game_scores) + 1
+        self._game_scores.append(s)
+        return s.id
+
+    def game_leaderboard(self, game: str) -> list[GameRow]:
+        return _rank_game([s for s in self._game_scores if s.game == game])
 
 
 class PostgresStore:
@@ -252,6 +298,25 @@ class PostgresStore:
             )
             conn.commit()
             return cur.rowcount == 1
+
+    def insert_game_score(self, s: GameScore) -> int:
+        with self._connect() as conn:
+            row = conn.execute(
+                "INSERT INTO game_scores (game, team_key, team_display, nickname, score, played_at) "
+                "VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
+                (s.game, s.team_key, s.team_display, s.nickname, s.score, s.played_at),
+            ).fetchone()
+            conn.commit()
+        s.id = int(row[0])
+        return s.id
+
+    def game_leaderboard(self, game: str) -> list[GameRow]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT id, game, team_key, team_display, nickname, score, played_at FROM game_scores WHERE game = %s",
+                (game,),
+            ).fetchall()
+        return _rank_game([GameScore(int(r[0]), r[1], r[2], r[3], r[4], int(r[5]), r[6]) for r in rows])
 
 
 def _row_to_submission(r) -> Submission:

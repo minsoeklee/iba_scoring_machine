@@ -31,7 +31,7 @@
 ### 홈 화면·미니게임
 
 10. 처음 방문한 후배로서, 홈 화면에서 프로젝트 소개, 리더보드 상위 팀, 데이터 설명(train/test/brand_model/sample_submission), 채점 방식(RMSE 주 지표, R² 보조), 제출 규칙(하루 3회, 행 순서 유지)을 한 번에 읽고 채점 페이지·리더보드로 이동하고 싶다.
-11. 동아리원으로서, 채점과 무관한 가벼운 미니게임 페이지를 열어 잠깐 놀 수 있길 원한다. 미니게임은 서버·DB와 통신하지 않는다.
+11. 동아리원으로서, 채점과 무관한 가벼운 미니게임을 하고, 게임마다 팀별 최고 점수 순위를 보고 싶다. 로그인한 상태로 게임을 마치면 점수가 우리 팀 기록으로 올라간다.
 
 ### 운영
 
@@ -62,6 +62,7 @@
 - `answers`: `row_no`(0부터 시작하는 위치, 기본키), `id`(test.csv의 id, 참고용), `price`(정답). 39,085행. 기수 시작 시 운영자가 스크립트로 1회 적재.
 - `users`: `id`(자동), `username`(로그인 아이디, 소문자, 고유), `password_hash`(PBKDF2-SHA256), `nickname`, `team_key`(정규화된 팀명), `team_display`(그 팀으로 처음 가입한 사람의 표기), `created_at`.
 - `submissions`: `id`(자동), `team_key`(정규화된 팀명), `team_display`(제출자 팀의 표기), `nickname`, `rmse`, `r2`, `negative_clipped`(0으로 처리한 건수), `submitted_at`(UTC 저장, 표시·일 계산은 KST 변환), `deleted_at`(관리자 삭제 시 기록; 삭제된 행은 리더보드·횟수 계산에서 제외).
+- `game_scores`: `id`(자동), `game`, `team_key`, `team_display`, `nickname`, `score`, `played_at`. 미니게임을 마칠 때마다 한 행.
 - 제출 파일 원본은 저장하지 않는다. 점수와 메타데이터만 남긴다.
 
 ### 채점 규칙 (결정 001, 002, 003)
@@ -83,6 +84,8 @@
 - `POST /api/login` — JSON `{ username, password }`. 성공 200 + 세션 쿠키, 실패 401. `POST /api/logout` — 쿠키 삭제.
 - `GET /api/me` — 로그인한 사용자 `{ username, nickname, team }`, 로그인하지 않았으면 `null`.
 - `POST /api/submit` (로그인 필요) — multipart: `file`. 로그인하지 않았으면 401. 성공 200: `{ rmse, r2, negative_clipped, remaining_today, rank }`. 검증 실패 400: `{ error_code, message, row? }`. 한도 초과 429: `{ message, resets_at }`.
+- `POST /api/games/{game}/score` (로그인 필요) — JSON `{ score }`. `game`은 `apple`(상한 170), `tetris`, `blocks`. 성공 200: `{ rank, team_best }`. 없는 게임 404, 범위 밖 점수 400.
+- `GET /api/games/{game}/leaderboard` — 팀별 최고 점수: `[{ rank, team, nickname, score, played_at }]`. 점수 내림차순, 동점이면 먼저 기록한 쪽.
 - `GET /api/leaderboard` — 팀별 최고 기록: `[{ rank, team, nickname, rmse, r2, submitted_at }]`. RMSE 오름차순, 동점 시 R² 내림차순, 그다음 `submitted_at` 오름차순.
 - `GET /api/quota` (로그인 필요) — 우리 팀의 `{ used_today, remaining_today, resets_at, limit }`.
 - `DELETE /api/submissions/{id}` — 헤더 `X-Admin-Key` 필수. 소프트 삭제. 키 불일치 시 401.
@@ -94,7 +97,7 @@
 - 홈: 소개·리더보드 상위 5팀(로그인했고 우리 팀이 5위 밖이면 우리 팀 행 추가)·데이터 설명·채점 방식·제출 규칙·데이터 다운로드 링크(train/test/brand_model/sample_submission은 정적 파일로 제공; answer는 절대 포함하지 않음).
 - 채점: 로그인하지 않았으면 로그인·회원가입 안내. 로그인했으면 파일 선택, 남은 횟수 표시, 제출 결과(점수·현재 순위·음수 처리 안내) 또는 오류 메시지 표시.
 - 리더보드: 표 하나. 페이지 로드 시 조회, 새로고침 버튼. 캐시 없이 매번 조회(요청량이 작다).
-- 미니게임: 게임 목록 페이지와 가격 감 테스트·테트리스·블록깨기 페이지. 모두 브라우저에서만 동작하고 서버 요청이 없다. 조작은 키보드·마우스만 지원하며, 최고 기록은 브라우저(localStorage)에만 저장한다.
+- 미니게임: 게임 목록 페이지와 사과게임·테트리스·블록깨기 페이지. 게임은 브라우저에서만 돌고, 조작은 키보드·마우스만 지원한다. 개인 최고 기록은 브라우저(localStorage)에 저장한다. 게임 페이지마다 팀 순위 표가 있고, 로그인한 상태로 게임을 마치면 점수를 서버에 기록한다. 점수는 브라우저가 계산해 보내므로 게임별 상한을 넘는 값만 거절하고, 그 이상의 조작 방지는 하지 않는다.
 - 로그인·회원가입: 가입 후 원래 보던 페이지로 돌아간다.
 - 공통 셸: 왼쪽 사이드바 내비게이션, 상단바의 로그인 상태(로그인·회원가입 버튼 또는 닉네임·팀과 로그아웃).
 

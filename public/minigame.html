@@ -15,23 +15,28 @@
 <main>
 <section class="card">
   <div class="card-head"><h2>미니게임</h2></div>
-  <p class="lead">채점·리더보드와는 무관한 쉬어 가는 게임입니다. 최고 기록은 이 브라우저에만 저장됩니다.</p>
+  <p class="lead">채점과는 무관한 쉬어 가는 게임입니다. 게임마다 팀 순위가 있고, 로그인한 상태로 게임을 마치면 우리 팀 기록으로 올라갑니다.</p>
 </section>
 
 <div class="game-list">
-  <a class="game-card" href="/games/price.html">
+  <a class="game-card" href="/games/apple.html">
     <div class="thumb">
       <svg viewBox="0 0 120 76" aria-hidden="true">
-        <rect x="14" y="30" width="92" height="26" rx="8" fill="#3ec7e0"/>
-        <path d="M30 30 L42 14 H78 L92 30 Z" fill="#4f7df0"/>
-        <circle cx="36" cy="58" r="9" fill="#e8eefc"/><circle cx="84" cy="58" r="9" fill="#e8eefc"/>
-        <text x="60" y="48" text-anchor="middle" font-size="14" font-weight="700" fill="#0b1a2e">£ ?</text>
+        <g font-family="sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">
+          <circle cx="30" cy="22" r="11" fill="#e5484d"/><text x="30" y="26">3</text>
+          <circle cx="60" cy="22" r="11" fill="#e5484d"/><text x="60" y="26">7</text>
+          <circle cx="90" cy="22" r="11" fill="#e5484d"/><text x="90" y="26">5</text>
+          <circle cx="30" cy="52" r="11" fill="#e5484d"/><text x="30" y="56">8</text>
+          <circle cx="60" cy="52" r="11" fill="#e5484d"/><text x="60" y="56">2</text>
+          <circle cx="90" cy="52" r="11" fill="#e5484d"/><text x="90" y="56">4</text>
+        </g>
+        <rect x="16" y="8" width="58" height="28" rx="3" fill="none" stroke="#4cc38a" stroke-width="2"/>
       </svg>
     </div>
     <div class="body">
-      <span class="title">가격 감 테스트</span>
-      <span class="desc">train.csv의 중고차 10대를 보고 가격을 맞혀 내 RMSE를 확인합니다.</span>
-      <span class="meta">10대 · 약 3분</span>
+      <span class="title">사과게임</span>
+      <span class="desc">사각형으로 묶은 사과의 숫자 합이 10이면 사과가 사라집니다. 2분 동안 최대한 많이 없애세요.</span>
+      <span class="meta" data-best="iba.best.apple">마우스 · 2분</span>
     </div>
   </a>
 
@@ -78,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("[data-best]").forEach((el) => {
     let best = 0;
     try { best = Number(localStorage.getItem(el.dataset.best)) || 0; } catch (_) {}
-    if (best > 0) el.textContent += ` · 최고 기록 ${best.toLocaleString("ko-KR")}점`;
+    if (best > 0) el.textContent += ` · 내 최고 ${best.toLocaleString("ko-KR")}점`;
   });
 });
 </script>

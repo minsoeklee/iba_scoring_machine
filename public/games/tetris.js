@@ -175,6 +175,7 @@
     updateStats();
     draw();
     showOverlay("게임 오버", `${score.toLocaleString("ko-KR")}점${score > best ? " · 최고 기록!" : ""}`, "다시 하기");
+    window.IBA.reportScore("tetris", score, overlay);
   }
 
   function setPaused(paused) {
@@ -232,5 +233,6 @@
     updateStats();
     draw();
     showOverlay("테트리스", "줄을 채워 없애세요. 10줄마다 빨라집니다.", "시작하기");
+    window.IBA.gameBoard("tetris");
   });
 })();

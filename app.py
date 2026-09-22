@@ -8,6 +8,8 @@
 - POST   /api/submit                 (로그인) CSV → 채점·기록
 - GET    /api/leaderboard            팀별 최고 기록
 - GET    /api/quota                  (로그인) 우리 팀 오늘 남은 횟수
+- POST   /api/games/{game}/score     (로그인) 미니게임 점수 기록
+- GET    /api/games/{game}/leaderboard  미니게임 팀별 최고 점수
 - GET    /api/submissions?team=      (관리자) 팀 제출 목록
 - DELETE /api/submissions/{id}       (관리자) 소프트 삭제
 
@@ -31,7 +33,7 @@ from scoring import clock
 from scoring.metrics import score
 from scoring.parse import SubmissionError, parse_submission
 from scoring.teams import NameError_, clean_nickname, clean_team_display, normalize_team
-from store import Answers, DuplicateUsername, PostgresStore, Store, Submission, User
+from store import Answers, DuplicateUsername, GameScore, PostgresStore, Store, Submission, User
 
 app = FastAPI(title="IBA Scoring Machine", docs_url=None, redoc_url=None)
 
@@ -163,6 +165,14 @@ class SignupBody(BaseModel):
     password: str
     nickname: str
     team: str
+
+
+class ScoreBody(BaseModel):
+    score: int
+
+
+# 미니게임별 점수 상한. 점수는 브라우저가 보내므로 불가능한 값만 거른다.
+GAME_MAX_SCORE = {"apple": 170, "tetris": 9_999_999, "blocks": 999_999}
 
 
 class LoginBody(BaseModel):
@@ -297,6 +307,43 @@ def quota(
     body = _quota_body(store, user.team_key, now_fn())
     body["limit"] = clock.DAILY_LIMIT
     return body
+
+
+def _game_row(row) -> dict:
+    return {
+        "rank": row.rank,
+        "team": row.team,
+        "nickname": row.nickname,
+        "score": row.score,
+        "played_at": row.played_at.astimezone(clock.KST).isoformat(),
+    }
+
+
+@app.post("/api/games/{game}/score")
+def record_game_score(
+    game: str,
+    body: ScoreBody,
+    user: User = Depends(require_user),
+    store: Store = Depends(get_store),
+    now_fn: Callable[[], datetime] = Depends(get_now),
+):
+    if game not in GAME_MAX_SCORE:
+        raise HTTPException(status_code=404, detail="없는 게임입니다.")
+    if not 0 <= body.score <= GAME_MAX_SCORE[game]:
+        return _bad_request("bad_score", "점수가 올바르지 않습니다.")
+    store.insert_game_score(
+        GameScore(0, game, user.team_key, user.team_display, user.nickname, body.score, now_fn())
+    )
+    rows = store.game_leaderboard(game)
+    mine = next(r for r in rows if r.team_key == user.team_key)
+    return {"rank": mine.rank, "team_best": mine.score}
+
+
+@app.get("/api/games/{game}/leaderboard")
+def game_leaderboard(game: str, store: Store = Depends(get_store)):
+    if game not in GAME_MAX_SCORE:
+        raise HTTPException(status_code=404, detail="없는 게임입니다.")
+    return [_game_row(r) for r in store.game_leaderboard(game)]
 
 
 @app.get("/api/submissions", dependencies=[Depends(require_admin)])

@@ -28,4 +28,16 @@ CREATE TABLE IF NOT EXISTS submissions (
     deleted_at       TIMESTAMPTZ
 );
 
+CREATE TABLE IF NOT EXISTS game_scores (
+    id               BIGSERIAL PRIMARY KEY,
+    game             TEXT NOT NULL,        -- apple, tetris, blocks
+    team_key         TEXT NOT NULL,
+    team_display     TEXT NOT NULL,
+    nickname         TEXT NOT NULL,
+    score            INTEGER NOT NULL,
+    played_at        TIMESTAMPTZ NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS game_scores_game ON game_scores (game);
+
 CREATE INDEX IF NOT EXISTS submissions_team_day ON submissions (team_key, submitted_at) WHERE deleted_at IS NULL;

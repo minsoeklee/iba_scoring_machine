@@ -20,7 +20,7 @@
 - 참가: 아이디·비밀번호로 가입하고, 가입 때 적은 팀명으로 팀이 묶인다. 제출만 로그인 필요. 팀당 하루 3회(KST 자정 초기화).
 - 리더보드: 팀별 최고 기록 1건 — 닉네임·팀명·RMSE·R².
 - 스택: Vercel Hobby + Python(FastAPI) + Neon Postgres Free + 정적 프론트. 비용 0원.
-- 페이지: 홈 / 채점 / 리더보드 / 미니게임(순수 프론트).
+- 페이지: 홈 / 채점 / 리더보드 / 미니게임(사과게임·테트리스·블록깨기, 게임별 팀 순위).
 
 ## 저장소 구조
 
@@ -35,8 +35,8 @@ scoring/             # 채점 도메인 로직 (프레임워크·DB 무관)
   clock.py           #   KST 하루 경계, 일일 한도
 public/              # 정적 사이트 (Vercel CDN이 그대로 서빙)
   index.html, submit.html, leaderboard.html, minigame.html(게임 목록), login.html, signup.html
-  games/             #   미니게임: price(가격 감 테스트), tetris, blocks(블록깨기). 브라우저에서만 동작
-  assets/            #   style.css, app.js(셸·공통), icons.js, contest.js(대회 일정·공지), minigame-data.js
+  games/             #   미니게임: apple(사과게임), tetris, blocks(블록깨기). 게임은 브라우저에서 돌고 점수만 API로 기록
+  assets/            #   style.css, app.js(셸·공통), icons.js, contest.js(대회 일정·공지)
   data/              #   train/test/sample_submission/brand_model.csv (후배 배포용)
 scripts/             # 운영 스크립트: schema.sql, load_answers.py, reset_season.py
 tests/               # pytest (API 레벨)

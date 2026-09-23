@@ -3,186 +3,100 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>IBA Scoring Machine</title>
+  <title>IBA — Regression Project Scoring Service</title>
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" href="/favicon.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
-  <link rel="stylesheet" href="/assets/style.css">
-  <script src="/assets/icons.js" defer></script>
-  <script src="/assets/contest.js" defer></script>
-  <script src="/assets/app.js" defer></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&family=Playfair+Display:wght@700;900&family=Instrument+Serif&family=Archivo:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/assets/landing.css">
 </head>
 <body>
-<main>
-<div class="cols">
-  <div>
-    <section class="card hero photo">
-      <span class="status idle" id="status">대회 일정 확인 중</span>
-      <h1>중고차 가격 예측 프로젝트 채점</h1>
-      <p class="lead">팀이 만든 회귀 모델의 예측 결과를 올리면 바로 RMSE와 R²를 계산해 리더보드에 올립니다.</p>
-      <div class="actions">
-        <a class="btn primary" href="/submit.html"><i data-icon="upload"></i>모델 제출하기</a>
-        <a class="btn" href="#rules"><i data-icon="book-open"></i>참가 규정 보기</a>
-      </div>
-    </section>
 
-    <section class="card flush">
-      <div class="card-head">
-        <h2>실시간 리더보드</h2>
-        <a class="more" href="/leaderboard.html">전체 순위 보기<i data-icon="arrow-right"></i></a>
-      </div>
-      <div class="table-wrap">
-        <table id="board" hidden>
-          <thead>
-            <tr><th>순위</th><th>팀</th><th class="num">점수 (RMSE)</th><th class="num">R²</th><th class="num">제출 시각</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <p class="empty" id="boardEmpty">불러오는 중…</p>
-      <div class="card-foot" id="boardFoot" hidden></div>
-    </section>
+<!-- 메뉴 버튼과 사이드바: 버튼과 사이드바를 한 요소로 감싸 커서가 둘 사이를 오갈 때 닫히지 않게 한다.
+     hover로 열되 focus-within으로도 열려 키보드만 쓰는 사람도 같은 메뉴에 닿는다. -->
+<div class="menu-zone" id="menuZone">
+  <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="sidebar" aria-label="Open menu">
+    <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+  </button>
 
-    <section class="card">
-      <div class="card-head"><h2>과제</h2></div>
-      <p class="lead">영국 중고차 거래 데이터로 차량 가격(<code>price</code>, 파운드)을 예측하는 회귀 모델을 만듭니다. <code>train.csv</code>로 학습하고, <code>test.csv</code>의 각 차량에 대한 예측 가격을 제출합니다.</p>
-    </section>
+  <nav class="sidebar" id="sidebar" aria-label="Site menu">
+    <a class="side-brand" href="/">IBA</a>
 
-    <section class="card flush" id="data">
-      <div class="card-head"><h2>데이터</h2></div>
-      <div class="table-wrap">
-      <table class="downloads">
-        <thead><tr><th>파일</th><th>내용</th><th class="num">행</th></tr></thead>
-        <tbody>
-          <tr><td><a href="/data/train.csv" download>train.csv</a></td><td>학습 데이터. <code>brand, model, year, transmission, mileage, fuelType, tax, mpg, engineSize, price</code>. <code>mileage</code>·<code>tax</code>·<code>mpg</code>에 결측이 있습니다.</td><td class="num">58,627</td></tr>
-          <tr><td><a href="/data/test.csv" download>test.csv</a></td><td>예측 대상. <code>id</code> + 위와 같은 특성, <code>price</code> 없음. 결측 없음.</td><td class="num">39,085</td></tr>
-          <tr><td><a href="/data/sample_submission.csv" download>sample_submission.csv</a></td><td>제출 형식 예시. <code>id,price</code> 두 열, test.csv와 같은 순서. price는 무작위 값입니다.</td><td class="num">39,085</td></tr>
-          <tr><td><a href="/data/brand_model.csv" download>brand_model.csv</a></td><td><code>brand</code>·<code>model</code>의 전체 클래스 목록. 인코더를 fit할 때 쓰면 train에 없는 model도 처리할 수 있습니다.</td><td class="num">195</td></tr>
-        </tbody>
-      </table>
-      </div>
-      <div class="card-foot">⚠ test.csv의 id는 고유하지 않습니다(39,085행 중 고유값 31,573개). 채점은 id가 아니라 행 순서로 이루어지므로 제출 파일의 행 순서를 바꾸지 마세요.</div>
-    </section>
+    <ul class="side-nav">
+      <li><a href="/"><span>Home</span></a></li>
+      <li><a href="/submit.html"><span>Submit</span></a></li>
+      <li><a href="/leaderboard.html"><span>Leaderboard</span></a></li>
+      <li><a href="/minigame.html"><span>Minigame</span></a></li>
+    </ul>
 
-    <section class="card" id="rules">
-      <div class="card-head"><h2>채점 방식</h2></div>
-      <dl class="facts">
-        <dt>주 지표</dt><dd><strong>RMSE</strong>: 리더보드 순위 기준. 낮을수록 좋음.</dd>
-        <dt>보조 지표</dt><dd><strong>R²</strong>: 참고용. 1에 가까울수록 좋음.</dd>
-        <dt>음수 예측</dt><dd>0으로 바꿔 채점하고 몇 건이었는지 알려줍니다.</dd>
-        <dt>기준선</dt><dd>sample_submission.csv를 그대로 내면 RMSE 13,189.79 (아무것도 안 한 점수).</dd>
-      </dl>
-
-      <h3>제출 규칙</h3>
-      <ul>
-        <li>형식은 <code>sample_submission.csv</code>와 동일: 헤더 <code>id,price</code>, 데이터 39,085행, test.csv와 같은 순서.</li>
-        <li>팀당 <strong>하루 3회</strong>. 한국 시간 자정에 초기화됩니다. 형식 오류로 거부된 제출은 횟수에 들어가지 않습니다.</li>
-        <li>제출하려면 로그인해야 합니다. 가입할 때 같은 팀명을 적은 사람끼리 한 팀이 되며, 팀명은 공백·대소문자를 무시하고 비교합니다.</li>
-        <li>리더보드에는 팀별 최고 기록 한 건이 올라갑니다. 실험 제출을 두려워하지 마세요.</li>
-        <li>가입할 때 다른 팀의 팀명을 적지 마세요. 그 팀과 하루 제출 횟수를 나눠 쓰게 됩니다.</li>
-      </ul>
-
-      <h3>시작 코드</h3>
-      <p class="lead">저장소의 <code>scoring_machine/regression/IBA_reg_comp_BASELINE.ipynb</code>에 데이터 로드 → 인코딩 → DecisionTreeRegressor → 제출 파일 생성까지의 베이스라인이 있습니다.</p>
-    </section>
-  </div>
-
-  <div>
-    <section class="card">
-      <div class="card-head"><h2>대회 정보</h2></div>
-      <span class="chip">회귀 · 중고차 가격 예측</span>
-      <p class="info-title">중고차 가격 예측 챌린지</p>
-      <p class="info-desc">영국 중고차 거래 데이터로 차량 가격을 예측하는 모델을 만들어 예측 결과를 제출합니다.</p>
-      <div class="progress" id="progress" hidden>
-        <div class="row"><span>대회 진행률</span><span id="progressText"></span></div>
-        <div class="bar"><i id="progressBar"></i></div>
-      </div>
-      <ul class="kv">
-        <li><i data-icon="calendar"></i><span class="k">기간</span><span class="v" id="period">–</span></li>
-        <li><i data-icon="database"></i><span class="k">데이터셋</span><span class="v">train 58,627 · test 39,085행</span></li>
-        <li><i data-icon="target"></i><span class="k">평가 기준</span><span class="v">RMSE (파운드)</span></li>
-      </ul>
-      <a class="btn block" href="#data"><i data-icon="download"></i>데이터셋 내려받기</a>
-    </section>
-
-    <section class="card">
-      <div class="card-head"><h2>공지사항</h2></div>
-      <ul class="notices" id="notices"></ul>
-    </section>
-  </div>
+    <div class="side-foot">
+      <a href="/login.html"><span>Log in</span></a>
+      <a href="/signup.html"><span>Sign up</span></a>
+    </div>
+  </nav>
 </div>
+
+<!-- 사이드바가 열렸을 때 본문을 아주 살짝 눌러 주는 막 -->
+<div class="scrim" id="scrim" aria-hidden="true"></div>
+
+<main class="hero">
+  <h1 class="wordmark">IBA</h1>
+  <p class="tagline">Regression Project Scoring Service</p>
 </main>
+
+<!-- 하단 바: 배경 없이 사이트와 같은 바탕. 줄글 한 덩이 + 한 줄 저작권. -->
+<footer class="site-foot">
+  <div class="foot-inner">
+
+    <div class="foot-bottom">
+      <p class="foot-legal">
+        © 2026 PNU IBA
+        <span class="sep">·</span>
+        <a href="https://pnuiba.imweb.me/26" target="_blank" rel="noopener">Webpage</a> |
+        <a href="https://www.instagram.com/pnu_iba/" target="_blank" rel="noopener">Instagram</a> |
+        <a href="https://linktr.ee/pnuiba" target="_blank" rel="noopener">Linktree</a>
+        <span class="sep">·</span>
+        The devil&rsquo;s in the details.
+      </p>
+
+    </div>
+  </div>
+</footer>
 
 <script>
 (function () {
-  const DAY = 86400000;
-  const WEEK = "일월화수목금토";
-  const kstDate = (s) => new Date(s + "T00:00:00+09:00");
-  const label = (s) => {
-    const d = new Date(s + "T00:00:00Z");
-    return `${String(d.getUTCMonth() + 1).padStart(2, "0")}.${String(d.getUTCDate()).padStart(2, "0")} (${WEEK[d.getUTCDay()]})`;
+  const zone = document.getElementById("menuZone");
+  const btn = document.getElementById("menuBtn");
+  const sidebar = document.getElementById("sidebar");
+
+  // 호버로 열리지만, 클릭하면 고정(핀)되어 커서를 빼도 닫히지 않는다.
+  let pinned = false;
+
+  const isOpen = () => pinned || zone.matches(":hover, :focus-within");
+  const sync = () => {
+    const open = isOpen();
+    document.body.classList.toggle("menu-open", open);
+    btn.setAttribute("aria-expanded", String(open));
+    btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
   };
-  function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
-  function render() {
-    const c = window.CONTEST;
-    if (!c) return;
-    const statusEl = document.getElementById("status");
-    const start = kstDate(c.start), end = kstDate(c.end);
-    const total = Math.round((end - start) / DAY) + 1;
-    const day = Math.floor((Date.now() - start) / DAY) + 1;  // 오늘이 대회 며칠째인지(KST)
+  zone.addEventListener("pointerenter", sync);
+  zone.addEventListener("pointerleave", sync);
+  zone.addEventListener("focusin", sync);
+  zone.addEventListener("focusout", () => requestAnimationFrame(sync));
 
-    document.getElementById("period").textContent = `${label(c.start)} ~ ${label(c.end)}`;
+  btn.addEventListener("click", () => { pinned = !pinned; sync(); });
 
-    if (day < 1) {
-      statusEl.textContent = `대회 시작 전 · ${1 - day}일 뒤 시작`;
-    } else if (day > total) {
-      statusEl.textContent = "대회 종료";
-    } else {
-      const left = total - day;
-      statusEl.classList.remove("idle");
-      statusEl.textContent = left === 0 ? "대회 진행 중 · 오늘 마감" : `대회 진행 중 · 마감까지 ${left}일 남음`;
-      document.getElementById("progress").hidden = false;
-      document.getElementById("progressText").textContent = `${day}일 차 / ${total}일`;
-      document.getElementById("progressBar").style.width = `${(day / total) * 100}%`;
-    }
-
-    document.getElementById("notices").innerHTML = c.notices.map((n) =>
-      `<li><div><div class="t">${esc(n.title)}</div><div class="d">${n.date.replaceAll("-", ".")}</div></div></li>`).join("");
-  }
-
-  const TOP = 5;
-
-  async function loadBoard() {
-    const [r, user] = await Promise.all([window.IBA.api("/api/leaderboard"), window.IBA.me]);
-    const emptyEl = document.getElementById("boardEmpty");
-    if (!r.ok) { emptyEl.textContent = `리더보드를 불러오지 못했습니다 (HTTP ${r.status})`; return; }
-    const rows = r.body;
-    if (rows.length === 0) {
-      emptyEl.innerHTML = '아직 제출이 없습니다. <a href="/submit.html">첫 제출</a>을 해보세요.';
-      return;
-    }
-    const myTeam = user && user.team;
-    const shown = rows.slice(0, TOP);
-    const mine = rows.find((row) => row.team === myTeam);
-    if (mine && mine.rank > TOP) shown.push(mine);
-    document.querySelector("#board tbody").innerHTML = window.IBA.boardRows(shown, myTeam);
-    document.getElementById("board").hidden = false;
-    emptyEl.hidden = true;
-    const foot = document.getElementById("boardFoot");
-    foot.textContent = rows.length > TOP
-      ? `전체 ${rows.length}팀 중 상위 ${TOP}팀${mine && mine.rank > TOP ? "과 우리 팀" : ""} 순위입니다. RMSE가 낮을수록 높은 순위입니다.`
-      : `전체 ${rows.length}팀 순위입니다. RMSE가 낮을수록 높은 순위입니다.`;
-    foot.hidden = false;
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    render();
-    loadBoard();
-    window.IBA.refreshEvery(loadBoard, 60000);
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    pinned = false;
+    btn.blur();
+    if (sidebar.contains(document.activeElement)) btn.focus();
+    sync();
   });
+
+  document.addEventListener("DOMContentLoaded", sync);
 })();
 </script>
 </body>

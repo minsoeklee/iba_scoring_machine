@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>명예의 전당 — IBA Scoring Machine</title>
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+<main>
+<section class="card">
+  <div class="card-head"><h2>명예의 전당</h2></div>
+  <p class="lead">기수별 우승 팀과 최고 기록을 모아 두는 자리입니다.</p>
+</section>
+
+<!-- TODO: 기수가 끝날 때마다 아래 표에 한 줄씩 추가합니다.
+     지금은 기록을 보관하는 곳이 없습니다. 기수 교체 때 submissions 테이블을 비우므로
+     (scripts/reset_season.py), 비우기 전에 1위 팀을 여기에 적어 두어야 합니다.
+     자동화하려면 seasons 테이블을 만들어 기수 종료 시 순위를 옮기는 작업이 필요합니다. -->
+<section class="card flush">
+  <div class="card-head"><h2>역대 기록</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>기수</th><th>과제</th><th>우승 팀</th><th class="num">RMSE</th><th class="num">R²</th></tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="5" class="empty">2026년 가을 기수가 첫 대회입니다. 대회가 끝나면 이곳에 기록이 남습니다.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card-foot">진행 중인 대회의 순위는 <a href="/leaderboard.html">리더보드</a>에서 볼 수 있습니다.</div>
+</section>
+</main>
+</body>
+</html>

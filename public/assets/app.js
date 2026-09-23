@@ -5,8 +5,12 @@
     ["/submit.html", "모델 제출", "upload"],
     ["/leaderboard.html", "리더보드", "chart-column"],
     ["/minigame.html", "미니게임", "gamepad-2"],
+    ["/mypage.html", "마이페이지", "user"],
   ];
-  const OTHER_TITLES = { "/login.html": "로그인", "/signup.html": "회원가입" };
+  const OTHER_TITLES = {
+    "/login.html": "로그인", "/signup.html": "회원가입",
+    "/about.html": "소개", "/hall.html": "명예의 전당",
+  };
 
   function icon(name) {
     const d = (window.ICON_PATHS || {})[name] || "";

@@ -11,10 +11,13 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
   <link rel="stylesheet" href="/assets/style.css">
   <script src="/assets/icons.js" defer></script>
+  <script src="/assets/contest.js" defer></script>
   <script src="/assets/app.js" defer></script>
 </head>
 <body>
 <main>
+<div class="cols">
+  <div>
 <section class="card flush">
   <div class="card-head">
     <h2>실시간 리더보드</h2>
@@ -35,7 +38,77 @@
   <p class="empty" id="empty" hidden>아직 제출이 없습니다. <a href="/submit.html">첫 제출</a>을 해보세요.</p>
   <div class="card-foot">팀별 최고 기록입니다. RMSE가 낮을수록 높은 순위이고, 같으면 R²가 높은 쪽, 그다음 먼저 제출한 쪽이 앞섭니다.</div>
 </section>
+  </div>
+
+  <!-- 대회 정보·공지사항: 예전 홈에 있던 것을 리더보드 옆으로 옮겼다 -->
+  <div>
+  <section class="card">
+    <div class="card-head"><h2>대회 정보</h2></div>
+  <p class="status idle" id="status">대회 정보를 불러오는 중…</p>
+    <span class="chip">회귀 · 중고차 가격 예측</span>
+    <p class="info-title">중고차 가격 예측 챌린지</p>
+    <p class="info-desc">영국 중고차 거래 데이터로 차량 가격을 예측하는 모델을 만들어 예측 결과를 제출합니다.</p>
+    <div class="progress" id="progress" hidden>
+      <div class="row"><span>대회 진행률</span><span id="progressText"></span></div>
+      <div class="bar"><i id="progressBar"></i></div>
+    </div>
+    <ul class="kv">
+      <li><i data-icon="calendar"></i><span class="k">기간</span><span class="v" id="period">–</span></li>
+      <li><i data-icon="database"></i><span class="k">데이터셋</span><span class="v">train 58,627 · test 39,085행</span></li>
+      <li><i data-icon="target"></i><span class="k">평가 기준</span><span class="v">RMSE (파운드)</span></li>
+    </ul>
+    <a class="btn block" href="/submit.html#data"><i data-icon="download"></i>데이터셋 내려받기</a>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>공지사항</h2></div>
+    <ul class="notices" id="notices"></ul>
+  </section>
+  </div>
+</div>
 </main>
+
+<script>
+(function () {
+  const DAY = 86400000;
+  const WEEK = "일월화수목금토";
+  const kstDate = (s) => new Date(s + "T00:00:00+09:00");
+  const label = (s) => {
+    const d = new Date(s + "T00:00:00Z");
+    return `${String(d.getUTCMonth() + 1).padStart(2, "0")}.${String(d.getUTCDate()).padStart(2, "0")} (${WEEK[d.getUTCDay()]})`;
+  };
+  function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  function render() {
+    const c = window.CONTEST;
+    if (!c) return;
+    const statusEl = document.getElementById("status");
+    const start = kstDate(c.start), end = kstDate(c.end);
+    const total = Math.round((end - start) / DAY) + 1;
+    const day = Math.floor((Date.now() - start) / DAY) + 1;  // 오늘이 대회 며칠째인지(KST)
+
+    document.getElementById("period").textContent = `${label(c.start)} ~ ${label(c.end)}`;
+
+    if (day < 1) {
+      statusEl.textContent = `대회 시작 전 · ${1 - day}일 뒤 시작`;
+    } else if (day > total) {
+      statusEl.textContent = "대회 종료";
+    } else {
+      const left = total - day;
+      statusEl.classList.remove("idle");
+      statusEl.textContent = left === 0 ? "대회 진행 중 · 오늘 마감" : `대회 진행 중 · 마감까지 ${left}일 남음`;
+      document.getElementById("progress").hidden = false;
+      document.getElementById("progressText").textContent = `${day}일 차 / ${total}일`;
+      document.getElementById("progressBar").style.width = `${(day / total) * 100}%`;
+    }
+
+    document.getElementById("notices").innerHTML = c.notices.map((n) =>
+      `<li><div><div class="t">${esc(n.title)}</div><div class="d">${n.date.replaceAll("-", ".")}</div></div></li>`).join("");
+  }
+
+  document.addEventListener("DOMContentLoaded", render);
+})();
+</script>
 
 <script>
 (function () {

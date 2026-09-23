@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>마이페이지 — IBA Scoring Machine</title>
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+<main>
+<section class="card" id="needLogin" hidden>
+  <div class="card-head"><h2>로그인이 필요합니다</h2></div>
+  <p class="lead">내 팀의 기록을 보려면 로그인하세요.</p>
+  <div class="actions">
+    <a class="btn primary" id="loginLink" href="/login.html">로그인</a>
+    <a class="btn" id="signupLink" href="/signup.html">회원가입</a>
+  </div>
+</section>
+
+<div id="content" hidden>
+  <section class="card">
+    <div class="card-head"><h2>내 정보</h2></div>
+    <ul class="kv">
+      <li><i data-icon="user"></i><span class="k">닉네임</span><span class="v" id="nickname">–</span></li>
+      <li><i data-icon="users"></i><span class="k">팀</span><span class="v" id="team">–</span></li>
+      <li><i data-icon="upload"></i><span class="k">오늘 제출</span><span class="v" id="quota">–</span></li>
+      <li><i data-icon="calendar"></i><span class="k">횟수 초기화</span><span class="v" id="resets">–</span></li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>우리 팀 최고 기록</h2>
+      <a class="more" href="/leaderboard.html">리더보드<i data-icon="arrow-right"></i></a>
+    </div>
+    <div class="score" id="best" hidden>
+      <div><div class="label">순위</div><div class="value sub" id="rank">–</div></div>
+      <div><div class="label">RMSE</div><div class="value" id="rmse">–</div></div>
+      <div><div class="label">R²</div><div class="value sub" id="r2">–</div></div>
+    </div>
+    <p class="empty" id="noBest" hidden>아직 제출한 기록이 없습니다. <a href="/submit.html">첫 제출</a>을 해보세요.</p>
+    <div class="card-foot" id="bestFoot" hidden></div>
+  </section>
+</div>
+</main>
+
+<script>
+(function () {
+  document.addEventListener("DOMContentLoaded", async () => {
+    const user = await window.IBA.me;
+    if (!user) {
+      document.getElementById("loginLink").href = window.IBA.authLink("login");
+      document.getElementById("signupLink").href = window.IBA.authLink("signup");
+      document.getElementById("needLogin").hidden = false;
+      return;
+    }
+    document.getElementById("content").hidden = false;
+    document.getElementById("nickname").textContent = user.nickname;
+    document.getElementById("team").textContent = user.team;
+
+    const f = window.IBA.fmt;
+    const [q, board] = await Promise.all([
+      window.IBA.api("/api/quota"),
+      window.IBA.api("/api/leaderboard"),
+    ]);
+
+    if (q.ok) {
+      document.getElementById("quota").textContent = `${q.body.used_today} / ${q.body.limit}회 사용 · ${q.body.remaining_today}회 남음`;
+      document.getElementById("resets").textContent = f.time(q.body.resets_at);
+    }
+
+    if (!board.ok) return;
+    const mine = board.body.find((row) => row.team === user.team);
+    if (!mine) { document.getElementById("noBest").hidden = false; return; }
+    document.getElementById("rank").textContent = `${mine.rank}위`;
+    document.getElementById("rmse").textContent = f.rmse(mine.rmse);
+    document.getElementById("r2").textContent = f.r2(mine.r2);
+    document.getElementById("best").hidden = false;
+    const foot = document.getElementById("bestFoot");
+    foot.textContent = `전체 ${board.body.length}팀 중 ${mine.rank}위 · ${f.time(mine.submitted_at)} 제출 (${mine.nickname})`;
+    foot.hidden = false;
+  });
+})();
+</script>
+</body>
+</html>

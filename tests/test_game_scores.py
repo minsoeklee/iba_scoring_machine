@@ -42,3 +42,8 @@ def test_unknown_game_and_bad_score_rejected(client):
     assert record(client, "apple", 171).json()["error_code"] == "bad_score"
     assert record(client, "apple", -1).json()["error_code"] == "bad_score"
     assert client.get("/api/games/apple/leaderboard").json() == []
+
+
+def test_shooter_score_recorded(client):
+    assert record(client, "shooter", 12345).json() == {"rank": 1, "team_best": 12345}
+    assert record(client, "shooter", 10_000_000).json()["error_code"] == "bad_score"

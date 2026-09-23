@@ -172,7 +172,7 @@ class ScoreBody(BaseModel):
 
 
 # 미니게임별 점수 상한. 점수는 브라우저가 보내므로 불가능한 값만 거른다.
-GAME_MAX_SCORE = {"apple": 170, "tetris": 9_999_999, "blocks": 999_999}
+GAME_MAX_SCORE = {"apple": 170, "tetris": 9_999_999, "blocks": 999_999, "shooter": 9_999_999}
 
 
 class LoginBody(BaseModel):

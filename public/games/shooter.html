@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>비행기 슈팅 — IBA Scoring Machine</title>
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&display=swap">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
+  <script src="/assets/app.js" defer></script>
+  <script src="/games/shooter.js" defer></script>
+  <style>
+    .game-stage.playing canvas { cursor: none; }
+    .power-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+    .power-legend li { display: flex; align-items: center; gap: 8px; }
+    .power-legend .chip { flex: none; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #0b1a2e; }
+  </style>
+</head>
+<body>
+<main>
+<section class="card">
+  <div class="card-head">
+    <h2>비행기 슈팅</h2>
+    <a class="more" href="/minigame.html">미니게임 목록<i data-icon="arrow-right"></i></a>
+  </div>
+  <div class="game-layout">
+    <div class="game-stage">
+      <canvas id="board" width="480" height="640" aria-label="비행기 슈팅 화면"></canvas>
+      <div class="game-overlay" id="overlay" hidden></div>
+    </div>
+    <div class="game-side">
+      <div class="game-stats">
+        <div><div class="label">점수</div><div class="value" id="score">0</div></div>
+        <div><div class="label">최고 기록</div><div class="value" id="best">0</div></div>
+        <div><div class="label">목숨</div><div class="value" id="lives">3</div></div>
+        <div><div class="label">단계</div><div class="value" id="level">1</div></div>
+      </div>
+      <dl class="keys">
+        <dt><kbd>←</kbd> <kbd>↑</kbd> <kbd>↓</kbd> <kbd>→</kbd></dt><dd>이동</dd>
+        <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dt><dd>이동</dd>
+        <dt>마우스</dt><dd>커서를 따라 이동</dd>
+        <dt><kbd>P</kbd></dt><dd>일시정지</dd>
+        <dt><kbd>R</kbd></dt><dd>처음부터 다시</dd>
+      </dl>
+      <ul class="power-legend">
+        <li><span class="chip" style="background:#f29b4c">P</span>화력이 한 단계 오릅니다. 최대 5단계이고, 가득 찬 뒤에는 500점을 얻습니다.</li>
+        <li><span class="chip" style="background:#4cc38a">S</span>보호막이 한 번 맞는 것을 막아 줍니다.</li>
+        <li><span class="chip" style="background:#ef6b6b">+</span>목숨이 하나 늘어납니다. 대형기를 격추하면 가끔 나오고, 최대 5개입니다.</li>
+      </ul>
+      <p class="small">총알은 저절로 나갑니다. 비행기 가운데의 빨간 점에 맞았을 때만 목숨을 잃고, 목숨을 잃으면 화력이 한 단계 내려갑니다. 30초마다 단계가 올라 적이 많아지고 탄이 빨라지며, 3단계부터는 대형기가 나타납니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="card flush">
+  <div class="card-head"><h2>팀 순위</h2></div>
+  <div class="table-wrap">
+    <table id="gameBoard" hidden>
+      <thead><tr><th>순위</th><th>팀</th><th class="num">점수</th><th class="num">기록 시각</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="empty" id="gameBoardEmpty">불러오는 중…</p>
+  <div class="card-foot">팀별 최고 점수입니다. 로그인한 상태로 게임을 마치면 우리 팀 기록으로 올라갑니다.</div>
+</section>
+</main>
+</body>
+</html>

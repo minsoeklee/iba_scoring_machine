@@ -11,42 +11,29 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&family=Playfair+Display:wght@700;900&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="/assets/chrome.css">
   <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/assets/thanks.css">
   <script src="/assets/icons.js" defer></script>
   <script src="/assets/app.js" defer></script>
   <script src="/assets/chrome.js" defer></script>
+  <script src="/assets/thanks.js" defer></script>
 </head>
 <body>
-<main>
-<section class="card">
-  <p class="lead">
-    10기 집행부에게 고맙습니다. 회귀 프로젝트를 기획하고 데이터를 준비하고 기수를 굴려 온 사람들이고,
-    이 사이트는 그 위에 얹은 도구일 뿐입니다.
-  </p>
-</section>
-
-<!-- TODO: 10기 집행부 명단을 채워 주세요. 한 사람당 아래 <li> 한 덩이입니다.
-     직책과 이름, 한 줄 소개(생략 가능)를 적으면 됩니다. -->
-<section class="card">
-  <div class="card-head"><h2>10기 집행부</h2></div>
-  <ul class="crew">
-    <li>
-      <span class="role">회장</span>
-      <span class="name">이름</span>
-      <span class="note">한 줄 소개를 적어 주세요.</span>
-    </li>
-    <li>
-      <span class="role">부회장</span>
-      <span class="name">이름</span>
-      <span class="note">한 줄 소개를 적어 주세요.</span>
-    </li>
-    <li>
-      <span class="role">총무</span>
-      <span class="name">이름</span>
-      <span class="note">한 줄 소개를 적어 주세요.</span>
-    </li>
-  </ul>
-  <div class="card-foot">직책과 인원은 기수마다 다릅니다. 명단이 바뀌면 이 목록만 고치면 됩니다.</div>
-</section>
+<main class="thanks-page">
+  <div class="thanks-viewport" id="thanksViewport" aria-label="사진 10개를 탐색하는 캔버스">
+    <div class="thanks-world" id="thanksWorld">
+      <button class="thanks-slot" type="button" data-z="120" style="--x: 85px; --y: 245px; --w: 210px; --h: 270px" aria-label="사진 1 확대"><img src="/assets/thanks_to/photo-01.jpg" alt="" decoding="async"></button>
+      <button class="thanks-slot" type="button" data-z="820" style="--x: 405px; --y: 75px; --w: 205px; --h: 281px" aria-label="사진 2 확대"><img src="/assets/thanks_to/photo-02.png" alt="" decoding="async"></button>
+      <button class="thanks-slot" type="button" data-z="420" style="--x: 754px; --y: 162px; --w: 258px; --h: 204px" aria-label="사진 3 확대"><img src="/assets/thanks_to/photo-03.png" alt="" decoding="async"></button>
+      <button class="thanks-slot" type="button" data-z="1080" style="--x: 1110px; --y: 45px; --w: 202px; --h: 303px" aria-label="사진 4 확대"><img src="/assets/thanks_to/photo-04.png" alt="" decoding="async"></button>
+      <button class="thanks-slot" type="button" data-z="180" style="--x: 40px; --y: 598px; --w: 205px; --h: 281px" aria-label="사진 5 확대"><img src="/assets/thanks_to/photo-05.png" alt="" decoding="async"></button>
+      <button class="thanks-slot" type="button" data-z="560" style="--x: 350px; --y: 410px; --w: 202px; --h: 259px" aria-label="사진 6 확대"><img src="/assets/thanks_to/photo-06.jpg" alt="" decoding="async"></button>
+      <button class="thanks-slot" type="button" data-z="0" style="--x: 706px; --y: 500px; --w: 196px; --h: 262px" aria-label="사진 7 확대"><img src="/assets/thanks_to/photo-07.jpg" alt="" decoding="async"></button>
+      <button class="thanks-slot" type="button" data-z="870" style="--x: 1190px; --y: 350px; --w: 202px; --h: 260px" aria-label="사진 8 확대"><img src="/assets/thanks_to/photo-08.jpg" alt="" decoding="async"></button>
+      <button class="thanks-slot" type="button" data-z="480" style="--x: 255px; --y: 840px; --w: 202px; --h: 260px" aria-label="사진 9 확대"><img src="/assets/thanks_to/photo-09.jpg" alt="" decoding="async"></button>
+      <button class="thanks-slot" type="button" data-z="70" style="--x: 830px; --y: 755px; --w: 207px; --h: 250px" aria-label="사진 10 확대"><img src="/assets/thanks_to/photo-10.jpg" alt="" decoding="async"></button>
+    </div>
+    <p class="thanks-hint"><span class="thanks-hint-pointer">커서로 회전 · 두 손가락으로 확대·축소 · 사진 클릭</span><span class="thanks-hint-touch">한 손가락으로 회전 · 두 손가락으로 확대·축소</span></p>
+  </div>
 </main>
 </body>
 </html>

@@ -1,16 +1,18 @@
-// 공통 도우미: 셸(사이드바·상단바) 렌더링, 로그인 상태, 아이콘, 숫자 포맷, API 호출, 리더보드 행, 미니게임 팀 순위.
+// 공통 도우미: 틀(메뉴·페이지 제목·하단 바) 렌더링, 로그인 상태, 아이콘, 숫자 포맷, API 호출, 리더보드 행, 미니게임 팀 순위.
 (function () {
+  // 사이드바 메뉴. 랜딩(index.html)의 메뉴와 같은 항목·같은 이름이다.
   const PAGES = [
-    ["/", "홈", "house"],
-    ["/submit.html", "모델 제출", "upload"],
-    ["/leaderboard.html", "리더보드", "chart-column"],
-    ["/minigame.html", "미니게임", "gamepad-2"],
-    ["/mypage.html", "마이페이지", "user"],
+    ["/", "Home"],
+    ["/submit.html", "Submit"],
+    ["/leaderboard.html", "Leaderboard"],
+    ["/minigame.html", "Minigame"],
+    ["/mypage.html", "My page"],
   ];
-  const OTHER_TITLES = {
-    "/login.html": "로그인", "/signup.html": "회원가입",
-    "/about.html": "소개", "/thanks.html": "감사한 분들",
-  };
+  const FOOT_PAGES = [
+    ["/about.html", "About us"],
+    ["/thanks.html", "Special thanks to"],
+  ];
+  const AUTH_TITLES = { "/login.html": "Sign in", "/signup.html": "Sign up" };
 
   function icon(name) {
     const d = (window.ICON_PATHS || {})[name] || "";
@@ -47,50 +49,69 @@
     const here = location.pathname.replace(/index\.html$/, "");
     // 개별 게임 페이지(/games/...)는 미니게임 메뉴 아래에 있는 것으로 본다.
     const navPath = here.startsWith("/games/") ? "/minigame.html" : here;
-    const current = PAGES.find(([href]) => href === navPath);
-    const title = current ? current[1] : OTHER_TITLES[here] || "";
-    const nav = PAGES.map(([href, label, ic]) => {
-      const cur = current && href === current[0] ? ' aria-current="page"' : "";
-      return `<a href="${href}"${cur}>${icon(ic)}<span>${label}</span></a>`;
-    }).join("");
+    const current = [...PAGES, ...FOOT_PAGES].find(([href]) => href === navPath);
+    const title = current ? current[1] : AUTH_TITLES[here] || "";
+    const link = ([href, label]) => {
+      const cur = href === navPath ? ' aria-current="page"' : "";
+      return `<a href="${href}"${cur}><span>${label}</span></a>`;
+    };
 
-    const shell = document.createElement("div");
-    shell.className = "shell";
-    shell.innerHTML = `
-      <aside class="sidebar">
-        <div class="sidebar-top">
-          <a class="wordmark" href="/"><img src="/assets/iba-mark.png" alt="">IBA</a>
-          <nav class="nav" aria-label="페이지">${nav}</nav>
-        </div>
-        <div class="sidebar-bottom" id="meCard"></div>
-      </aside>
-      <div class="main-col">
-        <header class="topbar">
-          <div class="where"><span class="page">${title}</span>${icon("chevron-right")}<span class="sub">중고차 가격 예측 챌린지</span></div>
-          <div class="topbar-auth" id="topbarAuth"></div>
-        </header>
-      </div>`;
+    // 메뉴 버튼·사이드바·막은 랜딩과 같은 마크업. 여닫는 동작은 chrome.js가 붙인다.
+    document.body.insertAdjacentHTML("afterbegin", `
+      <div class="menu-zone" id="menuZone">
+        <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="sidebar" aria-label="Open menu">
+          <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        </button>
+        <nav class="sidebar" id="sidebar" aria-label="Site menu">
+          <a class="side-brand" href="/">IBA</a>
+          <ul class="side-nav">${PAGES.map((p) => `<li>${link(p)}</li>`).join("")}</ul>
+          <div class="side-foot">${FOOT_PAGES.map(link).join("")}</div>
+        </nav>
+      </div>
+      <nav class="corner-links" id="cornerLinks" aria-label="Quick links"><a class="home-mark" href="/" aria-label="IBA 홈으로">IBA</a></nav>
+      <div class="scrim" aria-hidden="true"></div>`);
+
     const main = document.querySelector("main");
-    if (main) shell.querySelector(".main-col").append(main);
-    document.body.prepend(shell);
+    if (main) {
+      main.classList.add("page");
+      // 로그인·가입 화면은 가운데 좁은 카드라 제목도 가운데에 둔다.
+      // 게임 화면은 캔버스가 한 화면에 들어오도록 제목을 줄인다.
+      const variant = here in AUTH_TITLES ? " centered" : here.startsWith("/games/") ? " compact" : "";
+      if (variant === " compact") main.classList.add("compact");
+      main.insertAdjacentHTML("afterbegin", `
+        <header class="page-head${variant}">
+          <p class="page-eyebrow">Regression Project Scoring Service</p>
+          <h1 class="page-title">${title}</h1>
+        </header>`);
+    }
+
+    document.body.insertAdjacentHTML("beforeend", `
+      <footer class="site-foot">
+        <p class="foot-legal">
+          © 2026 PNU IBA
+          <span class="sep">·</span>
+          <a href="https://pnuiba.imweb.me/" target="_blank" rel="noopener">Webpage</a> |
+          <a href="https://www.instagram.com/pnu_iba/" target="_blank" rel="noopener">Instagram</a> |
+          <a href="https://linktr.ee/pnuiba" target="_blank" rel="noopener">Linktree</a>
+          <span class="sep">·</span>
+          The devil&rsquo;s in the details.
+        </p>
+      </footer>`);
+
     hydrateIcons(document.body);
     me.then(renderAuth);
   }
 
+  // 오른쪽 위. 본문 페이지는 랜딩으로 돌아가는 IBA 워드마크를 늘 두고(renderShell),
+  // Sign in·How to use?는 랜딩에만 둔다. 로그인했으면 그 아래에 내 이름(마이페이지로)과 로그아웃.
   function renderAuth(user) {
-    const card = document.getElementById("meCard");
-    const bar = document.getElementById("topbarAuth");
-    if (user) {
-      card.innerHTML = `<div class="me"><span class="avatar">${icon("user")}</span><span><div class="name">${esc(user.nickname)}</div><div class="sub">${esc(user.team)} 팀 · ${esc(user.username)}</div></span></div>`;
-      bar.innerHTML = `<span class="who">${esc(user.nickname)} · ${esc(user.team)}</span><button type="button" class="sm" id="logoutBtn">로그아웃</button>`;
-      document.getElementById("logoutBtn").addEventListener("click", async () => {
-        await api("/api/logout", { method: "POST" });
-        location.reload();
-      });
-    } else {
-      card.innerHTML = `<a class="me" href="${authLink("login")}"><span class="avatar">${icon("user")}</span><span class="name">로그인</span></a>`;
-      bar.innerHTML = `<a class="btn sm" href="${authLink("login")}">로그인</a><a class="btn sm primary" href="${authLink("signup")}">회원가입</a>`;
-    }
+    if (!user) return;
+    const corner = document.getElementById("cornerLinks");
+    corner.insertAdjacentHTML("beforeend", `<a class="who" href="/mypage.html">${esc(user.nickname)} · ${esc(user.team)}</a><button type="button" id="logoutBtn">Sign out</button>`);
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await api("/api/logout", { method: "POST" });
+      location.reload();
+    });
   }
 
   const fmt = {

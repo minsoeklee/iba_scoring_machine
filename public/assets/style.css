@@ -237,45 +237,64 @@ input[type="file"]::file-selector-button {
 .game-stats .value { font-size: 21px; font-weight: 700; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
 .game-stats .label { color: var(--muted); font-size: 12px; font-weight: 500; }
 
-/* ── 미니게임 바탕화면 ─────────────────────────────────────────
-   macOS 바탕화면처럼 게임 아이콘을 흩어 두고, 누르면 게임을 창에 담아 연다(desktop.js).
-   아이콘: 누르면 선택(회색 틀 + 파란 이름표), 끌면 옮겨진다. */
-.desk-main .page-head { display: none; }   /* 바탕화면은 제목 없이 화면 전체를 쓴다 */
-main.page.desk-main { padding-bottom: 0; }
-.desktop {
+/* ── 미니게임 Dock ─────────────────────────────────────────────
+   사이트 바탕 위, 화면 아래쪽 가운데에 macOS Dock 같은 반투명 유리 막대 하나. 게임 아이콘을 누르면 창이 열린다(desktop.js).
+   커서 가까운 아이콘일수록 커지고(--s, desktop.js), 커진 아이콘은 막대 위로 솟는다. */
+.desk-main .page-head { display: none; }   /* 제목 없이 Dock만 둔다 */
+main.page.desk-main { max-width: none; padding: 24px 88px 0; }
+.dock-stage {
+  height: calc(100vh - 24px - 53px);   /* 위 여백과 하단 바 사이 전체. Dock은 그 바닥에 선다 */
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 12px;
+}
+.dock {
+  --icon: 60px;
+  display: flex; align-items: flex-end; gap: 10px;
+  height: calc(var(--icon) + 16px);
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 22px;
+  box-shadow: 0 0 0 1px rgba(21, 24, 29, 0.08), 0 14px 36px rgba(21, 24, 29, 0.14);
+}
+.dock-item {
+  --s: 1;
   position: relative;
-  /* 메뉴 버튼 줄(위 112px)과 하단 바(약 53px) 사이를 모두 바탕화면으로 — 스크롤 없이 한 화면 */
-  height: max(460px, calc(100vh - 168px));
+  display: block; flex: none;
+  width: calc(var(--icon) * var(--s)); height: calc(var(--icon) * var(--s));
+  padding: 0; border: 0; border-radius: 0; background: none;   /* style.css의 전역 button 모양을 걷어낸다 */
+  cursor: pointer;
+  transition: width 140ms ease-out, height 140ms ease-out;
 }
-.desk-icon {
-  position: absolute; left: var(--x); top: var(--y);
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  width: 104px; height: auto; padding: 0;
-  border: 0; border-radius: 0; background: none;   /* style.css의 전역 button 모양을 걷어낸다 */
-  font: inherit; color: var(--ink);
-  cursor: grab; user-select: none;
+.dock-item:hover { background: none; }
+.dock-item:focus-visible { outline: none; }
+.dock-item:focus-visible svg { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 14px; }
+.dock-item svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.25)); }
+/* 이름 말풍선: 올리거나 키보드로 고르면 아이콘 위에 뜬다 */
+.dock-tip {
+  position: absolute; left: 50%; bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  padding: 3px 10px; border-radius: 6px;
+  background: rgba(40, 42, 46, 0.86); color: #fff;
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 120ms ease-out;
 }
-.desk-icon:hover { background: none; }
-/* 포인터는 아이콘 단추가 직접 받는다. 안쪽 SVG가 받으면 끌기 포인터 캡처가 이어지지 않는다 */
-.desk-icon > * { pointer-events: none; }
-.desk-icon:active { cursor: grabbing; }
-.desk-icon:focus-visible { outline: none; }
-.desk-thumb {
-  display: grid; place-items: center;
-  width: 80px; height: 80px; padding: 6px;
-  border: 1px solid transparent; border-radius: 10px;
+.dock-item:hover .dock-tip, .dock-item:focus-visible .dock-tip { opacity: 1; }
+/* 열려 있는 게임: 아이콘 아래 작은 점 */
+.dock-dot {
+  position: absolute; left: 50%; bottom: -6px;
+  width: 4px; height: 4px; border-radius: 50%;
+  transform: translateX(-50%);
+  background: rgba(21, 24, 29, 0.55);
+  opacity: 0; transition: opacity 160ms ease-out;
 }
-.desk-thumb svg { width: 64px; height: 64px; display: block; filter: drop-shadow(0 4px 10px rgba(11, 26, 46, 0.22)); }
-.desk-label {
-  max-width: 100%; padding: 1px 7px; border-radius: 5px;
-  font-size: 12.5px; font-weight: 600; line-height: 1.5; letter-spacing: -0.1px;
-  color: var(--ink);
+.dock-item.running .dock-dot { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .dock-item { transition: none; }
 }
-.desk-icon:hover .desk-thumb { background: rgba(21, 24, 29, 0.05); }
-.desk-icon.selected .desk-thumb, .desk-icon:focus-visible .desk-thumb {
-  background: rgba(21, 24, 29, 0.08); border-color: rgba(21, 24, 29, 0.14);
-}
-.desk-icon.selected .desk-label, .desk-icon:focus-visible .desk-label { background: var(--accent); color: var(--accent-ink); }
 
 /* 창: 제목 줄(신호등 세 개 + 가운데 제목) 아래에 게임 페이지를 iframe으로 담는다.
    앞에 있지 않은 창은 신호등을 회색으로 죽이고 그림자를 줄인다(macOS 비활성 창). */
@@ -312,10 +331,7 @@ main.page.desk-main { padding-bottom: 0; }
 .desk-dragging .win iframe { pointer-events: none; }
 .desk-dragging, .desk-dragging * { cursor: grabbing !important; }
 
-@media (prefers-reduced-motion: no-preference) {
-  .win { animation: win-open 180ms cubic-bezier(0.22, 1, 0.36, 1); }
-  @keyframes win-open { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
-}
+.win.closing { pointer-events: none; }   /* 여닫는 움직임은 desktop.js가 Web Animations로 준다 */
 
 /* 창 안(iframe)에 들어간 게임 페이지(?embed=1): 메뉴·제목·하단 바 없이 본문만.
    카드 테두리를 걷어 창이 곧 카드가 되게 하고, 목록으로 돌아가는 링크는 숨긴다. */
@@ -355,6 +371,35 @@ kbd {
   border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--subtle); color: var(--ink);
 }
 .time-bar { margin-top: 10px; }
+/* 통계 칸 옆의 단추(사과게임의 처음부터 다시): 통계 값과 같은 줄 높이에 세운다 */
+.game-stats > .stat-action { display: flex; align-items: flex-end; }
+.game-stats > .stat-action button { width: 100%; }
+
+/* 게임 옆 칸에 넣은 팀 순위(사과게임). 칸이 좁아 표 여백을 줄이고 기록 시각 열은 숨기며,
+   기록이 많으면 표만 스크롤한다. */
+/* 사과게임: 게임판(674px) 오른쪽에 좁은 칸 하나만 두고 여백을 줄여 창을 작게 만든다 */
+/* 오른쪽 칸은 게임판 높이에 맞춰 늘어나고(contain: size로 칸 내용이 줄 높이를 키우지 못하게),
+   팀 순위가 그 높이를 채워 칸 아래가 비지 않게 한다. 기록이 많으면 표만 스크롤. */
+.apple-layout { gap: 16px; flex-wrap: nowrap; align-items: stretch; }
+.apple-layout .game-side { flex: 0 0 210px; min-width: 0; max-width: none; gap: 14px; contain: size; }
+.apple-layout .side-board { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.apple-layout .side-board .table-wrap { max-height: none; min-height: 0; flex: 0 1 auto; }
+.apple-layout .side-board > .small { margin-top: auto; padding-top: 8px; }
+.apple-layout .game-stats > div { padding-left: 14px; padding-right: 0; border-left: 0; }   /* 칸 사이 세로 구분선 없이 */
+.apple-layout .game-stats > div:nth-child(odd) { padding-left: 0; }
+.apple-layout .game-stats > .stat-action { padding-left: 4px; }
+.apple-layout .game-stats > .stat-action button { width: auto; }
+body.embed main:has(.apple-layout) { padding: 16px; }
+.side-board h3 { margin: 0 0 8px; font-size: 13px; }
+.side-board .table-wrap { max-height: 204px; overflow-y: auto; margin: 0 !important; }   /* 카드 안 표를 양옆으로 늘리는 규칙을 끈다 */
+.side-board th, .side-board td { padding: 7px 6px; }
+.side-board th:first-child, .side-board td:first-child { padding-left: 0; }
+.side-board th:last-child, .side-board td:last-child { padding-right: 0; }
+.side-board th:nth-child(4), .side-board td:nth-child(4) { display: none; }
+.side-board th:nth-child(3), .side-board td:nth-child(3) { padding-right: 0; }
+.side-board .team .avatar { display: none; }
+.side-board .empty { padding: 10px 0; }
+.side-board .small { margin: 8px 0 0; line-height: 1.55; }
 
 @media (max-width: 1100px) {
   .cols { grid-template-columns: minmax(0, 1fr); }

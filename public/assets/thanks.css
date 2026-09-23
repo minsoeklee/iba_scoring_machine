@@ -53,23 +53,7 @@ main.page.thanks-page {
   box-shadow: 0 7px 26px rgb(21 24 29 / 9%);
 }
 .thanks-slot:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
-.thanks-hint {
-  position: absolute;
-  right: 17px;
-  bottom: 11px;
-  margin: 0;
-  padding: 4px 7px;
-  color: var(--ink-2);
-  font-size: 11px;
-  pointer-events: none;
-}
-.thanks-hint-touch { display: none; }
-@media (pointer: coarse) {
-  .thanks-hint-pointer { display: none; }
-  .thanks-hint-touch { display: inline; }
-}
 @media (max-width: 700px) {
   main.page.thanks-page { padding: 90px 14px 24px; }
   .thanks-viewport { height: max(510px, calc(100svh - 155px)); }
-  .thanks-hint { font-size: 10px; }
 }

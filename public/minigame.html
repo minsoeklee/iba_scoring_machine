@@ -18,68 +18,71 @@
 </head>
 <body>
 <main class="desk-main">
-<!-- 바탕화면: 게임마다 아이콘 하나. 누르면 desktop.js가 그 게임 페이지(?embed=1)를 창에 담아 연다.
-     --x·--y는 처음 놓이는 자리(바탕화면 기준 %), data-w는 창 너비(px). -->
-<section class="desktop" id="desktop" aria-label="미니게임 바탕화면">
-  <button class="desk-icon" type="button" data-game="apple" data-title="사과게임" data-w="980" style="--x: 14%; --y: 12%">
-    <span class="desk-thumb">
-      <svg viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="14" fill="#0b1a2e"/>
+<!-- 미니게임 Dock: 게임마다 아이콘 하나. 누르면 desktop.js가 그 게임 페이지(?embed=1)를 창에 담아 연다.
+     data-w는 창 너비(px). 올리면 macOS Dock처럼 커지고, 열려 있는 게임은 아래에 점이 켜진다. -->
+<div class="dock-stage">
+<nav class="dock" id="dock" aria-label="미니게임">
+  <button class="dock-item" type="button" data-game="apple" data-title="사과게임" data-w="934" aria-label="사과게임 열기">
+    <span class="dock-tip" aria-hidden="true">사과게임</span>
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+        <defs><linearGradient id="ig-apple" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b3358"/><stop offset="1" stop-color="#0a1629"/></linearGradient></defs>
+        <rect width="64" height="64" rx="14" fill="url(#ig-apple)"/>
         <g font-family="sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">
-          <circle cx="21" cy="22" r="9" fill="#e5484d"/><text x="21" y="25.5">3</text>
-          <circle cx="43" cy="22" r="9" fill="#e5484d"/><text x="43" y="25.5">7</text>
-          <circle cx="21" cy="44" r="9" fill="#e5484d"/><text x="21" y="47.5">6</text>
-          <circle cx="43" cy="44" r="9" fill="#e5484d"/><text x="43" y="47.5">4</text>
+        <circle cx="21" cy="22" r="9" fill="#e5484d"/><text x="21" y="25.5">3</text>
+        <circle cx="43" cy="22" r="9" fill="#e5484d"/><text x="43" y="25.5">7</text>
+        <circle cx="21" cy="44" r="9" fill="#e5484d"/><text x="21" y="47.5">6</text>
+        <circle cx="43" cy="44" r="9" fill="#e5484d"/><text x="43" y="47.5">4</text>
         </g>
         <rect x="9" y="10" width="46" height="24" rx="4" fill="none" stroke="#4cc38a" stroke-width="2.2"/>
-      </svg>
-    </span>
-    <span class="desk-label">사과게임</span>
+        <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity="0.14"/>
+        </svg>
+    <span class="dock-dot" aria-hidden="true"></span>
   </button>
-
-  <button class="desk-icon" type="button" data-game="tetris" data-title="테트리스" data-w="640" style="--x: 38%; --y: 46%">
-    <span class="desk-thumb">
-      <svg viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="14" fill="#0b1a2e"/>
+  <button class="dock-item" type="button" data-game="tetris" data-title="테트리스" data-w="640" aria-label="테트리스 열기">
+    <span class="dock-tip" aria-hidden="true">테트리스</span>
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+        <defs><linearGradient id="ig-tetris" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b3358"/><stop offset="1" stop-color="#0a1629"/></linearGradient></defs>
+        <rect width="64" height="64" rx="14" fill="url(#ig-tetris)"/>
         <g stroke="#0b1a2e" stroke-width="1.5">
-          <rect x="20" y="10" width="8" height="8" fill="#a77bf3"/><rect x="28" y="10" width="8" height="8" fill="#a77bf3"/><rect x="36" y="10" width="8" height="8" fill="#a77bf3"/><rect x="28" y="18" width="8" height="8" fill="#a77bf3"/>
-          <rect x="12" y="46" width="8" height="8" fill="#4f7df0"/><rect x="12" y="38" width="8" height="8" fill="#4f7df0"/><rect x="20" y="46" width="8" height="8" fill="#4f7df0"/><rect x="28" y="46" width="8" height="8" fill="#4f7df0"/>
-          <rect x="36" y="38" width="8" height="8" fill="#f2c94c"/><rect x="44" y="38" width="8" height="8" fill="#f2c94c"/><rect x="36" y="46" width="8" height="8" fill="#f2c94c"/><rect x="44" y="46" width="8" height="8" fill="#f2c94c"/>
+        <rect x="20" y="10" width="8" height="8" fill="#a77bf3"/><rect x="28" y="10" width="8" height="8" fill="#a77bf3"/><rect x="36" y="10" width="8" height="8" fill="#a77bf3"/><rect x="28" y="18" width="8" height="8" fill="#a77bf3"/>
+        <rect x="12" y="46" width="8" height="8" fill="#4f7df0"/><rect x="12" y="38" width="8" height="8" fill="#4f7df0"/><rect x="20" y="46" width="8" height="8" fill="#4f7df0"/><rect x="28" y="46" width="8" height="8" fill="#4f7df0"/>
+        <rect x="36" y="38" width="8" height="8" fill="#f2c94c"/><rect x="44" y="38" width="8" height="8" fill="#f2c94c"/><rect x="36" y="46" width="8" height="8" fill="#f2c94c"/><rect x="44" y="46" width="8" height="8" fill="#f2c94c"/>
         </g>
-      </svg>
-    </span>
-    <span class="desk-label">테트리스</span>
+        <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity="0.14"/>
+        </svg>
+    <span class="dock-dot" aria-hidden="true"></span>
   </button>
-
-  <button class="desk-icon" type="button" data-game="blocks" data-title="블록깨기" data-w="960" style="--x: 62%; --y: 16%">
-    <span class="desk-thumb">
-      <svg viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="14" fill="#0b1a2e"/>
+  <button class="dock-item" type="button" data-game="blocks" data-title="블록깨기" data-w="960" aria-label="블록깨기 열기">
+    <span class="dock-tip" aria-hidden="true">블록깨기</span>
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+        <defs><linearGradient id="ig-blocks" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b3358"/><stop offset="1" stop-color="#0a1629"/></linearGradient></defs>
+        <rect width="64" height="64" rx="14" fill="url(#ig-blocks)"/>
         <g>
-          <rect x="9" y="11" width="14" height="6" rx="1.5" fill="#ef6b6b"/><rect x="25" y="11" width="14" height="6" rx="1.5" fill="#ef6b6b"/><rect x="41" y="11" width="14" height="6" rx="1.5" fill="#ef6b6b"/>
-          <rect x="9" y="19" width="14" height="6" rx="1.5" fill="#f2c94c"/><rect x="41" y="19" width="14" height="6" rx="1.5" fill="#f2c94c"/>
-          <rect x="25" y="27" width="14" height="6" rx="1.5" fill="#3ec7e0"/>
+        <rect x="9" y="11" width="14" height="6" rx="1.5" fill="#ef6b6b"/><rect x="25" y="11" width="14" height="6" rx="1.5" fill="#ef6b6b"/><rect x="41" y="11" width="14" height="6" rx="1.5" fill="#ef6b6b"/>
+        <rect x="9" y="19" width="14" height="6" rx="1.5" fill="#f2c94c"/><rect x="41" y="19" width="14" height="6" rx="1.5" fill="#f2c94c"/>
+        <rect x="25" y="27" width="14" height="6" rx="1.5" fill="#3ec7e0"/>
         </g>
         <circle cx="36" cy="41" r="3.2" fill="#fff"/>
         <rect x="21" y="49" width="22" height="4.5" rx="2.25" fill="#e8eefc"/>
-      </svg>
-    </span>
-    <span class="desk-label">블록깨기</span>
+        <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity="0.14"/>
+        </svg>
+    <span class="dock-dot" aria-hidden="true"></span>
   </button>
-
-  <button class="desk-icon" type="button" data-game="shooter" data-title="비행기 슈팅" data-w="800" style="--x: 80%; --y: 52%">
-    <span class="desk-thumb">
-      <svg viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="14" fill="#0b1a2e"/>
+  <button class="dock-item" type="button" data-game="shooter" data-title="비행기 슈팅" data-w="800" aria-label="비행기 슈팅 열기">
+    <span class="dock-tip" aria-hidden="true">비행기 슈팅</span>
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+        <defs><linearGradient id="ig-shooter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b3358"/><stop offset="1" stop-color="#0a1629"/></linearGradient></defs>
+        <rect width="64" height="64" rx="14" fill="url(#ig-shooter)"/>
         <g fill="#ef6b6b"><path d="M20 20 L27 11 L23 12.5 L20 9.5 L17 12.5 L13 11 Z"/><path d="M44 20 L51 11 L47 12.5 L44 9.5 L41 12.5 L37 11 Z"/></g>
         <g fill="#f2c94c"><rect x="30.5" y="22" width="3" height="7" rx="1"/><rect x="30.5" y="31" width="3" height="5" rx="1"/></g>
         <circle cx="46" cy="30" r="2.5" fill="#ff5a7a"/>
         <path d="M32 38 L35 45 L43 50 L43 53 L35 52 L34 55 L30 55 L29 52 L21 53 L21 50 L29 45 Z" fill="#e8eefc"/>
-      </svg>
-    </span>
-    <span class="desk-label">비행기 슈팅</span>
+        <rect x="0.5" y="0.5" width="63" height="63" rx="13.5" fill="none" stroke="#fff" stroke-opacity="0.14"/>
+        </svg>
+    <span class="dock-dot" aria-hidden="true"></span>
   </button>
-</section>
+</nav>
+</div>
 </main>
 
 </body>

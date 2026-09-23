@@ -1,8 +1,7 @@
 // 공통 도우미: 틀(메뉴·페이지 제목·하단 바) 렌더링, 로그인 상태, 아이콘, 숫자 포맷, API 호출, 리더보드 행, 미니게임 팀 순위.
 (function () {
-  // 사이드바 메뉴. 랜딩(index.html)의 메뉴와 같은 항목·같은 이름이다.
+  // 사이드바 메뉴. 랜딩(index.html)의 메뉴와 같은 항목·같은 이름이다. 홈은 워드마크(IBA)로 간다.
   const PAGES = [
-    ["/", "Home"],
     ["/submit.html", "Submit"],
     ["/leaderboard.html", "Leaderboard"],
     ["/minigame.html", "Minigame"],

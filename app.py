@@ -376,6 +376,15 @@ def health():
 if not os.environ.get("VERCEL"):
     from fastapi.staticfiles import StaticFiles
 
+    class _NoCacheStaticFiles(StaticFiles):
+        """로컬 개발용: 브라우저가 매번 새 버전인지 확인하게 해 고친 CSS·JS·HTML이 바로 보이게 한다.
+        Cache-Control이 없으면 브라우저가 알아서 한동안 옛 파일을 재사용한다."""
+
+        def file_response(self, *args, **kwargs):
+            response = super().file_response(*args, **kwargs)
+            response.headers["Cache-Control"] = "no-cache"
+            return response
+
     _public = Path(__file__).parent / "public"
     if _public.is_dir():
-        app.mount("/", StaticFiles(directory=_public, html=True), name="public")
+        app.mount("/", _NoCacheStaticFiles(directory=_public, html=True), name="public")

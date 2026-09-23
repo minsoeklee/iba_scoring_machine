@@ -27,7 +27,7 @@
     <h2>사과게임</h2>
     <a class="more" href="/minigame.html">미니게임 목록<i data-icon="arrow-right"></i></a>
   </div>
-  <div class="game-layout">
+  <div class="game-layout apple-layout">
     <div>
       <div class="game-stage">
         <canvas id="board" width="674" height="408" aria-label="사과게임 판"></canvas>
@@ -40,26 +40,22 @@
         <div><div class="label">없앤 사과</div><div class="value" id="score">0</div></div>
         <div><div class="label">최고 기록</div><div class="value" id="best">0</div></div>
         <div><div class="label">남은 시간</div><div class="value" id="time">100초</div></div>
+        <div class="stat-action"><button type="button" class="sm" id="restart">처음부터 다시</button></div>
       </div>
-      <dl class="keys">
-        <dt>드래그</dt><dd>사각형 그리기</dd>
-      </dl>
-      <p class="small">사각형 안 사과의 숫자 합이 정확히 10이면 사과가 사라집니다. 사각형 테두리가 초록색이면 합이 10이고, 모서리에 현재 합이 표시됩니다. 만들 수 있는 10이 더 없으면 게임이 끝납니다. 다른 탭으로 옮기면 일시정지됩니다.</p>
-      <button type="button" id="restart">처음부터 다시</button>
+      <!-- 팀 순위는 게임판 오른쪽에. 좁은 칸이라 기록 시각 열은 숨긴다(style.css .side-board). -->
+      <div class="side-board">
+        <h3>팀 순위</h3>
+        <div class="table-wrap">
+          <table id="gameBoard" hidden>
+            <thead><tr><th>순위</th><th>팀</th><th class="num">점수</th><th class="num">기록 시각</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="empty" id="gameBoardEmpty">불러오는 중…</p>
+        <p class="small">팀별 최고 점수입니다. 로그인한 상태로 게임을 마치면 우리 팀 기록으로 올라갑니다.</p>
+      </div>
     </div>
   </div>
-</section>
-
-<section class="card flush">
-  <div class="card-head"><h2>팀 순위</h2></div>
-  <div class="table-wrap">
-    <table id="gameBoard" hidden>
-      <thead><tr><th>순위</th><th>팀</th><th class="num">점수</th><th class="num">기록 시각</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-  <p class="empty" id="gameBoardEmpty">불러오는 중…</p>
-  <div class="card-foot">팀별 최고 점수입니다. 로그인한 상태로 게임을 마치면 우리 팀 기록으로 올라갑니다.</div>
 </section>
 </main>
 </body>

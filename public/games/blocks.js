@@ -4,8 +4,8 @@
   const COLS = 10, PAD = 24, GAP = 6, TOP = 64, BRICK_H = 18;
   const BRICK_W = (W - PAD * 2 - GAP * (COLS - 1)) / COLS;
   const ROW_COLORS = ["#ef6b6b", "#f29b4c", "#f2c94c", "#4cc38a", "#3ec7e0", "#4f7df0", "#9b7cf0"];
-  const PADDLE_W = 96, PADDLE_WIDE = 144, PADDLE_H = 12, PADDLE_Y = H - 36, PADDLE_SPEED = 560;
-  const BALL_R = 7, START_SPEED = 340, SPEED_UP = 1.1, MAX_SPEED = 720;
+  const PADDLE_W = 96, PADDLE_WIDE = 144, PADDLE_H = 12, PADDLE_Y = H - 36, PADDLE_SPEED = 400;
+  const BALL_R = 7, START_SPEED = 340, SPEED_UP = 1.15, MAX_SPEED = 720;
   // 패들에 맞은 공이 세로축에서 기우는 각도의 최대·최소. 최소가 있어 공이 수직으로만 오가지 않는다.
   const MAX_BOUNCE = Math.PI / 3, MIN_BOUNCE = 0.12;
   const LIVES = 3, MAX_BALLS = 8, SCORE_MAX = 999999, RESTART_DELAY = 800;

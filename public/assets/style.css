@@ -53,7 +53,8 @@ code { font-family: var(--mono); font-size: 0.92em; background: var(--subtle); b
   height: 100vh;
 }
 .sidebar-top { flex: 1; display: flex; flex-direction: column; gap: 28px; padding: 24px 16px 0; }
-.wordmark { font-size: 19px; font-weight: 700; letter-spacing: -0.4px; color: var(--ink); padding: 0 8px; }
+.wordmark { display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: -0.4px; color: var(--ink); padding: 0 8px; }
+.wordmark img { height: 26px; width: auto; }
 .wordmark:hover { text-decoration: none; }
 .nav { display: flex; flex-direction: column; gap: 2px; }
 .nav a {

@@ -55,7 +55,7 @@
     shell.innerHTML = `
       <aside class="sidebar">
         <div class="sidebar-top">
-          <a class="wordmark" href="/">IBA</a>
+          <a class="wordmark" href="/"><img src="/assets/iba-mark.png" alt="">IBA</a>
           <nav class="nav" aria-label="페이지">${nav}</nav>
         </div>
         <div class="sidebar-bottom" id="meCard"></div>

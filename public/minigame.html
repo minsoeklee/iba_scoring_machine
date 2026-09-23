@@ -14,83 +14,72 @@
   <script src="/assets/icons.js" defer></script>
   <script src="/assets/app.js" defer></script>
   <script src="/assets/chrome.js" defer></script>
+  <script src="/assets/desktop.js" defer></script>
 </head>
 <body>
-<main>
-<section class="card">
-  <p class="lead">채점과는 무관한 쉬어 가는 게임입니다. 게임마다 팀 순위가 있고, 로그인한 상태로 게임을 마치면 우리 팀 기록으로 올라갑니다.</p>
-</section>
-
-<div class="game-list">
-  <a class="game-card" href="/games/apple.html">
-    <div class="thumb">
-      <svg viewBox="0 0 120 76" aria-hidden="true">
-        <g font-family="sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">
-          <circle cx="30" cy="22" r="11" fill="#e5484d"/><text x="30" y="26">3</text>
-          <circle cx="60" cy="22" r="11" fill="#e5484d"/><text x="60" y="26">7</text>
-          <circle cx="90" cy="22" r="11" fill="#e5484d"/><text x="90" y="26">5</text>
-          <circle cx="30" cy="52" r="11" fill="#e5484d"/><text x="30" y="56">8</text>
-          <circle cx="60" cy="52" r="11" fill="#e5484d"/><text x="60" y="56">2</text>
-          <circle cx="90" cy="52" r="11" fill="#e5484d"/><text x="90" y="56">4</text>
+<main class="desk-main">
+<!-- 바탕화면: 게임마다 아이콘 하나. 누르면 desktop.js가 그 게임 페이지(?embed=1)를 창에 담아 연다.
+     --x·--y는 처음 놓이는 자리(바탕화면 기준 %), data-w는 창 너비(px). -->
+<section class="desktop" id="desktop" aria-label="미니게임 바탕화면">
+  <button class="desk-icon" type="button" data-game="apple" data-title="사과게임" data-w="980" style="--x: 14%; --y: 12%">
+    <span class="desk-thumb">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#0b1a2e"/>
+        <g font-family="sans-serif" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">
+          <circle cx="21" cy="22" r="9" fill="#e5484d"/><text x="21" y="25.5">3</text>
+          <circle cx="43" cy="22" r="9" fill="#e5484d"/><text x="43" y="25.5">7</text>
+          <circle cx="21" cy="44" r="9" fill="#e5484d"/><text x="21" y="47.5">6</text>
+          <circle cx="43" cy="44" r="9" fill="#e5484d"/><text x="43" y="47.5">4</text>
         </g>
-        <rect x="16" y="8" width="58" height="28" rx="3" fill="none" stroke="#4cc38a" stroke-width="2"/>
+        <rect x="9" y="10" width="46" height="24" rx="4" fill="none" stroke="#4cc38a" stroke-width="2.2"/>
       </svg>
-    </div>
-    <div class="body">
-      <span class="title">사과게임</span>
-      <span class="desc">사각형으로 묶은 사과의 숫자 합이 10이면 사과가 사라집니다. 제한 시간 안에 최대한 많이 없애세요.</span>
-    </div>
-  </a>
+    </span>
+    <span class="desk-label">사과게임</span>
+  </button>
 
-  <a class="game-card" href="/games/tetris.html">
-    <div class="thumb">
-      <svg viewBox="0 0 120 76" aria-hidden="true">
-        <g stroke="#0b1a2e" stroke-width="2">
-          <rect x="24" y="52" width="16" height="16" fill="#4f7df0"/><rect x="40" y="52" width="16" height="16" fill="#4f7df0"/><rect x="56" y="52" width="16" height="16" fill="#4f7df0"/><rect x="24" y="36" width="16" height="16" fill="#4f7df0"/>
-          <rect x="72" y="52" width="16" height="16" fill="#f2c94c"/><rect x="88" y="52" width="16" height="16" fill="#f2c94c"/><rect x="72" y="36" width="16" height="16" fill="#f2c94c"/><rect x="88" y="36" width="16" height="16" fill="#f2c94c"/>
-          <rect x="48" y="4" width="16" height="16" fill="#a77bf3"/><rect x="32" y="20" width="16" height="16" fill="#a77bf3"/><rect x="48" y="20" width="16" height="16" fill="#a77bf3"/><rect x="64" y="20" width="16" height="16" fill="#a77bf3"/>
+  <button class="desk-icon" type="button" data-game="tetris" data-title="테트리스" data-w="640" style="--x: 38%; --y: 46%">
+    <span class="desk-thumb">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#0b1a2e"/>
+        <g stroke="#0b1a2e" stroke-width="1.5">
+          <rect x="20" y="10" width="8" height="8" fill="#a77bf3"/><rect x="28" y="10" width="8" height="8" fill="#a77bf3"/><rect x="36" y="10" width="8" height="8" fill="#a77bf3"/><rect x="28" y="18" width="8" height="8" fill="#a77bf3"/>
+          <rect x="12" y="46" width="8" height="8" fill="#4f7df0"/><rect x="12" y="38" width="8" height="8" fill="#4f7df0"/><rect x="20" y="46" width="8" height="8" fill="#4f7df0"/><rect x="28" y="46" width="8" height="8" fill="#4f7df0"/>
+          <rect x="36" y="38" width="8" height="8" fill="#f2c94c"/><rect x="44" y="38" width="8" height="8" fill="#f2c94c"/><rect x="36" y="46" width="8" height="8" fill="#f2c94c"/><rect x="44" y="46" width="8" height="8" fill="#f2c94c"/>
         </g>
       </svg>
-    </div>
-    <div class="body">
-      <span class="title">테트리스</span>
-      <span class="desc">떨어지는 블록을 돌리고 쌓아 줄을 없앱니다. 보관과 다음 블록 3개를 보며 둘 수 있고, 10줄마다 빨라집니다.</span>
-    </div>
-  </a>
+    </span>
+    <span class="desk-label">테트리스</span>
+  </button>
 
-  <a class="game-card" href="/games/blocks.html">
-    <div class="thumb">
-      <svg viewBox="0 0 120 76" aria-hidden="true">
+  <button class="desk-icon" type="button" data-game="blocks" data-title="블록깨기" data-w="960" style="--x: 62%; --y: 16%">
+    <span class="desk-thumb">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#0b1a2e"/>
         <g>
-          <rect x="8" y="6" width="20" height="8" rx="2" fill="#ef6b6b"/><rect x="31" y="6" width="20" height="8" rx="2" fill="#ef6b6b"/><rect x="54" y="6" width="20" height="8" rx="2" fill="#ef6b6b"/><rect x="77" y="6" width="20" height="8" rx="2" fill="#ef6b6b"/><rect x="100" y="6" width="12" height="8" rx="2" fill="#ef6b6b"/>
-          <rect x="8" y="17" width="20" height="8" rx="2" fill="#f2c94c"/><rect x="54" y="17" width="20" height="8" rx="2" fill="#f2c94c"/><rect x="77" y="17" width="20" height="8" rx="2" fill="#f2c94c"/>
-          <rect x="31" y="28" width="20" height="8" rx="2" fill="#3ec7e0"/><rect x="77" y="28" width="20" height="8" rx="2" fill="#3ec7e0"/><rect x="100" y="28" width="12" height="8" rx="2" fill="#3ec7e0"/>
+          <rect x="9" y="11" width="14" height="6" rx="1.5" fill="#ef6b6b"/><rect x="25" y="11" width="14" height="6" rx="1.5" fill="#ef6b6b"/><rect x="41" y="11" width="14" height="6" rx="1.5" fill="#ef6b6b"/>
+          <rect x="9" y="19" width="14" height="6" rx="1.5" fill="#f2c94c"/><rect x="41" y="19" width="14" height="6" rx="1.5" fill="#f2c94c"/>
+          <rect x="25" y="27" width="14" height="6" rx="1.5" fill="#3ec7e0"/>
         </g>
-        <circle cx="58" cy="50" r="4" fill="#fff"/>
-        <rect x="42" y="64" width="34" height="6" rx="3" fill="#e8eefc"/>
+        <circle cx="36" cy="41" r="3.2" fill="#fff"/>
+        <rect x="21" y="49" width="22" height="4.5" rx="2.25" fill="#e8eefc"/>
       </svg>
-    </div>
-    <div class="body">
-      <span class="title">블록깨기</span>
-      <span class="desc">패들로 공을 튕겨 블록을 모두 깹니다. 캡슐을 받으면 패들이 넓어지거나 공이 늘어납니다.</span>
-    </div>
-  </a>
+    </span>
+    <span class="desk-label">블록깨기</span>
+  </button>
 
-  <a class="game-card" href="/games/shooter.html">
-    <div class="thumb">
-      <svg viewBox="0 0 120 76" aria-hidden="true">
-        <g fill="#ef6b6b"><path d="M30 22 L40 10 L34 12 L30 8 L26 12 L20 10 Z"/><path d="M58 16 L68 4 L62 6 L58 2 L54 6 L48 4 Z"/><path d="M86 22 L96 10 L90 12 L86 8 L82 12 L76 10 Z"/></g>
-        <g fill="#f2c94c"><rect x="55" y="26" width="3" height="9"/><rect x="62" y="34" width="3" height="9"/></g>
-        <circle cx="88" cy="36" r="3.5" fill="#ff5a7a"/><circle cx="78" cy="44" r="3.5" fill="#ff5a7a"/>
-        <path d="M60 48 L64 58 L74 64 L74 67 L64 66 L63 70 L57 70 L56 66 L46 67 L46 64 L56 58 Z" fill="#e8eefc"/>
+  <button class="desk-icon" type="button" data-game="shooter" data-title="비행기 슈팅" data-w="800" style="--x: 80%; --y: 52%">
+    <span class="desk-thumb">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#0b1a2e"/>
+        <g fill="#ef6b6b"><path d="M20 20 L27 11 L23 12.5 L20 9.5 L17 12.5 L13 11 Z"/><path d="M44 20 L51 11 L47 12.5 L44 9.5 L41 12.5 L37 11 Z"/></g>
+        <g fill="#f2c94c"><rect x="30.5" y="22" width="3" height="7" rx="1"/><rect x="30.5" y="31" width="3" height="5" rx="1"/></g>
+        <circle cx="46" cy="30" r="2.5" fill="#ff5a7a"/>
+        <path d="M32 38 L35 45 L43 50 L43 53 L35 52 L34 55 L30 55 L29 52 L21 53 L21 50 L29 45 Z" fill="#e8eefc"/>
       </svg>
-    </div>
-    <div class="body">
-      <span class="title">비행기 슈팅</span>
-      <span class="desc">비행기를 움직여 적기를 격추하고 탄을 피합니다. 30초마다 적이 많아지고, 캡슐을 받으면 화력이 오릅니다.</span>
-    </div>
-  </a>
-</div>
+    </span>
+    <span class="desk-label">비행기 슈팅</span>
+  </button>
+</section>
 </main>
 
 </body>

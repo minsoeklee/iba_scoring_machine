@@ -323,34 +323,10 @@ kbd {
   display: inline-block; min-width: 22px; padding: 1px 6px; text-align: center;
   border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--subtle); color: var(--ink);
 }
-.desktop-only-note { display: none; }
 .time-bar { margin-top: 10px; }
 
 @media (max-width: 1100px) {
   .cols { grid-template-columns: minmax(0, 1fr); }
-}
-
-/* 좁은 화면: 사이드바를 위쪽 가로 메뉴로 접는다 */
-@media (max-width: 860px) {
-  .shell { flex-direction: column; }
-  .sidebar { width: auto; height: auto; position: static; border-right: 0; border-bottom: 1px solid var(--line); }
-  .sidebar-top { flex-direction: row; align-items: center; gap: 12px; padding: 12px 16px; overflow-x: auto; }
-  .wordmark { padding: 0; }
-  .nav { flex-direction: row; }
-  .nav a { padding: 8px 10px; gap: 6px; }
-  .nav a .icon { width: 16px; height: 16px; }
-  .sidebar-bottom { display: none; }
-  .topbar { height: 52px; padding: 0 16px; }
-  .topbar-auth .who { display: none; }
-  .desktop-only-note { display: block; margin-bottom: 16px; color: var(--warn); font-size: 13px; }
-  main { padding: 16px; }
-  .hero { padding: 20px; }
-}
-
-@media (max-width: 600px) {
-  .nav a span { display: none; }
-  .nav a[aria-current="page"] span { display: inline; }
-  .score > div, .game-stats > div { padding: 2px 14px; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

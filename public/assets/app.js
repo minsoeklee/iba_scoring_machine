@@ -9,7 +9,7 @@
   ];
   const OTHER_TITLES = {
     "/login.html": "로그인", "/signup.html": "회원가입",
-    "/about.html": "소개", "/hall.html": "명예의 전당",
+    "/about.html": "소개", "/thanks.html": "감사한 분들",
   };
 
   function icon(name) {

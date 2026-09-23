@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&family=Playfair+Display:wght@700;900&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/assets/chrome.css">
   <link rel="stylesheet" href="/assets/landing.css">
 </head>
 <body>
@@ -24,7 +25,7 @@
     <a class="side-brand" href="/">IBA</a>
 
     <ul class="side-nav">
-      <li><a href="/"><span>Home</span></a></li>
+      <li><a href="/" aria-current="page"><span>Home</span></a></li>
       <li><a href="/submit.html"><span>Submit</span></a></li>
       <li><a href="/leaderboard.html"><span>Leaderboard</span></a></li>
       <li><a href="/minigame.html"><span>Minigame</span></a></li>
@@ -71,40 +72,6 @@
   </div>
 </footer>
 
-<script>
-(function () {
-  const zone = document.getElementById("menuZone");
-  const btn = document.getElementById("menuBtn");
-  const sidebar = document.getElementById("sidebar");
-
-  // 호버로 열리지만, 클릭하면 고정(핀)되어 커서를 빼도 닫히지 않는다.
-  let pinned = false;
-
-  const isOpen = () => pinned || zone.matches(":hover, :focus-within");
-  const sync = () => {
-    const open = isOpen();
-    document.body.classList.toggle("menu-open", open);
-    btn.setAttribute("aria-expanded", String(open));
-    btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
-  };
-
-  zone.addEventListener("pointerenter", sync);
-  zone.addEventListener("pointerleave", sync);
-  zone.addEventListener("focusin", sync);
-  zone.addEventListener("focusout", () => requestAnimationFrame(sync));
-
-  btn.addEventListener("click", () => { pinned = !pinned; sync(); });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    pinned = false;
-    btn.blur();
-    if (sidebar.contains(document.activeElement)) btn.focus();
-    sync();
-  });
-
-  document.addEventListener("DOMContentLoaded", sync);
-})();
-</script>
+<script src="/assets/chrome.js" defer></script>
 </body>
 </html>

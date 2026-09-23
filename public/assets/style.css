@@ -1,98 +1,60 @@
-/* IBA Scoring Machine — PNUiBA 대시보드 테마.
-   흰 카드 + 회색 바탕, 강조색은 파랑 하나. 토큰은 dashboard.html 디자인에서 가져왔다. */
+/* IBA Scoring Machine — 본문 페이지(제출·리더보드·미니게임·마이페이지 등).
+   색 토큰·메뉴·하단 바는 chrome.css에서 받는다. 랜딩과 같은 따뜻한 오프화이트 바탕에
+   세리프 페이지 제목을 얹고, 내용은 선 하나로 두른 흰 카드에 담는다. */
 
 :root {
-  --bg: #f6f6f7;
-  --panel: #ffffff;
-  --subtle: #f2f3f5;
-  --ink: #15181d;
-  --ink-2: #5f646d;
-  --muted: #979ca5;
-  --line: #e6e7ea;
-  --line-soft: #eff0f2;
-  --accent: #2f55e0;
-  --accent-ink: #ffffff;
+  --card: #ffffff;
+  --line-soft: #efede8;   /* 카드 안 구분선. 바탕과 같은 따뜻한 쪽으로 */
   --ok: #1f7a4d;
   --warn: #9a6400;
   --danger: #c8372d;
-  --radius-card: 14px;
-  --radius-ctl: 9px;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --sans: "Noto Sans KR", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-  --sidebar-w: 248px;
+  --radius-card: 12px;
 }
 
-* { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: 14px;
-  line-height: 1.6;
-}
-a { color: var(--accent); text-decoration: none; }
+a { color: var(--accent); }
 a:hover { text-decoration: underline; }
 code { font-family: var(--mono); font-size: 0.92em; background: var(--subtle); border-radius: 4px; padding: 1px 4px; }
 .num, .mono { font-variant-numeric: tabular-nums; }
 .icon { width: 16px; height: 16px; flex: none; fill: currentColor; }
 
-/* 셸: 왼쪽 사이드바 + 상단바 + 본문 */
-.shell { display: flex; min-height: 100vh; }
-.sidebar {
-  width: var(--sidebar-w);
-  flex: none;
-  background: var(--panel);
-  border-right: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-}
-.sidebar-top { flex: 1; display: flex; flex-direction: column; gap: 28px; padding: 24px 16px 0; }
-.wordmark { display: flex; align-items: center; gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: -0.4px; color: var(--ink); padding: 0 8px; }
-.wordmark img { height: 26px; width: auto; }
-.wordmark:hover { text-decoration: none; }
-.nav { display: flex; flex-direction: column; gap: 2px; }
-.nav a {
-  display: flex; align-items: center; gap: 12px;
-  padding: 11px 12px; border-radius: 8px;
-  color: var(--ink-2); font-weight: 500; white-space: nowrap;
-}
-.nav a .icon { width: 18px; height: 18px; color: var(--muted); }
-.nav a:hover { background: var(--subtle); text-decoration: none; }
-.nav a[aria-current="page"] { background: var(--subtle); color: var(--ink); font-weight: 600; }
-.nav a[aria-current="page"] .icon { color: var(--accent); }
-.sidebar-bottom { padding: 16px; }
-.me { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; color: var(--ink); }
-.me:hover { background: var(--subtle); text-decoration: none; }
 .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--subtle); display: grid; place-items: center; color: var(--muted); flex: none; }
-.me .name { font-size: 13px; font-weight: 600; line-height: 1.3; }
-.me .sub { font-size: 11px; font-weight: 500; color: var(--muted); line-height: 1.3; }
 
-.main-col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.topbar {
-  height: 68px; flex: none;
-  display: flex; align-items: center; gap: 8px;
-  padding: 0 28px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--line);
+/* ── 본문 틀 ──────────────────────────────────────────────
+   좌우 여백을 88px 이상 두어 고정된 메뉴 버튼(오른쪽 끝 64px)과 내용이 겹치지 않게 한다.
+   위쪽은 메뉴 버튼·오른쪽 위 두 줄이 앉는 자리. */
+main.page {
+  flex: 1;
+  width: 100%; max-width: 1200px;
+  margin: 0 auto;
+  padding: 112px 88px 72px;
 }
-.topbar .where { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
-.topbar .page { font-size: 15px; font-weight: 600; white-space: nowrap; }
-.topbar .icon { width: 14px; height: 14px; color: var(--muted); flex: none; }
-.topbar .sub { font-size: 13px; font-weight: 500; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.topbar-auth { display: flex; align-items: center; gap: 8px; flex: none; }
-.topbar-auth .who { font-size: 13px; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
+/* 본문 페이지는 내려 읽으므로 오른쪽 위 두 줄은 화면에 고정하지 않고 함께 올라가게 둔다.
+   메뉴 버튼은 어디서든 닿도록 고정 그대로. */
+.corner-links { position: absolute; }
 
-main { padding: 24px; width: 100%; max-width: 1200px; }
+.page-head { margin-bottom: 36px; }
+.page-head.centered { text-align: center; }
+.page-eyebrow {
+  margin: 0 0 6px;
+  font-family: var(--sub);
+  font-size: 17px; letter-spacing: 0.03em;
+  color: var(--muted);
+}
+.page-title {
+  margin: 0;
+  font-family: var(--display); font-weight: 900;
+  font-size: 60px; line-height: 1; letter-spacing: -0.015em;
+  color: var(--ink);
+}
+main.page.compact { padding-top: 92px; }
+.page-head.compact { margin-bottom: 20px; }
+.page-head.compact .page-title { font-size: 40px; }
 
 /* 카드 */
 .card {
-  background: var(--panel);
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   padding: 20px;
@@ -121,29 +83,9 @@ li strong, li code { color: var(--ink); }
 .cols { display: grid; grid-template-columns: minmax(0, 1fr) 332px; gap: 20px; align-items: start; }
 .cols > div > .card + .card { margin-top: 16px; }
 
-/* 히어로 */
-.hero { padding: 24px 26px; display: flex; flex-direction: column; gap: 13px; }
-.hero .card-head { margin-bottom: 0; }
 .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ok); }
 .status::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .status.idle { color: var(--muted); }
-
-/* 홈 히어로: 네트워크 사진 배경. 글자가 있는 왼쪽을 어둡게 덮어 대비를 확보한다. */
-.hero.photo {
-  padding: 32px 30px;
-  border-color: #0b2340;
-  background:
-    linear-gradient(90deg, rgba(3, 14, 30, 0.92) 0%, rgba(3, 14, 30, 0.7) 50%, rgba(3, 14, 30, 0.25) 100%),
-    #06192f url("/assets/hero-network.jpg") center 40% / cover no-repeat;
-  color: #ffffff;
-}
-.hero.photo .lead { color: rgba(255, 255, 255, 0.78); max-width: 520px; }
-.hero.photo .status { color: #5fe0a4; }
-.hero.photo .status.idle { color: rgba(255, 255, 255, 0.6); }
-.hero.photo .btn:not(.primary) { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.28); color: #ffffff; }
-.hero.photo .btn:not(.primary) .icon { color: #ffffff; }
-.hero.photo .btn:not(.primary):hover { background: rgba(255, 255, 255, 0.18); }
-.hero.photo .btn.primary { border-color: var(--accent); }
 
 /* 버튼 */
 .actions { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -153,7 +95,7 @@ li strong, li code { color: var(--ink); }
   height: 40px; padding: 0 16px;
   border-radius: var(--radius-ctl);
   border: 1px solid var(--line);
-  background: var(--panel); color: var(--ink);
+  background: var(--card); color: var(--ink);
   cursor: pointer; white-space: nowrap;
 }
 .btn .icon, button .icon { color: var(--ink-2); }
@@ -166,7 +108,7 @@ li strong, li code { color: var(--ink); }
 button.ghost { height: 30px; padding: 0 12px; border-radius: 15px; font-size: 12.5px; color: var(--ink-2); }
 button.ghost .icon { width: 13px; height: 13px; color: var(--muted); }
 button:disabled { opacity: 0.5; cursor: default; }
-input:focus-visible, button:focus-visible, .btn:focus-visible, .nav a:focus-visible {
+input:focus-visible, button:focus-visible, .btn:focus-visible {
   outline: 2px solid var(--accent); outline-offset: 2px;
 }
 
@@ -230,7 +172,7 @@ td.num { font-variant-numeric: tabular-nums; }
 .team .avatar .icon { width: 15px; height: 15px; }
 .team .name { font-size: 13.5px; font-weight: 600; line-height: 1.35; }
 .team .sub { font-size: 11.5px; color: var(--muted); line-height: 1.35; }
-tr.mine td { background: #f5f7fe; }
+tr.mine td { background: #f3f5fd; }
 .tag { display: inline-flex; align-items: center; height: 19px; padding: 0 6px; margin-left: 4px; border: 1px solid var(--accent); border-radius: 5px; font-size: 10.5px; font-weight: 600; color: var(--accent); vertical-align: 1px; }
 td.score-main { font-size: 14.5px; font-weight: 700; letter-spacing: -0.2px; color: var(--ink); }
 td.soft { color: var(--ink-2); font-size: 13px; }
@@ -239,8 +181,8 @@ td.faint { color: var(--muted); font-size: 12.5px; }
 .empty { color: var(--muted); padding: 24px 20px; margin: 0; }
 
 /* 로그인·회원가입 */
-.auth-card { max-width: 420px; margin: 24px auto 0; padding: 28px; }
-.auth-card h1 { margin-bottom: 6px; }
+.auth-card { max-width: 420px; margin: 0 auto; padding: 28px; }
+.auth-card .lead { margin-bottom: 18px; }
 .auth-card .switch { margin-top: 16px; font-size: 13px; color: var(--ink-2); text-align: center; }
 
 /* 폼 */
@@ -252,7 +194,7 @@ input[type="text"], input[type="password"], input[type="number"] {
   height: 40px; padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: var(--radius-ctl);
-  background: var(--panel);
+  background: var(--card);
   color: var(--ink);
 }
 input[type="file"] {
@@ -261,7 +203,7 @@ input[type="file"] {
 }
 input[type="file"]::file-selector-button {
   font: inherit; font-weight: 600; margin-right: 10px;
-  height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); cursor: pointer;
+  height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--card); cursor: pointer;
 }
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
@@ -289,7 +231,7 @@ input[type="file"]::file-selector-button {
 .game-list { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
 .game-card {
   display: flex; flex-direction: column;
-  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-card);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-card);
   overflow: hidden; color: var(--ink);
 }
 .game-card:hover { border-color: var(--accent); text-decoration: none; }

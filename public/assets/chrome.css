@@ -1,0 +1,233 @@
+/* 모든 페이지가 함께 쓰는 틀 — 색 토큰, 좌상단 메뉴 버튼과 호버 사이드바, 오른쪽 위 두 줄, 하단 바.
+   랜딩(landing.css)과 본문 페이지(style.css)가 이 파일 위에 각자의 본문 규칙을 얹는다.
+   워드마크는 Playfair Display 900(레퍼런스의 Collapse는 상용이라 대체), 메뉴·소제목은 Instrument Serif. */
+
+:root {
+  --bg: #faf9f6;   /* 세리프 두 종을 받쳐 주는 따뜻한 오프화이트 */
+  --panel: #faf9f6;   /* 사이드바도 바탕과 같은 색. 경계는 선과 그림자로만 만든다 */
+  --subtle: #f1efe9;  /* 호버 배경도 따뜻한 쪽으로 (기존 #f2f3f5는 푸른 기가 돌아 겉돈다) */
+  --ink: #15181d;
+  --ink-2: #5f646d;
+  --muted: #6d727b;      /* 배경 #faf9f6 위에서 4.59:1 — WCAG AA(4.5:1) 통과선 */
+  --line: #e6e7ea;
+  --accent: #2f55e0;
+  --accent-ink: #ffffff;
+  --radius-ctl: 9px;
+  --sans: "Noto Sans KR", -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --display: "Playfair Display", Georgia, serif;
+  --sub: "Instrument Serif", Georgia, serif;   /* 소제목: 제목과 같은 고대비 세리프 계열 */
+  --nav: "Instrument Serif", Georgia, serif;   /* 메뉴도 소제목과 같은 서체 */
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --sidebar-w: 236px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);   /* 끝이 길게 풀리는 곡선 — 열릴 때 부드럽다 */
+  --dur: 620ms;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  word-break: keep-all;   /* 한국어가 낱말 중간에서 끊기지 않게 */
+  min-height: 100vh;
+  display: flex; flex-direction: column;   /* 본문이 남은 높이를 채우고 하단바가 바닥에 붙는다 */
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ── 메뉴 버튼 ───────────────────────────────────────────── */
+.menu-zone { position: fixed; top: 0; left: 0; z-index: 20; padding: 20px; }
+
+.menu-btn {
+  position: relative; z-index: 2;
+  display: grid; place-items: center;
+  width: 44px; height: 44px; padding: 0;   /* 눌리는 영역은 그대로 두되 */
+  border: 0; border-radius: var(--radius-ctl);
+  background: none;                        /* 바탕·테두리·그림자는 없앤다 */
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+.menu-btn:hover { color: var(--ink); background: none; }   /* style.css의 button:hover 바탕을 끈다 */
+.menu-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* 가로줄 세 개. 열려도 모양은 그대로 둔다 — 사이드바가 이미 열린 것을 보여 주므로
+   X로 바뀌는 것은 같은 말을 두 번 하는 셈이다. */
+.bars { display: block; width: 18px; height: 12px; position: relative; }
+.bars i {
+  position: absolute; left: 0;
+  display: block; width: 100%; height: 1.8px; border-radius: 2px;
+  background: currentColor;
+}
+.bars i:nth-child(1) { top: 0; }
+.bars i:nth-child(2) { top: 50%; margin-top: -0.9px; }
+.bars i:nth-child(3) { bottom: 0; }
+
+/* ── 오른쪽 위 두 줄 ────────────────────────────────────────
+   왼쪽 메뉴 버튼과 같은 선에서 시작해, 오른쪽 여백은 하단바와 같은 33px. */
+.corner-links {
+  position: fixed; top: 44px; right: 33px; z-index: 20;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+  text-align: right;
+}
+.corner-links a {
+  font-family: var(--nav);
+  font-size: 18px; letter-spacing: 0.035em;
+  color: var(--ink-2);
+  border-bottom: 1px solid transparent;
+  transition: color 160ms var(--ease), border-color 160ms var(--ease);
+}
+.corner-links a:hover { color: var(--ink); border-bottom-color: var(--line); }
+/* 로그인한 사람의 닉네임·팀명은 한글이라, Instrument Serif에 없는 글자는 명조가 아닌 Noto Sans KR로 받는다 */
+.corner-links a.who { font-family: "Instrument Serif", var(--sans); font-size: 16px; letter-spacing: 0.01em; }
+/* 로그아웃은 버튼이지만 위 링크와 똑같이 보이게 */
+.corner-links button {
+  height: auto; padding: 0; border: 0; border-radius: 0; background: none;
+  font-family: var(--nav); font-size: 18px; font-weight: 400; letter-spacing: 0.035em;
+  color: var(--ink-2);
+  border-bottom: 1px solid transparent;
+  transition: color 160ms var(--ease), border-color 160ms var(--ease);
+}
+.corner-links button:hover { color: var(--ink); background: none; border-bottom-color: var(--line); }
+.corner-links button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.corner-links a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-bottom-color: transparent; }
+
+/* ── 사이드바: 화면 왼쪽 끝에서 통째로 밀려 나오는 전체 높이 패널 ── */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  padding: 76px 14px 18px;      /* 위쪽은 메뉴 버튼이 앉을 자리 */
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  box-shadow: 18px 0 48px rgba(21, 24, 29, 0.08);
+  display: flex; flex-direction: column;
+
+  /* 닫힘: 화면 밖으로 완전히 나가 있다. visibility로 포커스도 막는다. */
+  visibility: hidden;
+  transform: translateX(-100%);
+  transition:
+    transform var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
+}
+.menu-open .sidebar {
+  visibility: visible;
+  transform: none;
+  transition:
+    transform var(--dur) var(--ease),
+    visibility 0s;
+}
+
+.side-brand {
+  display: block;
+  padding: 0 5px 14px;
+  /* 가운데 워드마크와 같은 서체 — 작은 로고처럼 */
+  font-family: var(--display);
+  font-weight: 900; font-size: 20px; letter-spacing: -0.01em;
+  color: var(--accent);
+  border-bottom: 1px solid var(--line);
+}
+
+.side-nav { list-style: none; margin: 10px 0 0; padding: 0; }
+.side-nav li { margin: 0; }
+.side-nav a, .side-foot a {
+  display: flex; align-items: center;
+  padding: 10px 5px; border-radius: 8px;
+  font-family: var(--nav);
+  font-size: 18px; font-weight: 400;   /* 세리프는 획이 가늘어 산세리프보다 키운다 */
+  letter-spacing: 0.06em;              /* 촘촘한 세리프라 항목 사이가 붙어 보이지 않게 연다 */
+  color: var(--ink-2);
+  transition: background 160ms var(--ease), color 160ms var(--ease);
+}
+.side-nav a:hover, .side-foot a:hover { background: var(--subtle); color: var(--ink); }
+/* 지금 보고 있는 페이지는 워드마크와 같은 파랑으로 */
+.side-nav a[aria-current="page"], .side-foot a[aria-current="page"] { color: var(--accent); }
+.side-nav a:focus-visible, .side-foot a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* 항목이 차례로 따라 들어온다 — 열릴 때만 지연을 준다.
+   지연은 opacity·transform에만 걸고 background·color는 0으로 둔다.
+   한 값으로 주면 호버 배경까지 그만큼 늦게 떠서 반응이 굼떠 보인다. */
+.side-nav li a, .side-foot a {
+  opacity: 0; transform: translateX(-6px);
+  transition: opacity 240ms var(--ease), transform 240ms var(--ease),
+              background 160ms var(--ease), color 160ms var(--ease);
+  transition-delay: 0ms, 0ms, 0ms, 0ms;
+}
+.menu-open .side-nav li a, .menu-open .side-foot a { opacity: 1; transform: none; }
+.menu-open .side-nav li:nth-child(1) a { transition-delay: 80ms, 80ms, 0ms, 0ms; }
+.menu-open .side-nav li:nth-child(2) a { transition-delay: 120ms, 120ms, 0ms, 0ms; }
+.menu-open .side-nav li:nth-child(3) a { transition-delay: 160ms, 160ms, 0ms, 0ms; }
+.menu-open .side-nav li:nth-child(4) a { transition-delay: 200ms, 200ms, 0ms, 0ms; }
+.menu-open .side-nav li:nth-child(5) a { transition-delay: 240ms, 240ms, 0ms, 0ms; }
+.menu-open .side-foot a:nth-child(1) { transition-delay: 280ms, 280ms, 0ms, 0ms; }
+.menu-open .side-foot a:nth-child(2) { transition-delay: 315ms, 315ms, 0ms, 0ms; }
+
+.side-foot {
+  margin-top: auto; padding-top: 12px;   /* 로그인·회원가입은 패널 바닥에 */
+  border-top: 1px solid var(--line);
+  display: flex; flex-direction: column;
+}
+.side-foot a { font-size: 16px; }
+
+/* ── 막 ──────────────────────────────────────────────────── */
+.scrim {
+  position: fixed; inset: 0; z-index: 10;
+  background: rgba(21, 24, 29, 0.06);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--dur) var(--ease);
+}
+.menu-open .scrim { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar, .bars i, .scrim,
+  .side-nav li a, .side-foot a, .menu-btn {
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+
+/* ── 하단 바 ─────────────────────────────────────────────────
+   별도 배경 없이 사이트와 같은 바탕. 형식은 줄글 한 덩이(RGE 방식). */
+.site-foot {
+  /* 왼쪽 여백은 햄버거 선이 서는 자리(20px + (44-18)/2)와 같은 세로선 */
+  padding: 16px 32px 13px 33px;   /* 저작권 줄을 바닥에 더 붙인다 */
+}
+
+.foot-inner { max-width: none; }   /* 가운데 정렬 없이 왼쪽 끝에 붙인다 */
+
+/* 줄글: 한 문단으로 흐르되 폭을 묶어 읽기 좋게 */
+.foot-lede {
+  max-width: 112ch;   /* 줄이 화면 끝까지 늘어지지 않게 묶어 둔다 */
+  margin: 0 0 10px;
+  font-size: 13px; line-height: 1.55;   /* 두 줄을 붙여 한 덩이로 읽히게 */
+  color: var(--ink-2);
+}
+.foot-lede strong { color: var(--ink); font-weight: 600; }
+
+.foot-bottom {
+  padding-top: 0;
+}
+
+/* 소제목과 같은 세리프로 통일. 대문자·넓은 자간을 풀고 문장처럼 둔다 */
+.foot-legal {
+  margin: 0;
+  font-family: var(--sub);
+  font-size: 15px; letter-spacing: 0.03em;   /* 세리프라 조금만 열어도 숨이 트인다 */
+  color: var(--muted);
+}
+.foot-legal a {
+  color: var(--accent);
+  padding-bottom: 1px;
+  border-bottom: 1px solid rgba(47, 85, 224, 0.35);
+  transition: border-color 160ms var(--ease);
+}
+.foot-legal a:hover { border-bottom-color: var(--accent); }
+.foot-legal a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-bottom-color: transparent; }
+.foot-legal .sep { padding: 0 4px; color: var(--line); }
+
+/* style.css의 a:hover 밑줄이 메뉴·하단바 링크에 번지지 않게 */
+.menu-zone a:hover, .corner-links a:hover, .site-foot a:hover { text-decoration: none; }

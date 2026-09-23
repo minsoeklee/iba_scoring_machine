@@ -68,7 +68,7 @@
           <div class="side-foot">${FOOT_PAGES.map(link).join("")}</div>
         </nav>
       </div>
-      <nav class="corner-links" id="cornerLinks" aria-label="Quick links"></nav>
+      <nav class="corner-links" id="cornerLinks" aria-label="Quick links"><a class="home-mark" href="/" aria-label="IBA 홈으로">IBA</a></nav>
       <div class="scrim" aria-hidden="true"></div>`);
 
     const main = document.querySelector("main");
@@ -102,12 +102,12 @@
     me.then(renderAuth);
   }
 
-  // 오른쪽 위. Sign in·How to use?는 랜딩에만 두고, 본문 페이지는 로그인했을 때만
-  // 내 이름(마이페이지로)과 로그아웃을 보인다.
+  // 오른쪽 위. 본문 페이지는 랜딩으로 돌아가는 IBA 워드마크를 늘 두고(renderShell),
+  // Sign in·How to use?는 랜딩에만 둔다. 로그인했으면 그 아래에 내 이름(마이페이지로)과 로그아웃.
   function renderAuth(user) {
     if (!user) return;
     const corner = document.getElementById("cornerLinks");
-    corner.innerHTML = `<a class="who" href="/mypage.html">${esc(user.nickname)} · ${esc(user.team)}</a><button type="button" id="logoutBtn">Sign out</button>`;
+    corner.insertAdjacentHTML("beforeend", `<a class="who" href="/mypage.html">${esc(user.nickname)} · ${esc(user.team)}</a><button type="button" id="logoutBtn">Sign out</button>`);
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await api("/api/logout", { method: "POST" });
       location.reload();

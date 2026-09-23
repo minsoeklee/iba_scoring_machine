@@ -24,6 +24,15 @@
 
     btn.addEventListener("click", () => { pinned = !pinned; sync(); });
 
+    // 고정된 상태에서 사이드바 밖을 누르면 바로 닫는다. 버튼에 남은 포커스도 함께 풀어야
+    // :focus-within 때문에 열린 채로 남지 않는다.
+    document.addEventListener("pointerdown", (e) => {
+      if (zone.contains(e.target)) return;
+      pinned = false;
+      if (zone.contains(document.activeElement)) document.activeElement.blur();
+      sync();
+    });
+
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
       pinned = false;

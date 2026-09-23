@@ -32,7 +32,17 @@ main.page {
 }
 /* 본문 페이지는 내려 읽으므로 오른쪽 위 두 줄은 화면에 고정하지 않고 함께 올라가게 둔다.
    메뉴 버튼은 어디서든 닿도록 고정 그대로. */
-.corner-links { position: absolute; }
+.corner-links { position: absolute; top: 24px; }   /* 워드마크가 메뉴 버튼과 같은 높이에 서도록 */
+
+/* 오른쪽 위 IBA: 랜딩 워드마크를 작게 줄인 것. 누르면 랜딩으로 돌아간다 */
+.corner-links .home-mark {
+  margin-bottom: 6px;
+  font-family: var(--display); font-weight: 900;
+  font-size: 28px; line-height: 36px; letter-spacing: -0.01em;
+  color: var(--accent);
+  border-bottom: 0;
+}
+.corner-links .home-mark:hover { color: #2749c7; }
 
 .page-head { margin-bottom: 36px; }
 .page-head.centered { text-align: center; }

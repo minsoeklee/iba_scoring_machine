@@ -37,8 +37,7 @@
     </div>
     <div class="body">
       <span class="title">사과게임</span>
-      <span class="desc">사각형으로 묶은 사과의 숫자 합이 10이면 사과가 사라집니다. 2분 동안 최대한 많이 없애세요.</span>
-      <span class="meta" data-best="iba.best.apple">마우스 · 2분</span>
+      <span class="desc">사각형으로 묶은 사과의 숫자 합이 10이면 사과가 사라집니다. 제한 시간 안에 최대한 많이 없애세요.</span>
     </div>
   </a>
 
@@ -54,8 +53,7 @@
     </div>
     <div class="body">
       <span class="title">테트리스</span>
-      <span class="desc">떨어지는 블록을 돌리고 쌓아 줄을 없앱니다. 10줄마다 빨라집니다.</span>
-      <span class="meta" data-best="iba.best.tetris">키보드</span>
+      <span class="desc">떨어지는 블록을 돌리고 쌓아 줄을 없앱니다. 보관과 다음 블록 3개를 보며 둘 수 있고, 10줄마다 빨라집니다.</span>
     </div>
   </a>
 
@@ -73,21 +71,11 @@
     </div>
     <div class="body">
       <span class="title">블록깨기</span>
-      <span class="desc">패들로 공을 튕겨 블록을 모두 깹니다. 스테이지마다 공이 빨라집니다.</span>
-      <span class="meta" data-best="iba.best.blocks">마우스 · 키보드</span>
+      <span class="desc">패들로 공을 튕겨 블록을 모두 깹니다. 캡슐을 받으면 패들이 넓어지거나 공이 늘어납니다.</span>
     </div>
   </a>
 </div>
 </main>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll("[data-best]").forEach((el) => {
-    let best = 0;
-    try { best = Number(localStorage.getItem(el.dataset.best)) || 0; } catch (_) {}
-    if (best > 0) el.textContent += ` · 내 최고 ${best.toLocaleString("ko-KR")}점`;
-  });
-});
-</script>
 </body>
 </html>

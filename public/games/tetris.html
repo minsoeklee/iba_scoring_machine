@@ -13,6 +13,9 @@
   <script src="/assets/icons.js" defer></script>
   <script src="/assets/app.js" defer></script>
   <script src="/games/tetris.js" defer></script>
+  <style>
+    .tetris-pieces { display: flex; gap: 16px; align-items: flex-start; }
+  </style>
 </head>
 <body>
 <main>
@@ -33,16 +36,24 @@
         <div><div class="label">줄</div><div class="value" id="lines">0</div></div>
         <div><div class="label">레벨</div><div class="value" id="level">1</div></div>
       </div>
-      <div>
-        <p class="small">다음 블록</p>
-        <div class="game-stage"><canvas id="next" width="110" height="88"></canvas></div>
+      <div class="tetris-pieces">
+        <div>
+          <p class="small">보관</p>
+          <div class="game-stage"><canvas id="hold" width="96" height="72"></canvas></div>
+        </div>
+        <div>
+          <p class="small">다음 블록</p>
+          <div class="game-stage"><canvas id="next" width="96" height="192"></canvas></div>
+        </div>
       </div>
       <dl class="keys">
-        <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>이동</dd>
-        <dt><kbd>↑</kbd> <kbd>X</kbd></dt><dd>회전</dd>
+        <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>이동 (누르고 있으면 계속 이동)</dd>
+        <dt><kbd>↑</kbd> <kbd>X</kbd></dt><dd>시계 방향 회전</dd>
+        <dt><kbd>Z</kbd></dt><dd>반시계 방향 회전</dd>
         <dt><kbd>↓</kbd></dt><dd>빠르게 내리기</dd>
         <dt><kbd>Space</kbd></dt><dd>바로 떨어뜨리기</dd>
-        <dt><kbd>P</kbd></dt><dd>일시정지</dd>
+        <dt><kbd>C</kbd> <kbd>Shift</kbd></dt><dd>보관 (블록마다 한 번)</dd>
+        <dt><kbd>P</kbd> <kbd>Esc</kbd></dt><dd>일시정지</dd>
       </dl>
     </div>
   </div>

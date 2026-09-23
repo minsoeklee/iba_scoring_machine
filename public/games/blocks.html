@@ -13,6 +13,12 @@
   <script src="/assets/icons.js" defer></script>
   <script src="/assets/app.js" defer></script>
   <script src="/games/blocks.js" defer></script>
+  <style>
+    .game-stage.playing canvas { cursor: none; }
+    .power-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12.5px; color: var(--ink-2); }
+    .power-legend li { display: flex; align-items: center; gap: 8px; }
+    .power-legend .chip { flex: none; min-width: 52px; padding: 1px 6px; border-radius: 8px; text-align: center; font-size: 11px; font-weight: 700; color: #0b1a2e; }
+  </style>
 </head>
 <body>
 <main>
@@ -38,8 +44,14 @@
         <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>패들 이동</dd>
         <dt><kbd>Space</kbd> · 클릭</dt><dd>공 쏘기</dd>
         <dt><kbd>P</kbd></dt><dd>일시정지</dd>
+        <dt><kbd>R</kbd></dt><dd>처음부터 다시</dd>
       </dl>
-      <p class="small">위쪽 줄 블록일수록 점수가 높습니다. 블록을 모두 깨면 공이 빨라진 다음 스테이지가 시작됩니다.</p>
+      <ul class="power-legend">
+        <li><span class="chip" style="background:#4cc38a">넓게</span>패들이 12초 동안 넓어집니다.</li>
+        <li><span class="chip" style="background:#f2c94c">공 ×3</span>움직이는 공이 셋으로 나뉩니다.</li>
+        <li><span class="chip" style="background:#3ec7e0">느리게</span>공이 10초 동안 느려집니다.</li>
+      </ul>
+      <p class="small">패들 끝에 맞힐수록 공이 비스듬히 튕깁니다. 위쪽 줄 블록일수록 점수가 높고, 점이 찍힌 블록은 점 개수만큼 맞혀야 깨집니다. 패들에 닿지 않고 블록을 이어 깨면 콤보 배수가 붙습니다. 블록을 모두 깨면 공이 빨라진 다음 스테이지가 시작됩니다.</p>
     </div>
   </div>
 </section>

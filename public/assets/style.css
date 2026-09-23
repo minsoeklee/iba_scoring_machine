@@ -298,7 +298,6 @@ input[type="file"]::file-selector-button {
 .game-card .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
 .game-card .title { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
 .game-card .desc { font-size: 12.5px; color: var(--ink-2); line-height: 19px; }
-.game-card .meta { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
 
 /* 캔버스 게임 공통 */
 .game-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }

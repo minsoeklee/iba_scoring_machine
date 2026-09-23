@@ -13,6 +13,10 @@
   <script src="/assets/icons.js" defer></script>
   <script src="/assets/app.js" defer></script>
   <script src="/games/apple.js" defer></script>
+  <style>
+    /* 캔버스 픽셀은 devicePixelRatio만큼 늘리고, 화면 크기는 674×408로 고정한다 */
+    #board { width: 674px; height: 408px; user-select: none; }
+  </style>
 </head>
 <body>
 <main>
@@ -33,12 +37,12 @@
       <div class="game-stats">
         <div><div class="label">없앤 사과</div><div class="value" id="score">0</div></div>
         <div><div class="label">최고 기록</div><div class="value" id="best">0</div></div>
-        <div><div class="label">남은 시간</div><div class="value" id="time">120초</div></div>
+        <div><div class="label">남은 시간</div><div class="value" id="time">100초</div></div>
       </div>
       <dl class="keys">
         <dt>드래그</dt><dd>사각형 그리기</dd>
       </dl>
-      <p class="small">사각형 안 사과의 숫자 합이 정확히 10이면 사과가 사라집니다. 사각형 테두리가 초록색이면 합이 10입니다.</p>
+      <p class="small">사각형 안 사과의 숫자 합이 정확히 10이면 사과가 사라집니다. 사각형 테두리가 초록색이면 합이 10이고, 모서리에 현재 합이 표시됩니다. 만들 수 있는 10이 더 없으면 게임이 끝납니다. 다른 탭으로 옮기면 일시정지됩니다.</p>
       <button type="button" id="restart">처음부터 다시</button>
     </div>
   </div>

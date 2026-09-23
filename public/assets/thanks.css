@@ -1,0 +1,75 @@
+/* Special thanks: 사진이 놓일 공간. 사이트 공통 색과 타이포그래피를 그대로 쓴다. */
+main.page.thanks-page {
+  max-width: none;
+  padding: 98px 32px 40px;
+}
+
+.thanks-viewport {
+  position: relative;
+  width: min(100%, 1100px);
+  height: max(560px, calc(100svh - 175px));
+  max-height: 850px;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  cursor: default;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.thanks-world {
+  position: absolute;
+  inset: 0;
+}
+.thanks-slot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--w);
+  height: var(--h);
+  padding: 0;
+  border: 1px solid #bfc2c4;
+  border-radius: 1px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgb(21 24 29 / 4%);
+  cursor: pointer;
+  transform-origin: 0 0;
+  will-change: transform;
+  backface-visibility: hidden;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.thanks-slot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+.thanks-slot:hover,
+.thanks-slot.is-selected {
+  border-color: var(--accent);
+  box-shadow: 0 7px 26px rgb(21 24 29 / 9%);
+}
+.thanks-slot:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
+.thanks-hint {
+  position: absolute;
+  right: 17px;
+  bottom: 11px;
+  margin: 0;
+  padding: 4px 7px;
+  color: var(--ink-2);
+  font-size: 11px;
+  pointer-events: none;
+}
+.thanks-hint-touch { display: none; }
+@media (pointer: coarse) {
+  .thanks-hint-pointer { display: none; }
+  .thanks-hint-touch { display: inline; }
+}
+@media (max-width: 700px) {
+  main.page.thanks-page { padding: 90px 14px 24px; }
+  .thanks-viewport { height: max(510px, calc(100svh - 155px)); }
+  .thanks-hint { font-size: 10px; }
+}

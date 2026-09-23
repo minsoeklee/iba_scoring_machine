@@ -1,4 +1,4 @@
-// 블록깨기. 마우스나 방향키로 패들을 움직이고, 블록을 모두 깨면 공이 빨라진 다음 스테이지로 넘어간다.
+// 블록깨기. 방향키로 패들을 움직이고, 블록을 모두 깨면 공이 빨라진 다음 스테이지로 넘어간다.
 (function () {
   const W = 640, H = 480;
   const COLS = 10, PAD = 24, GAP = 6, TOP = 64, BRICK_H = 18;
@@ -338,7 +338,7 @@
 
     if (state === "playing" && banner > 0) text(`스테이지 ${stage}`, W / 2, H / 2 + 4, "700 26px", "#ffffff");
     if (state === "playing" && balls.some((b) => b.stuck)) {
-      text("스페이스나 클릭으로 공을 쏘세요", W / 2, H / 2 + 40, "600 14px", "rgba(255,255,255,0.7)");
+      text("스페이스로 공을 쏘세요", W / 2, H / 2 + 40, "600 14px", "rgba(255,255,255,0.7)");
     }
   }
 
@@ -380,7 +380,7 @@
     draw();
   }
 
-  // 게임이 끝난 직전에 공을 쏘려고 누른 스페이스나 클릭이 곧바로 새 게임을 시작하지 않게 잠시 막는다.
+  // 게임이 끝난 직전에 공을 쏘려고 누른 스페이스가 곧바로 새 게임을 시작하지 않게 잠시 막는다.
   function restart() {
     if (performance.now() - overAt > RESTART_DELAY) start();
   }
@@ -417,14 +417,6 @@
     step(dt);
     if (state === "playing") draw();
   }
-
-  // 마우스가 캔버스 밖으로 나가도 가로 위치를 따라가도록 창 전체에서 받는다.
-  window.addEventListener("mousemove", (e) => {
-    if (state !== "playing") return;
-    const rect = cv.getBoundingClientRect();
-    paddleX = ((e.clientX - rect.left) / rect.width) * W;
-  });
-  cv.addEventListener("click", launch);
 
   const KEYS = { ArrowLeft: "left", ArrowRight: "right" };
   document.addEventListener("keydown", (e) => {

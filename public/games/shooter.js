@@ -1,8 +1,8 @@
-// 비행기 슈팅. 방향키나 마우스로 비행기를 움직이면 총알은 저절로 나간다. 시간이 지날수록 적이 많아지고 탄이 빨라진다.
+// 비행기 슈팅. 방향키로 비행기를 움직이면 총알은 저절로 나간다. 시간이 지날수록 적이 많아지고 탄이 빨라진다.
 (function () {
   const W = 480, H = 640;
   // HIT_R는 비행기 가운데 빨간 점, BULLET_R은 적 탄의 반지름이다. 판정은 그려진 크기와 같다.
-  const PLAYER_SPEED = 300, MOUSE_SPEED = 420, HIT_R = 3, BULLET_R = 5, PICK_R = 18, MARGIN = 16;
+  const PLAYER_SPEED = 300, HIT_R = 3, BULLET_R = 5, PICK_R = 18, MARGIN = 16;
   const FIRE_INTERVAL = 0.11, SHOT_SPEED = 760, SHOT_W = 3, SHOT_H = 12;
   const LIVES = 3, MAX_LIVES = 5, INVULN = 2, SCORE_MAX = 9999999, RESTART_DELAY = 800;
   const LEVEL_TIME = 30;  // 이 초마다 단계가 오른다
@@ -39,7 +39,7 @@
 
   let player, shots, enemies, bullets, drops, particles, popups, stars;
   let score, lives, level, elapsed, nextWave, fireCool, banner;
-  let state = "ready", last = 0, overAt = 0, dpr = 0, mouse = null;
+  let state = "ready", last = 0, overAt = 0, dpr = 0;
   const held = { left: false, right: false, up: false, down: false };
 
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -234,17 +234,9 @@
 
   function movePlayer(dt) {
     const kx = held.right - held.left, ky = held.down - held.up;
-    if (kx || ky) {
-      mouse = null;  // 키보드를 쓰기 시작하면 마우스 목표를 버린다
-      const k = kx && ky ? Math.SQRT1_2 : 1;
-      player.x += kx * k * PLAYER_SPEED * dt;
-      player.y += ky * k * PLAYER_SPEED * dt;
-    } else if (mouse) {
-      // 마우스는 커서를 향해 따라가되 키보드보다 조금 빠른 속도 상한을 둔다.
-      const dx = mouse.x - player.x, dy = mouse.y - player.y, d = Math.hypot(dx, dy), m = MOUSE_SPEED * dt;
-      if (d <= m) { player.x = mouse.x; player.y = mouse.y; }
-      else { player.x += (dx / d) * m; player.y += (dy / d) * m; }
-    }
+    const k = kx && ky ? Math.SQRT1_2 : 1;
+    player.x += kx * k * PLAYER_SPEED * dt;
+    player.y += ky * k * PLAYER_SPEED * dt;
     player.x = clamp(player.x, MARGIN, W - MARGIN);
     player.y = clamp(player.y, MARGIN + 60, H - MARGIN);
   }
@@ -487,7 +479,6 @@
     score = 0; lives = LIVES; level = 1; elapsed = 0; nextWave = 1; fireCool = 0; banner = 1.6;
     player = { x: W / 2, y: H - 70, power: 1, shield: false, invuln: 0 };
     shots = []; enemies = []; bullets = []; drops = []; particles = []; popups = [];
-    mouse = null;
   }
 
   function start() {
@@ -519,8 +510,6 @@
       setState("paused");
       showOverlay("일시정지", "P 키나 스페이스를 누르면 이어서 합니다.", "이어 하기", () => setPaused(false));
     } else if (!paused && state === "paused") {
-      // 멈추기 전의 커서 위치로 비행기가 끌려가지 않게 마우스 목표를 버린다.
-      mouse = null;
       setState("playing");
       overlay.hidden = true;
     }
@@ -537,13 +526,6 @@
     step(dt);
     if (state === "playing") draw();
   }
-
-  // 마우스가 캔버스 위에서 움직일 때만 커서 위치를 비행기의 목표 위치로 삼는다.
-  cv.addEventListener("mousemove", (e) => {
-    if (state !== "playing") return;
-    const rect = cv.getBoundingClientRect();
-    mouse = { x: ((e.clientX - rect.left) / rect.width) * W, y: ((e.clientY - rect.top) / rect.height) * H };
-  });
 
   const KEYS = {
     ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down",

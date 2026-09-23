@@ -332,3 +332,19 @@ kbd {
   .result { animation: rise 160ms ease-out; }
   @keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 }
+
+/* ── 소개 페이지 ─────────────────────────────────────────────
+   만든 사람 두 명을 나란히. 좁은 PC 창에서는 한 칸으로 내려온다. */
+.people { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+.people .card + .card { margin-top: 0; }   /* 격자 간격이 이미 있으므로 카드끼리의 세로 여백은 끈다 */
+.people + .card { margin-top: 20px; }
+.person .who { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.person .name { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+.person .role { font-size: 12px; font-weight: 500; color: var(--muted); }
+.person .bio { color: var(--ink-2); font-size: 13px; line-height: 20px; }
+.person .links { list-style: none; margin: 12px 0 0; padding: 0; display: flex; gap: 14px; }
+.person .links a { font-size: 13px; font-weight: 600; }
+
+@media (max-width: 900px) {
+  .people { grid-template-columns: 1fr; }
+}

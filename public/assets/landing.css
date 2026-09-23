@@ -157,20 +157,23 @@ a { color: inherit; text-decoration: none; }
 .side-nav a:hover, .side-foot a:hover { background: var(--subtle); color: var(--ink); }
 .side-nav a:focus-visible, .side-foot a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
-/* 항목이 차례로 따라 들어온다 — 열릴 때만 지연을 준다 */
+/* 항목이 차례로 따라 들어온다 — 열릴 때만 지연을 준다.
+   지연은 opacity·transform에만 걸고 background·color는 0으로 둔다.
+   한 값으로 주면 호버 배경까지 그만큼 늦게 떠서 반응이 굼떠 보인다. */
 .side-nav li a, .side-foot a {
   opacity: 0; transform: translateX(-6px);
   transition: opacity 240ms var(--ease), transform 240ms var(--ease),
               background 160ms var(--ease), color 160ms var(--ease);
+  transition-delay: 0ms, 0ms, 0ms, 0ms;
 }
 .menu-open .side-nav li a, .menu-open .side-foot a { opacity: 1; transform: none; }
-.menu-open .side-nav li:nth-child(1) a { transition-delay: 80ms; }
-.menu-open .side-nav li:nth-child(2) a { transition-delay: 120ms; }
-.menu-open .side-nav li:nth-child(3) a { transition-delay: 160ms; }
-.menu-open .side-nav li:nth-child(4) a { transition-delay: 200ms; }
-.menu-open .side-nav li:nth-child(5) a { transition-delay: 240ms; }
-.menu-open .side-foot a:nth-child(1) { transition-delay: 280ms; }
-.menu-open .side-foot a:nth-child(2) { transition-delay: 315ms; }
+.menu-open .side-nav li:nth-child(1) a { transition-delay: 80ms, 80ms, 0ms, 0ms; }
+.menu-open .side-nav li:nth-child(2) a { transition-delay: 120ms, 120ms, 0ms, 0ms; }
+.menu-open .side-nav li:nth-child(3) a { transition-delay: 160ms, 160ms, 0ms, 0ms; }
+.menu-open .side-nav li:nth-child(4) a { transition-delay: 200ms, 200ms, 0ms, 0ms; }
+.menu-open .side-nav li:nth-child(5) a { transition-delay: 240ms, 240ms, 0ms, 0ms; }
+.menu-open .side-foot a:nth-child(1) { transition-delay: 280ms, 280ms, 0ms, 0ms; }
+.menu-open .side-foot a:nth-child(2) { transition-delay: 315ms, 315ms, 0ms, 0ms; }
 
 .side-foot {
   margin-top: auto; padding-top: 12px;   /* 로그인·회원가입은 패널 바닥에 */

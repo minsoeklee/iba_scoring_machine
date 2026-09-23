@@ -348,3 +348,17 @@ kbd {
 @media (max-width: 900px) {
   .people { grid-template-columns: 1fr; }
 }
+
+/* ── 감사한 분들 ─────────────────────────────────────────────
+   직책 · 이름 · 한 줄 소개를 한 줄에. 직책 폭을 고정해 이름이 한 선에 선다. */
+.crew { list-style: none; margin: 0; padding: 0; }
+.crew li {
+  display: grid; grid-template-columns: 96px max-content 1fr;
+  align-items: baseline; gap: 14px;
+  padding: 11px 0; margin: 0;
+  border-top: 1px solid var(--line-soft);
+}
+.crew li:first-child { border-top: 0; padding-top: 0; }
+.crew .role { font-size: 12px; font-weight: 600; color: var(--muted); }
+.crew .name { font-size: 15px; font-weight: 600; color: var(--ink); }
+.crew .note { font-size: 13px; color: var(--ink-2); }

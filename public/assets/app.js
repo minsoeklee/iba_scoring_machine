@@ -46,6 +46,13 @@
   }
 
   function renderShell() {
+    // ?embed=1: 미니게임 바탕화면의 창(iframe) 안에 들어갈 때. 메뉴·제목·하단 바 없이 본문만 둔다.
+    if (new URLSearchParams(location.search).has("embed")) {
+      document.body.classList.add("embed");
+      hydrateIcons(document.body);
+      return;
+    }
+
     const here = location.pathname.replace(/index\.html$/, "");
     // 개별 게임 페이지(/games/...)는 미니게임 메뉴 아래에 있는 것으로 본다.
     const navPath = here.startsWith("/games/") ? "/minigame.html" : here;

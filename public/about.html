@@ -11,57 +11,53 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&family=Playfair+Display:wght@700;900&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="/assets/chrome.css">
   <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/assets/about.css?v=2">
   <script src="/assets/icons.js" defer></script>
-  <script src="/assets/app.js" defer></script>
+  <script src="/assets/app.js?v=2" defer></script>
   <script src="/assets/chrome.js" defer></script>
+  <script src="/assets/about.js" defer></script>
 </head>
 <body>
-<main>
-<section class="card">
-  <div class="card-head"><h2>이 사이트를 만든 사람들</h2></div>
-  <p class="lead">
-    후배 기수가 회귀 프로젝트 점수를 기다리지 않고 바로 확인할 수 있도록, 손으로 하던 채점을
-    자동화해 만든 사이트입니다. PNU IBA 부원 두 명이 만들고 관리합니다.
-  </p>
-</section>
+<main class="about-page">
+  <section class="about-library" aria-label="이 사이트를 만든 사람들">
+    <div class="about-shelf" id="aboutShelf">
+      <div class="about-book-entry is-active" data-about-book>
+        <button class="about-book-control" type="button" aria-label="minsoeklee 책 선택" aria-pressed="true">
+          <span class="about-book-spine" aria-hidden="true"><span>minsoeklee</span></span>
+          <span class="about-book-cover" aria-hidden="true"><span>minsoeklee</span></span>
+        </button>
+        <div class="about-book-detail" data-about-detail>
+          <h2>이민석</h2>
+          <p>채점 서버 · 사이트</p>
+          <a href="https://github.com/minsoeklee" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
 
-<div class="people">
-  <!-- TODO: 이름·한 줄 소개·연락처를 각자 채워 주세요. -->
-  <section class="card person">
-    <div class="who">
-      <span class="name">이민석</span>
-      <span class="role">채점 서버 · 사이트</span>
+      <div class="about-book-entry about-book-entry--ink" data-about-book>
+        <button class="about-book-control" type="button" aria-label="taejeong0416 책 선택" aria-pressed="false">
+          <span class="about-book-spine" aria-hidden="true"><span>taejeong0416</span></span>
+          <span class="about-book-cover" aria-hidden="true"><span>taejeong0416</span></span>
+        </button>
+        <div class="about-book-detail" data-about-detail aria-hidden="true" inert>
+          <h2>박태정</h2>
+          <p>프론트엔드 · 미니게임</p>
+          <a href="https://github.com/taejeong0416" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+
+      <span class="about-decor" aria-hidden="true" style="--book-width: 38px; --book-height: 284px; --book-color: #e0dfd9"></span>
+      <span class="about-decor" aria-hidden="true" style="--book-width: 27px; --book-height: 310px; --book-color: #c9cfda"></span>
+      <span class="about-decor" aria-hidden="true" style="--book-width: 44px; --book-height: 273px; --book-color: #e8e2d8"></span>
+      <span class="about-decor" aria-hidden="true" style="--book-width: 31px; --book-height: 295px; --book-color: #bac4d3"></span>
+      <span class="about-decor" aria-hidden="true" style="--book-width: 52px; --book-height: 320px; --book-color: #dedbd3"></span>
+      <span class="about-decor" aria-hidden="true" style="--book-width: 35px; --book-height: 267px; --book-color: #d5d9d6"></span>
+      <span class="about-decor" aria-hidden="true" style="--book-width: 28px; --book-height: 306px; --book-color: #bdc9d8"></span>
+      <span class="about-decor" aria-hidden="true" style="--book-width: 47px; --book-height: 281px; --book-color: #e4dcd2"></span>
+      <span class="about-decor" aria-hidden="true" style="--book-width: 33px; --book-height: 317px; --book-color: #cdd0cf"></span>
+      <span class="about-decor" aria-hidden="true" style="--book-width: 40px; --book-height: 290px; --book-color: #d7dce4"></span>
     </div>
-    <p class="bio">한 줄 소개를 적어 주세요.</p>
-    <ul class="links">
-      <li><a href="https://github.com/minsoeklee" target="_blank" rel="noopener">GitHub</a></li>
-    </ul>
   </section>
 
-  <section class="card person">
-    <div class="who">
-      <span class="name">이태정</span>
-      <span class="role">프론트엔드 · 미니게임</span>
-    </div>
-    <p class="bio">한 줄 소개를 적어 주세요.</p>
-    <ul class="links">
-      <li><a href="https://github.com/taejeong0416" target="_blank" rel="noopener">GitHub</a></li>
-    </ul>
-  </section>
-</div>
-
-<section class="card">
-  <div class="card-head"><h2>문의</h2></div>
-  <p class="lead">
-    채점이 이상하거나 제출이 안 될 때, 잘못된 제출을 지워야 할 때는 운영진에게 알려 주세요.
-    동아리 <a href="https://linktr.ee/pnuiba" target="_blank" rel="noopener">Linktree</a>와
-    <a href="https://www.instagram.com/pnu_iba/" target="_blank" rel="noopener">인스타그램</a>에서도 연락할 수 있습니다.
-  </p>
-  <p class="small">
-    코드는 <a href="https://github.com/minsoeklee/iba_scoring_machine" target="_blank" rel="noopener">GitHub 저장소</a>에 공개되어 있습니다.
-    다음 기수가 이어받아 고칠 수 있도록 설계와 결정 과정도 <code>docs/</code>에 남겨 두었습니다.
-  </p>
-</section>
 </main>
 </body>
 </html>

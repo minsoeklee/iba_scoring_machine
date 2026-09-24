@@ -84,7 +84,7 @@
       // 게임 화면은 캔버스가 한 화면에 들어오도록 제목을 줄인다.
       const variant = here in AUTH_TITLES ? " centered" : here.startsWith("/games/") ? " compact" : "";
       if (variant === " compact") main.classList.add("compact");
-      if (here !== "/thanks.html") main.insertAdjacentHTML("afterbegin", `
+      if (here !== "/thanks.html" && here !== "/about.html") main.insertAdjacentHTML("afterbegin", `
         <header class="page-head${variant}">
           <p class="page-eyebrow">Regression Project Scoring Service</p>
           <h1 class="page-title">${title}</h1>

@@ -1,11 +1,11 @@
-// 미니게임 Dock. 아이콘을 누르면 그 게임 페이지를 창(iframe)에 담아 아이콘 자리에서 연다.
-// Dock은 macOS처럼 커서 가까운 아이콘일수록 커지고, 열려 있는 게임은 아이콘 아래에 점이 켜진다.
+// 미니게임 화면. 바탕의 게임 아이콘은 한 번 누르면 선택, 두 번 누르면 그 게임 페이지를 창(iframe)에 담아
+// 아이콘 자리에서 연다. 끌면 옮겨진다. 아래 Dock의 앱 아이콘은 장식으로, macOS처럼 커서 가까운 것일수록 커진다.
 // 창은 제목 줄을 끌어 옮기고, 누른 창이 맨 앞으로 오며, 빨간 버튼으로 닫는다(닫으면 게임도 멈춘다).
 (function () {
   const DRAG_START = 4;   // 이만큼(px) 움직여야 끌기로 본다. 그보다 적으면 클릭
   const GAP = 16;         // 창이 화면 가장자리와 띄우는 최소 여백
 
-  let dock, layer;
+  let desktop, dock, layer;
   let top = 10;           // 창 겹침 순서. 앞으로 올 때마다 하나씩 올린다
   let cascade = 0;        // 새 창을 조금씩 비켜 여는 계단
   const open = new Map(); // game → 창 요소
@@ -42,7 +42,40 @@
     });
   }
 
-  // --- Dock ------------------------------------------------------------------
+  // --- 게임 아이콘 ---------------------------------------------------------------
+
+  function select(icon) {
+    desktop.querySelectorAll(".desk-icon.selected").forEach((el) => el.classList.remove("selected"));
+    if (icon) icon.classList.add("selected");
+  }
+
+  function setupIcon(icon) {
+    let ox = 0, oy = 0, moved = false;
+    draggable(icon, {
+      onStart: () => {
+        // 처음 끌 때 %로 놓인 자리를 px로 바꿔 둔다
+        ox = icon.offsetLeft; oy = icon.offsetTop;
+        select(icon);
+      },
+      onMove: (dx, dy) => {
+        // 화면 안에서만, Dock 위까지만 움직인다(left는 아이콘 가운데 기준 — CSS에서 -50% 옮겨 둠)
+        icon.style.left = clamp(ox + dx, icon.offsetWidth / 2, desktop.clientWidth - icon.offsetWidth / 2) + "px";
+        icon.style.top = clamp(oy + dy, 0, dock.offsetTop - icon.offsetHeight - 8) + "px";
+      },
+      onEnd: (dragged) => { moved = dragged; },
+    });
+    const launch = () => openGame(icon.dataset.game, icon.dataset.title, Number(icon.dataset.w) || 640, icon);
+    // 한 번 누르면 선택만 하고, 두 번 누르면 연다(macOS 바탕화면과 같게). 끌고 난 뒤의 click은 무시한다.
+    // 키보드 Enter·Space로 누른 click은 detail이 0이라, 그때는 바로 연다.
+    icon.addEventListener("click", (e) => {
+      if (moved) { moved = false; return; }
+      select(icon);
+      if (e.detail === 0) launch();
+    });
+    icon.addEventListener("dblclick", launch);
+  }
+
+  // --- Dock(장식) ----------------------------------------------------------------
 
   const MAGNIFY = 1.6;    // 커서 바로 아래 아이콘의 최대 배율
   const REACH = 150;      // 커서에서 이만큼(px) 떨어진 아이콘까지 함께 커진다
@@ -61,9 +94,6 @@
     dock.addEventListener("pointermove", (e) => magnify(e.clientX));
     dock.addEventListener("pointerleave", () => {
       dock.querySelectorAll(".dock-item").forEach((item) => item.style.setProperty("--s", "1"));
-    });
-    dock.querySelectorAll(".dock-item").forEach((item) => {
-      item.addEventListener("click", () => openGame(item.dataset.game, item.dataset.title, Number(item.dataset.w) || 640, item));
     });
   }
 
@@ -96,7 +126,7 @@
   ];
   const CLOSE = { duration: 220, easing: "cubic-bezier(0.35, 0.2, 0.8, 0.6)" };
 
-  // 기준점: Dock 아이콘 그림의 한가운데(창 기준 좌표)
+  // 기준점: 게임 아이콘 그림의 한가운데(창 기준 좌표). 아이콘을 옮겼으면 지금 자리를 쓴다.
   function aimAtIcon(win) {
     const icon = iconOf.get(win);
     if (!icon) { win.style.transformOrigin = "50% 50%"; return; }
@@ -109,8 +139,6 @@
     const win = open.get(game);
     if (!win) return;
     open.delete(game);
-    const icon = iconOf.get(win);
-    if (icon) icon.classList.remove("running");
     win.classList.add("closing");   // 사라지는 동안 누르지 못하게
     const done = () => win.remove();
     if (calm.matches) done();
@@ -122,8 +150,8 @@
     if (rest[0]) { rest[0].classList.remove("inactive"); rest[0].querySelector("iframe").focus(); }
   }
 
-  // 열기: 게임 페이지를 다 불러온 뒤, 누른 Dock 아이콘 자리에서 창이 커져 나와 화면 가운데에 자리 잡는다
-  // (macOS에서 Dock의 앱을 열 때처럼). 크기는 이때 한 번 정하고 고정한다.
+  // 열기: 게임 페이지를 다 불러온 뒤, 두 번 누른 아이콘 자리에서 창이 커져 나와 화면 가운데에 자리 잡는다
+  // (macOS에서 바탕화면 아이콘을 열 때처럼). 크기는 이때 한 번 정하고 고정한다.
   function openGame(game, title, width, icon) {
     if (open.has(game)) { const w = open.get(game); front(w); w.querySelector("iframe").focus(); return; }
 
@@ -149,7 +177,7 @@
     win.style.visibility = "hidden";   // 내용을 다 불러와 크기가 정해질 때까지 숨겨 둔다
     layer.append(win);
     open.set(game, win);
-    if (icon) { iconOf.set(win, icon); icon.classList.add("running"); }
+    if (icon) iconOf.set(win, icon);
     front(win);
 
     // 주소 끝의 t=는 창을 열 때마다 바뀌어, 브라우저가 예전에 받아 둔 게임 페이지를 다시 쓰지 않게 한다.
@@ -187,13 +215,17 @@
   }
 
   function init() {
+    desktop = document.getElementById("desktop");
     dock = document.getElementById("dock");
-    if (!dock) return;
+    if (!desktop || !dock) return;
     layer = document.createElement("div");
     layer.className = "win-layer";
     document.body.append(layer);
 
+    desktop.querySelectorAll(".desk-icon").forEach(setupIcon);
     setupDock();
+    // 빈 바탕을 누르면 선택을 푼다
+    desktop.addEventListener("pointerdown", (e) => { if (e.target === desktop) select(null); });
 
     // iframe 안을 누르면 부모 문서에는 pointerdown이 오지 않는다. 대신 부모 창이 포커스를 잃으므로
     // 그때 포커스가 간 iframe의 창을 앞으로 올린다.

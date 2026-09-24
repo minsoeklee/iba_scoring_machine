@@ -237,42 +237,107 @@ input[type="file"]::file-selector-button {
 .game-stats .value { font-size: 21px; font-weight: 700; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
 .game-stats .label { color: var(--muted); font-size: 12px; font-weight: 500; }
 
-/* ── 미니게임 Dock ─────────────────────────────────────────────
-   사이트 바탕 위, 화면 아래쪽 가운데에 macOS Dock 같은 반투명 유리 막대 하나. 게임 아이콘을 누르면 창이 열린다(desktop.js).
-   커서 가까운 아이콘일수록 커지고(--s, desktop.js), 커진 아이콘은 막대 위로 솟는다. */
-.desk-main .page-head { display: none; }   /* 제목 없이 Dock만 둔다 */
-main.page.desk-main { max-width: none; padding: 24px 88px 0; }
-.dock-stage {
-  height: calc(100vh - 24px - 53px);   /* 위 여백과 하단 바 사이 전체. Dock은 그 바닥에 선다 */
-  display: flex; align-items: flex-end; justify-content: center;
-  padding-bottom: 12px;
+/* ── 미니게임 화면 ─────────────────────────────────────────────
+   macOS 화면을 그림 없이 색과 음영만으로 구분한 둥근 판. 사이트 바탕보다 조금 짙고 푸른 기가 도는 색에,
+   안쪽 위 가장자리 그늘과 바깥 그림자를 준다. 위쪽 바탕에 게임 아이콘, 아래쪽에 Dock(desktop.js). */
+.desk-main .page-head { display: none; }   /* 제목 없이 화면만 둔다 */
+/* 화면은 메뉴 버튼·IBA 줄 바로 아래(68px)에서 시작해, 양옆은 그 버튼들에 가리지 않으므로 넓게 쓴다 */
+main.page.desk-main { max-width: none; padding: 68px 40px 0; }
+.screen {
+  position: relative;
+  /* 가로로 긴 화면. 높이는 위 68px + 하단 바 53px + 숨 쉴 틈 12px = 133px를 뺀 만큼,
+     폭은 좌우 40px씩을 뺀 만큼(아주 넓은 모니터에서는 높이의 1.9배까지) */
+  height: calc(100vh - 133px);
+  width: min(calc(100vw - 80px), calc((100vh - 133px) * 1.9));
+  margin: 0 auto;
+  border-radius: 18px; overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #f4f2ee 0%, #e9e6e0 55%, #dedbd4 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 18px 40px -24px rgba(21, 24, 29, 0.18),   /* 위 가장자리 안쪽 그늘 */
+    0 0 0 1px rgba(21, 24, 29, 0.10),
+    0 24px 60px rgba(21, 24, 29, 0.16);
 }
+
+/* 켜지는 모션: 페이지에 들어오면 화면이 검게 꺼진 상태에서 백라이트가 올라오듯 밝아지고,
+   그다음 아이콘과 Dock이 살짝 떠오르며 나타난다. 검은 막은 누르기를 막지 않는다. */
+.screen::after {
+  content: ""; position: absolute; inset: 0; z-index: 3;
+  background: #0b0b0d;
+  pointer-events: none;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .screen::after { animation: screen-on 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both; }
+  .screen .desk-icon, .screen .dock { animation: screen-content-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 1s both; }
+  @keyframes screen-on {
+    0%   { opacity: 1; }
+    25%  { opacity: 0.92; }   /* 백라이트가 막 들어오는 순간 */
+    100% { opacity: 0; }
+  }
+  @keyframes screen-content-in {
+    from { opacity: 0; translate: 0 6px; }
+    to   { opacity: 1; translate: 0 0; }
+  }
+}
+
+/* 게임 아이콘: 그림은 Dock 아이콘과 같은 44px. 한 번 누르면 선택(회색 틀 + 파란 이름표), 두 번 누르면 창, 끌면 옮겨진다 */
+.desk-icon {
+  position: absolute; left: var(--x); top: var(--y);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: 88px; height: auto; padding: 0;
+  border: 0; border-radius: 0; background: none;   /* style.css의 전역 button 모양을 걷어낸다 */
+  font: inherit; color: var(--ink);
+  cursor: grab; user-select: none;
+  transform: translateX(-50%);   /* --x는 아이콘 가운데 기준 */
+}
+.desk-icon:hover { background: none; }
+/* 포인터는 아이콘 단추가 직접 받는다. 안쪽 SVG가 받으면 끌기 포인터 캡처가 이어지지 않는다 */
+.desk-icon > * { pointer-events: none; }
+.desk-icon:active { cursor: grabbing; }
+.desk-icon:focus-visible { outline: none; }
+.desk-thumb {
+  display: grid; place-items: center;
+  width: 60px; height: 60px; padding: 7px;   /* 테두리 1px + 여백 7px을 빼면 그림이 Dock 아이콘과 같은 44px */
+  border: 1px solid transparent; border-radius: 10px;
+}
+.desk-thumb svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.18)) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.12)); }
+.desk-label {
+  max-width: 100%; padding: 1px 7px; border-radius: 5px;
+  font-size: 11.5px; font-weight: 600; line-height: 1.5; letter-spacing: -0.1px;
+  color: var(--ink);
+}
+.desk-icon:hover .desk-thumb { background: rgba(21, 24, 29, 0.05); }
+.desk-icon.selected .desk-thumb, .desk-icon:focus-visible .desk-thumb {
+  background: rgba(21, 24, 29, 0.08); border-color: rgba(21, 24, 29, 0.14);
+}
+.desk-icon.selected .desk-label, .desk-icon:focus-visible .desk-label { background: var(--accent); color: var(--accent-ink); }
+
+/* Dock: 화면 아래 가운데의 반투명 유리 막대. 앱 아이콘은 장식이고, 커서 가까운 것일수록 커진다(--s). */
 .dock {
-  --icon: 60px;
-  display: flex; align-items: flex-end; gap: 10px;
-  height: calc(var(--icon) + 16px);
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.55);
+  --icon: 44px;
+  position: absolute; left: 50%; bottom: 12px;
+  transform: translateX(-50%);
+  display: flex; align-items: flex-end; gap: 7px;
+  height: calc(var(--icon) + 12px);
+  padding: 6px 9px;
+  background: rgba(255, 255, 255, 0.5);
   -webkit-backdrop-filter: blur(24px) saturate(1.6);
   backdrop-filter: blur(24px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-radius: 22px;
-  box-shadow: 0 0 0 1px rgba(21, 24, 29, 0.08), 0 14px 36px rgba(21, 24, 29, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 17px;
+  box-shadow: 0 0 0 1px rgba(21, 24, 29, 0.08), 0 12px 30px rgba(21, 24, 29, 0.14);
 }
 .dock-item {
   --s: 1;
-  position: relative;
-  display: block; flex: none;
+  position: relative; flex: none;
   width: calc(var(--icon) * var(--s)); height: calc(var(--icon) * var(--s));
-  padding: 0; border: 0; border-radius: 0; background: none;   /* style.css의 전역 button 모양을 걷어낸다 */
-  cursor: pointer;
   transition: width 140ms ease-out, height 140ms ease-out;
 }
-.dock-item:hover { background: none; }
-.dock-item:focus-visible { outline: none; }
-.dock-item:focus-visible svg { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 14px; }
-.dock-item svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.25)); }
-/* 이름 말풍선: 올리거나 키보드로 고르면 아이콘 위에 뜬다 */
+.dock-item svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.18)) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.12)); }   /* 짧고 또렷한 그림자 */
+.dock-sep { align-self: stretch; width: 1px; margin: 4px 2px; background: rgba(21, 24, 29, 0.14); }
+/* 이름 말풍선: 올리면 아이콘 위에 뜬다 */
 .dock-tip {
   position: absolute; left: 50%; bottom: calc(100% + 10px);
   transform: translateX(-50%);
@@ -282,16 +347,7 @@ main.page.desk-main { max-width: none; padding: 24px 88px 0; }
   opacity: 0; pointer-events: none;
   transition: opacity 120ms ease-out;
 }
-.dock-item:hover .dock-tip, .dock-item:focus-visible .dock-tip { opacity: 1; }
-/* 열려 있는 게임: 아이콘 아래 작은 점 */
-.dock-dot {
-  position: absolute; left: 50%; bottom: -6px;
-  width: 4px; height: 4px; border-radius: 50%;
-  transform: translateX(-50%);
-  background: rgba(21, 24, 29, 0.55);
-  opacity: 0; transition: opacity 160ms ease-out;
-}
-.dock-item.running .dock-dot { opacity: 1; }
+.dock-item:hover .dock-tip { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .dock-item { transition: none; }
 }

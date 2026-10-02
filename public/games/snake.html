@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>스네이크 — IBA Scoring Machine</title>
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400..700&family=Playfair+Display:wght@700;900&family=Instrument+Serif&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/assets/chrome.css">
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/icons.js" defer></script>
+  <script src="/assets/app.js" defer></script>
+  <script src="/assets/chrome.js" defer></script>
+  <script src="/games/snake.js" defer></script>
+</head>
+<body>
+<main>
+<section class="card">
+  <div class="card-head">
+    <h2>스네이크</h2>
+    <a class="more" href="/minigame.html">미니게임 목록<i data-icon="arrow-right"></i></a>
+  </div>
+  <div class="game-layout">
+    <div class="game-stage">
+      <canvas id="board" width="480" height="480" aria-label="스네이크 화면"></canvas>
+      <div class="game-overlay" id="overlay" hidden></div>
+    </div>
+    <div class="game-side">
+      <div class="game-stats">
+        <div><div class="label">점수</div><div class="value" id="score">0</div></div>
+        <div><div class="label">최고 기록</div><div class="value" id="best">0</div></div>
+        <div><div class="label">길이</div><div class="value" id="length">3</div></div>
+        <div><div class="label">단계</div><div class="value" id="level">1</div></div>
+      </div>
+      <dl class="keys">
+        <dt><kbd>←</kbd> <kbd>↑</kbd> <kbd>↓</kbd> <kbd>→</kbd></dt><dd>방향 바꾸기</dd>
+        <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dt><dd>방향 바꾸기</dd>
+        <dt><kbd>P</kbd></dt><dd>일시정지</dd>
+        <dt><kbd>R</kbd></dt><dd>처음부터 다시</dd>
+      </dl>
+      <p class="small">먹이를 먹을 때마다 뱀이 한 칸 길어지고 조금씩 빨라집니다. 먹이 5개마다 단계가 오르고, 먹이 하나의 점수는 단계 × 10점입니다. 벽이나 자기 몸에 부딪히면 게임이 끝납니다. 다른 탭으로 옮기면 일시정지됩니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="card flush">
+  <div class="card-head"><h2>팀 순위</h2></div>
+  <div class="table-wrap">
+    <table id="gameBoard" hidden>
+      <thead><tr><th>순위</th><th>팀</th><th class="num">점수</th><th class="num">기록 시각</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="empty" id="gameBoardEmpty">불러오는 중…</p>
+  <div class="card-foot">팀별 최고 점수입니다. 로그인한 상태로 게임을 마치면 우리 팀 기록으로 올라갑니다.</div>
+</section>
+</main>
+</body>
+</html>

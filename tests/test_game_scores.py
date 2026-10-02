@@ -47,3 +47,8 @@ def test_unknown_game_and_bad_score_rejected(client):
 def test_shooter_score_recorded(client):
     assert record(client, "shooter", 12345).json() == {"rank": 1, "team_best": 12345}
     assert record(client, "shooter", 10_000_000).json()["error_code"] == "bad_score"
+
+
+def test_snake_score_recorded(client):
+    assert record(client, "snake", 1230).json() == {"rank": 1, "team_best": 1230}
+    assert record(client, "snake", 1_000_000).json()["error_code"] == "bad_score"

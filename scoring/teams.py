@@ -1,8 +1,7 @@
-"""팀명·닉네임 정규화.
+"""팀 번호·닉네임 정규화.
 
-팀은 가입할 때 적은 팀명 문자열로 식별한다(결정 007). 앞뒤 공백 제거, 연속 공백 하나로 축약,
-대소문자 무시(casefold), 전각 문자를 반각으로 통일(NFKC)해 같은 팀으로 본다.
-리더보드에는 처음 입력된 표기(team_display)를 그대로 보여준다.
+팀은 가입할 때 적은 팀 번호로 식별한다(결정 007). 숫자만 받으며, 앞뒤 공백을 지우고 전각 숫자를
+반각으로 바꾼(NFKC) 뒤 앞자리 0을 떼어 같은 팀으로 본다("03"과 "3"은 같은 팀).
 """
 
 from __future__ import annotations
@@ -30,11 +29,14 @@ def clean_display(raw: str, max_len: int, label: str) -> str:
 
 
 def normalize_team(raw: str) -> str:
-    return clean_display(raw, MAX_TEAM_LEN, "팀명").casefold()
+    text = clean_display(raw, MAX_TEAM_LEN, "팀 번호")
+    if not (text.isascii() and text.isdigit()):
+        raise NameError_("팀 번호는 숫자만 입력하세요.")
+    return str(int(text))
 
 
 def clean_team_display(raw: str) -> str:
-    return clean_display(raw, MAX_TEAM_LEN, "팀명")
+    return normalize_team(raw)
 
 
 def clean_nickname(raw: str) -> str:

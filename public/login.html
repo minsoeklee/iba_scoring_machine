@@ -40,7 +40,7 @@
     <p class="msg-error" id="error" hidden></p>
     <button type="submit" class="primary block" id="submitBtn"><span id="submitLabel">Sign in</span></button>
   </form>
-  <p class="switch"><a id="toSignup" href="/signup.html">Don&rsquo;t have account?</a></p>
+  <p class="switch"><a id="toSignup" href="#signup">Don&rsquo;t have account?</a></p>
 </section>
 <!-- 오른쪽: IBA 표지 사진 -->
 <figure class="auth-visual">
@@ -145,6 +145,9 @@
     e.preventDefault();
     if (mode === "signin") toSignup(); else toSignin();
   });
+
+  // 다른 페이지의 회원가입 버튼(/login.html#signup)으로 들어오면 가입 모드로 연다
+  if (location.hash === "#signup") toSignup();
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();

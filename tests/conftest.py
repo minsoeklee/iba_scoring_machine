@@ -69,13 +69,13 @@ def csv_bytes(rows: list[tuple], header: str = "id,price") -> bytes:
 PASSWORD = "password123"
 
 
-def signup(client: TestClient, username: str, team: str = "3조", nickname: str = "민석", password: str = PASSWORD):
+def signup(client: TestClient, username: str, team: str = "3", nickname: str = "민석", password: str = PASSWORD):
     return client.post(
         "/api/signup", json={"username": username, "password": password, "nickname": nickname, "team": team}
     )
 
 
-def login_as(client: TestClient, team: str = "3조", nickname: str = "민석") -> None:
+def login_as(client: TestClient, team: str = "3", nickname: str = "민석") -> None:
     """(팀, 닉네임)마다 계정 하나. 없으면 가입하고, 있으면 로그인해 세션 쿠키를 바꾼다."""
     username = "u" + hashlib.sha1(f"{team}|{nickname}".encode()).hexdigest()[:12]
     r = signup(client, username, team=team, nickname=nickname)
@@ -84,12 +84,12 @@ def login_as(client: TestClient, team: str = "3조", nickname: str = "민석") -
     assert r.status_code == 200, r.text
 
 
-def submit(client: TestClient, data: bytes, team: str = "3조", nickname: str = "민석"):
+def submit(client: TestClient, data: bytes, team: str = "3", nickname: str = "민석"):
     login_as(client, team, nickname)
     return client.post("/api/submit", files={"file": ("submit.csv", data, "text/csv")})
 
 
-def quota(client: TestClient, team: str = "3조"):
+def quota(client: TestClient, team: str = "3"):
     login_as(client, team)
     return client.get("/api/quota")
 

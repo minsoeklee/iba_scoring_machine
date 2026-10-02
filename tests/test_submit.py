@@ -15,7 +15,7 @@ def test_perfect_submission_scores_zero_rmse(client):
     assert body["negative_clipped"] == 0
     assert body["remaining_today"] == 2
     assert body["rank"] == 1
-    assert body["team"] == "3조"
+    assert body["team"] == "3"
 
 
 def test_known_error_gives_expected_rmse(client):

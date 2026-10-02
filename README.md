@@ -17,8 +17,8 @@
 
 - 제출: `sample_submission.csv`와 같은 `id,price` CSV. 코드 실행 없음.
 - 채점: **행 순서 기준**. test.csv의 id는 0부터 매긴 행 번호이고, 제출 파일의 id가 같은 순서인지 확인한 뒤 같은 위치끼리 비교한다. RMSE가 순위 기준, R²는 보조.
-- 참가: 아이디·비밀번호로 가입하고, 가입 때 적은 팀명으로 팀이 묶인다. 제출만 로그인 필요. 팀당 하루 3회(KST 자정 초기화).
-- 리더보드: 팀별 최고 기록 1건 — 닉네임·팀명·RMSE·R².
+- 참가: 아이디·비밀번호로 가입하고, 가입 때 적은 팀 번호(숫자만, 앞자리 0 무시)로 팀이 묶인다. 제출만 로그인 필요. 팀당 하루 3회(KST 자정 초기화).
+- 리더보드: 팀별 최고 기록 1건 — 닉네임·팀 번호·RMSE·R².
 - 스택: Vercel Hobby + Python(FastAPI) + Neon Postgres Free + 정적 프론트. 비용 0원.
 - 페이지: 홈 / 채점 / 리더보드 / 미니게임(사과게임·테트리스·블록깨기, 게임별 팀 순위).
 
@@ -31,10 +31,10 @@ store.py             # 저장소 계층: PostgresStore(Neon) / MemoryStore(테�
 scoring/             # 채점 도메인 로직 (프레임워크·DB 무관)
   parse.py           #   제출 CSV 검증·파싱
   metrics.py         #   RMSE·R², 음수 클리핑
-  teams.py           #   팀명·닉네임 정규화
+  teams.py           #   팀 번호·닉네임 정규화
   clock.py           #   KST 하루 경계, 일일 한도
 public/              # 정적 사이트 (Vercel CDN이 그대로 서빙)
-  index.html, submit.html, leaderboard.html, minigame.html(게임 목록), login.html, signup.html
+  index.html, submit.html, leaderboard.html, minigame.html(게임 목록), login.html(로그인·가입)
   games/             #   미니게임: apple(사과게임), tetris, blocks(블록깨기). 게임은 브라우저에서 돌고 점수만 API로 기록
   assets/            #   style.css, app.js(셸·공통), icons.js, contest.js(대회 일정·공지)
   data/              #   train/test/sample_submission/brand_model.csv (후배 배포용)
@@ -84,7 +84,7 @@ ANSWER_CSV=/path/to/answer.csv .venv/bin/pytest tests/test_real_data.py
 
 ```bash
 # 팀 제출 목록 보기
-curl -H "X-Admin-Key: $ADMIN_KEY" --get --data-urlencode "team=3조" https://<도메인>/api/submissions
+curl -H "X-Admin-Key: $ADMIN_KEY" --get --data-urlencode "team=3" https://<도메인>/api/submissions
 ```
 
 ```bash

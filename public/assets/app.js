@@ -11,7 +11,7 @@
     ["/about.html", "About us"],
     ["/thanks.html", "Special thanks to"],
   ];
-  const AUTH_TITLES = { "/login.html": "Sign in", "/signup.html": "Sign up" };
+  const AUTH_TITLES = { "/login.html": "Sign in" };
 
   function icon(name) {
     const d = (window.ICON_PATHS || {})[name] || "";
@@ -40,8 +40,10 @@
     const next = new URLSearchParams(location.search).get("next") || "/";
     return next.startsWith("/") && !next.startsWith("//") ? next : "/";
   }
+  // 가입은 로그인 화면의 가입 모드(#signup)에서 한다.
   function authLink(page) {
-    return `/${page}.html?next=${encodeURIComponent(location.pathname)}`;
+    const hash = page === "signup" ? "#signup" : "";
+    return `/login.html?next=${encodeURIComponent(location.pathname)}${hash}`;
   }
 
   function renderShell() {

@@ -21,10 +21,10 @@
   <div>
   <section class="card" id="needLogin" hidden>
   <div class="card-head"><h2>로그인이 필요합니다</h2></div>
-  <p class="lead">모델을 제출하려면 로그인하세요. 계정이 없으면 팀명을 적어 가입하면 됩니다.</p>
+  <p class="lead">모델을 제출하려면 로그인하세요. 계정이 없으면 팀 번호를 적어 가입하면 됩니다.</p>
   <div class="actions">
     <a class="btn primary" id="loginLink" href="/login.html">로그인</a>
-    <a class="btn" id="signupLink" href="/signup.html">회원가입</a>
+    <a class="btn" id="signupLink" href="/login.html#signup">회원가입</a>
   </div>
   </section>
 
@@ -100,10 +100,10 @@
     <ul>
       <li>형식은 <code>sample_submission.csv</code>와 동일: 헤더 <code>id,price</code>, 데이터 39,085행, test.csv와 같은 순서.</li>
       <li>팀당 <strong>하루 3회</strong>. 한국 시간 자정에 초기화됩니다. 형식 오류로 거부된 제출은 횟수에 들어가지 않습니다.</li>
-      <li>제출하려면 로그인해야 합니다. 가입할 때 같은 팀명을 적은 사람끼리 한 팀이 되며, 팀명은 공백·대소문자를 무시하고 비교합니다.</li>
+      <li>제출하려면 로그인해야 합니다. 가입할 때 같은 팀 번호를 적은 사람끼리 한 팀이 됩니다. 팀 번호는 숫자만 받으며 3과 03은 같은 팀입니다.</li>
       <li>리더보드에는 팀별로 public 점수가 가장 좋은 기록 한 건이 올라가고, 이 제출이 최종 채점에 쓰입니다.</li>
       <li>대회 마지막 날 자정(한국 시간)이 지나면 제출이 막히고 리더보드가 최종 순위로 바뀝니다.</li>
-      <li>가입할 때 다른 팀의 팀명을 적지 마세요. 그 팀과 하루 제출 횟수를 나눠 쓰게 됩니다.</li>
+      <li>가입할 때 다른 팀의 번호를 적지 마세요. 그 팀과 하루 제출 횟수를 나눠 쓰게 됩니다.</li>
     </ul>
 
     <h3>시작 코드</h3>

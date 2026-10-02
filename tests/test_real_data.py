@@ -47,7 +47,7 @@ def test_sample_submission_matches_known_baseline(real_client):
     body = submit(real_client, SAMPLE.read_bytes()).json()
     # 응답은 public 구간 점수라 전체 기준값과 조금 다르다
     assert math.isclose(body["rmse"], 13189.79, rel_tol=0.03)
-    full = real_client.get("/api/submissions", params={"team": "3조"}, headers={"X-Admin-Key": "k"}).json()[0]
+    full = real_client.get("/api/submissions", params={"team": "3"}, headers={"X-Admin-Key": "k"}).json()[0]
     assert math.isclose(full["rmse"], 13189.79, abs_tol=0.01)
     assert math.isclose(full["r2"], -0.79, abs_tol=0.01)
 

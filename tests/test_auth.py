@@ -3,9 +3,9 @@ from tests.conftest import PASSWORD, csv_bytes, perfect_rows, signup
 
 
 def test_signup_logs_in_and_me_returns_user(client):
-    r = signup(client, "minseok_3", team=" 3조 ", nickname="민석")
+    r = signup(client, "minseok_3", team=" 03 ", nickname="민석")
     assert r.status_code == 200, r.text
-    assert r.json() == {"username": "minseok_3", "nickname": "민석", "team": "3조"}
+    assert r.json() == {"username": "minseok_3", "nickname": "민석", "team": "3"}
     assert client.get("/api/me").json()["username"] == "minseok_3"
 
 
@@ -21,14 +21,16 @@ def test_signup_validation(client):
     assert signup(client, "한글아이디").json()["error_code"] == "bad_account"
     assert signup(client, "valid_id", password="short").json()["error_code"] == "bad_account"
     assert signup(client, "valid_id", team="   ").json()["error_code"] == "bad_name"
-    assert signup(client, "valid_id", team="x" * 41).json()["error_code"] == "bad_name"
+    assert signup(client, "valid_id", team="1" * 41).json()["error_code"] == "bad_name"
+    assert signup(client, "valid_id", team="3조").json()["error_code"] == "bad_name"   # 팀 번호는 숫자만
+    assert signup(client, "valid_id", team="-3").json()["error_code"] == "bad_name"
     assert signup(client, "valid_id", nickname="").json()["error_code"] == "bad_name"
 
 
-def test_team_display_follows_first_member(client):
-    signup(client, "first_1", team="Team A")
-    r = signup(client, "second_2", team="  team   a ")
-    assert r.json()["team"] == "Team A"
+def test_team_number_ignores_leading_zeros(client):
+    signup(client, "first_1", team="7")
+    r = signup(client, "second_2", team="  007 ")
+    assert r.json()["team"] == "7"
 
 
 def test_login_logout(client):
@@ -58,11 +60,11 @@ def test_submit_and_quota_require_login(client):
 
 
 def test_submission_uses_account_team_and_nickname(client):
-    signup(client, "dave_123", team="딥밸류", nickname="태정")
+    signup(client, "dave_123", team="12", nickname="태정")
     r = client.post("/api/submit", files={"file": ("s.csv", csv_bytes(perfect_rows()), "text/csv")})
     assert r.status_code == 200, r.text
     board = client.get("/api/leaderboard").json()["rows"]
-    assert (board[0]["team"], board[0]["nickname"]) == ("딥밸류", "태정")
+    assert (board[0]["team"], board[0]["nickname"]) == ("12", "태정")
 
 
 def test_tampered_or_expired_session_is_rejected(client):

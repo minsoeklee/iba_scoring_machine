@@ -19,14 +19,13 @@ def test_fourth_submission_same_day_is_rejected(client):
     assert body["resets_at"].startswith("2026-09-20T00:00:00+09:00")
 
 
-def test_team_name_variants_share_quota(client):
-    assert submit(client, csv_bytes(perfect_rows()), team="Team A").status_code == 200
-    assert submit(client, csv_bytes(perfect_rows()), team="  team   a ").status_code == 200
-    assert submit(client, csv_bytes(perfect_rows()), team="TEAM A").status_code == 200
-    assert submit(client, csv_bytes(perfect_rows()), team="team a").status_code == 429
-    # 리더보드에는 처음 표기만 한 행
+def test_team_number_variants_share_quota(client):
+    assert submit(client, csv_bytes(perfect_rows()), team="5").status_code == 200
+    assert submit(client, csv_bytes(perfect_rows()), team=" 05 ").status_code == 200
+    assert submit(client, csv_bytes(perfect_rows()), team="５").status_code == 200
+    assert submit(client, csv_bytes(perfect_rows()), team="005").status_code == 429
     board = client.get("/api/leaderboard").json()["rows"]
-    assert [row["team"] for row in board] == ["Team A"]
+    assert [row["team"] for row in board] == ["5"]
 
 
 def test_quota_resets_at_kst_midnight(client, clock):
@@ -57,30 +56,30 @@ def test_quota_endpoint_reports_usage(client):
 
 
 def test_leaderboard_shows_best_record_per_team(client, clock):
-    submit(client, csv_bytes(offset_rows(300)), team="A", nickname="a1")
+    submit(client, csv_bytes(offset_rows(300)), team="1", nickname="a1")
     clock.advance(minutes=1)
-    submit(client, csv_bytes(offset_rows(100)), team="A", nickname="a2")
+    submit(client, csv_bytes(offset_rows(100)), team="1", nickname="a2")
     clock.advance(minutes=1)
-    submit(client, csv_bytes(offset_rows(200)), team="B", nickname="b1")
+    submit(client, csv_bytes(offset_rows(200)), team="2", nickname="b1")
     board = client.get("/api/leaderboard").json()["rows"]
-    assert [(r["rank"], r["team"], r["nickname"]) for r in board] == [(1, "A", "a2"), (2, "B", "b1")]
+    assert [(r["rank"], r["team"], r["nickname"]) for r in board] == [(1, "1", "a2"), (2, "2", "b1")]
     assert board[0]["submitted_at"].endswith("+09:00")
 
 
 def test_leaderboard_tie_breaks_by_r2_then_time(client, clock):
     # 같은 RMSE, 같은 R²(동일 오프셋) → 먼저 제출한 팀이 위
-    submit(client, csv_bytes(offset_rows(100)), team="late-first", nickname="x")
+    submit(client, csv_bytes(offset_rows(100)), team="1", nickname="x")
     clock.advance(minutes=5)
-    submit(client, csv_bytes(offset_rows(100)), team="second", nickname="y")
+    submit(client, csv_bytes(offset_rows(100)), team="2", nickname="y")
     board = client.get("/api/leaderboard").json()["rows"]
-    assert [r["team"] for r in board] == ["late-first", "second"]
+    assert [r["team"] for r in board] == ["1", "2"]
 
 
 def test_rank_in_submit_response_reflects_team_best(client):
-    submit(client, csv_bytes(offset_rows(100)), team="A")
-    r = submit(client, csv_bytes(offset_rows(200)), team="B")
+    submit(client, csv_bytes(offset_rows(100)), team="1")
+    r = submit(client, csv_bytes(offset_rows(200)), team="2")
     assert r.json()["rank"] == 2
-    r = submit(client, csv_bytes(offset_rows(50)), team="B")
+    r = submit(client, csv_bytes(offset_rows(50)), team="2")
     assert r.json()["rank"] == 1
 
 
@@ -89,16 +88,16 @@ def test_rank_in_submit_response_reflects_team_best(client):
 
 def test_admin_delete_restores_quota_and_removes_from_leaderboard(client):
     for _ in range(3):
-        submit(client, csv_bytes(perfect_rows()), team="A")
-    assert submit(client, csv_bytes(perfect_rows()), team="A").status_code == 429
+        submit(client, csv_bytes(perfect_rows()), team="1")
+    assert submit(client, csv_bytes(perfect_rows()), team="1").status_code == 429
 
-    subs = client.get("/api/submissions", params={"team": "a"}, headers=ADMIN).json()
+    subs = client.get("/api/submissions", params={"team": "01"}, headers=ADMIN).json()
     assert len(subs) == 3
     r = client.delete(f"/api/submissions/{subs[0]['id']}", headers=ADMIN)
     assert r.status_code == 200
 
-    assert quota(client, "A").json()["remaining_today"] == 1
-    subs = client.get("/api/submissions", params={"team": "A"}, headers=ADMIN).json()
+    assert quota(client, "1").json()["remaining_today"] == 1
+    subs = client.get("/api/submissions", params={"team": "1"}, headers=ADMIN).json()
     assert subs[0]["deleted_at"] is not None
 
     # 전부 지우면 리더보드에서 사라진다
@@ -108,13 +107,13 @@ def test_admin_delete_restores_quota_and_removes_from_leaderboard(client):
 
 
 def test_admin_endpoints_require_key(client):
-    assert client.get("/api/submissions", params={"team": "A"}).status_code == 401
-    assert client.get("/api/submissions", params={"team": "A"}, headers={"X-Admin-Key": "nope"}).status_code == 401
+    assert client.get("/api/submissions", params={"team": "1"}).status_code == 401
+    assert client.get("/api/submissions", params={"team": "1"}, headers={"X-Admin-Key": "nope"}).status_code == 401
     assert client.delete("/api/submissions/1").status_code == 401
 
 
 def test_delete_unknown_or_already_deleted_is_404(client):
-    submit(client, csv_bytes(perfect_rows()), team="A")
+    submit(client, csv_bytes(perfect_rows()), team="1")
     assert client.delete("/api/submissions/999", headers=ADMIN).status_code == 404
     assert client.delete("/api/submissions/1", headers=ADMIN).status_code == 200
     assert client.delete("/api/submissions/1", headers=ADMIN).status_code == 404

@@ -1,0 +1,8 @@
+# CLI 배포 때 로컬 파일이 올라가지 않게 막는다. 정답과 비밀값은 절대 업로드하지 않는다.
+answer.csv
+answer*.csv
+.env
+.env.*
+.venv/
+__pycache__/
+.pytest_cache/

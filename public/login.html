@@ -16,44 +16,150 @@
   <script src="/assets/chrome.js" defer></script>
 </head>
 <body>
-<main>
-<section class="card auth-card">
-  <p class="lead">모델을 제출하려면 로그인하세요.</p>
+<main class="auth-main">
+<section class="auth-card">
   <form class="stack" id="form" novalidate>
-    <label>아이디
+    <label>ID
       <input type="text" name="username" autocomplete="username" autocapitalize="off" required>
     </label>
-    <label>비밀번호
+    <label>Password
       <input type="password" name="password" autocomplete="current-password" required>
     </label>
+    <!-- 가입 모드에서만: Don't have account?를 누르면 줄이 높이 0에서 부드럽게 열리며 이름표가 타이핑되고,
+         이어서 입력 칸 자리가 열리며 칸이 나타난다(폼 높이가 한 번에 튀지 않게) -->
+    <div class="signup-field">
+      <label class="sf-inner"><span class="field-name" data-text="Nickname"></span>
+        <span class="sf-input"><span class="sf-input-inner"><input type="text" name="nickname" maxlength="40" autocomplete="off" tabindex="-1"></span></span>
+      </label>
+    </div>
+    <div class="signup-field">
+      <label class="sf-inner"><span class="field-name" data-text="Team No. (Only Number)"></span>
+        <span class="sf-input"><span class="sf-input-inner"><input type="text" name="team" maxlength="40" autocomplete="off" pattern="[0-9]*" tabindex="-1"></span></span>
+      </label>
+    </div>
     <p class="msg-error" id="error" hidden></p>
-    <button type="submit" class="primary block" id="submitBtn">로그인</button>
+    <button type="submit" class="primary block" id="submitBtn"><span id="submitLabel">Sign in</span></button>
   </form>
-  <p class="switch">계정이 없나요? <a id="toSignup" href="/signup.html">회원가입</a></p>
+  <p class="switch"><a id="toSignup" href="/signup.html">Don&rsquo;t have account?</a></p>
 </section>
+<!-- 오른쪽: IBA 표지 사진 -->
+<figure class="auth-visual">
+  <img src="/assets/login-cover.webp" alt="IBA Intelligent Business Analytics 표지" width="1500" height="2000">
+</figure>
 </main>
 
 <script>
+// 로그인 화면이 그 자리에서 가입 화면으로 바뀐다. Don't have account?를 누르면 닉네임 이름표 → 입력 칸 →
+// 팀 번호 이름표 → 입력 칸이 차례로 나타나고(이름표는 타이핑), 그다음 버튼 글자가 Sign in → Sign up으로 다시 타이핑된다.
 (function () {
   const form = document.getElementById("form");
   const errorEl = document.getElementById("error");
   const btn = document.getElementById("submitBtn");
+  const btnLabel = document.getElementById("submitLabel");
+  const toggle = document.getElementById("toSignup");
+  const extras = [...form.querySelectorAll(".signup-field")];
+  const calm = matchMedia("(prefers-reduced-motion: reduce)");
 
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("toSignup").href = "/signup.html" + location.search;
+  const TYPE_MS = 95;     // 글자 하나 칠 때
+  const ERASE_MS = 55;    // 글자 하나 지울 때
+  const STEP_MS = 420;    // 입력 칸이 나타난 뒤 다음 단계까지 쉬는 시간
+  let mode = "signin";
+  let run = 0;            // 바꾸는 도중 다시 누르면 앞선 움직임을 멈추기 위한 번호
+
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // el의 글자를 지우고 text를 한 글자씩 친다. 도중에 다시 바꾸면(id가 달라지면) 멈춘다.
+  async function retype(el, text, id) {
+    if (calm.matches) { el.textContent = text; return; }
+    el.classList.add("typing");
+    while (el.textContent.length) {
+      if (id !== run) return;
+      el.textContent = el.textContent.slice(0, -1);
+      await wait(ERASE_MS);
+    }
+    for (const ch of text) {
+      if (id !== run) return;
+      el.textContent += ch;
+      await wait(TYPE_MS);
+    }
+    el.classList.remove("typing");
+  }
+
+  // 줄(field)과 입력 칸 자리(.sf-input)는 CSS에서 grid 행 높이 0fr → 1fr로 부드럽게 열린다
+  const OPEN_MS = 520;
+  function openRow(field) { field.classList.add("open"); }
+  function openInput(field) {
+    field.classList.add("input-open");
+    field.querySelector("input").tabIndex = 0;
+  }
+
+  async function toSignup() {
+    const id = ++run;
+    mode = "signup";
+    errorEl.hidden = true;
+    form.password.autocomplete = "new-password";
+    toggle.textContent = "Already have an account?";
+    for (const field of extras) {
+      if (id !== run) return;
+      const name = field.querySelector(".field-name"), input = field.querySelector("input");
+      input.required = true;
+      openRow(field);
+      if (!calm.matches) await wait(OPEN_MS * 0.6);   // 줄이 어느 정도 열린 뒤 타이핑 시작
+      await retype(name, name.dataset.text, id);
+      if (id !== run) return;
+      openInput(field);
+      if (!calm.matches) await wait(OPEN_MS + STEP_MS * 0.4);
+    }
+    if (id === run) retype(btnLabel, "Sign up", id);   // 팀 번호 칸까지 다 나온 뒤에 버튼 글자를 바꾼다
+  }
+
+  // 로그인으로 돌아갈 때는 나타날 때를 거꾸로: 팀 번호부터 입력 칸이 접히고 → 이름표가 한 글자씩 지워지고 →
+  // 줄이 닫힌다. 닉네임도 똑같이 한 뒤 버튼 글자를 Sign in으로 다시 친다.
+  async function toSignin() {
+    const id = ++run;
+    mode = "signin";
+    errorEl.hidden = true;
+    form.password.autocomplete = "current-password";
+    toggle.textContent = "Don\u2019t have account?";
+    for (const field of [...extras].reverse()) {
+      if (id !== run) return;
+      const name = field.querySelector(".field-name"), input = field.querySelector("input");
+      input.required = false; input.tabIndex = -1;
+      if (!field.classList.contains("open")) { name.textContent = ""; continue; }   // 아직 안 열린 줄
+      field.classList.remove("input-open");
+      if (!calm.matches) await wait(OPEN_MS * 0.8);
+      if (id !== run) return;
+      await retype(name, "", id);
+      if (id !== run) return;
+      name.classList.remove("typing");
+      field.classList.remove("open");
+      if (!calm.matches) await wait(OPEN_MS * 0.8);
+    }
+    if (id === run) retype(btnLabel, "Sign in", id);
+  }
+
+  // 팀 번호 칸에는 숫자만 남긴다
+  form.team.addEventListener("input", () => { form.team.value = form.team.value.replace(/\D/g, ""); });
+
+  toggle.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (mode === "signin") toSignup(); else toSignin();
   });
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const signup = mode === "signup";
     const body = { username: form.username.value, password: form.password.value };
+    if (signup) { body.nickname = form.nickname.value; body.team = form.team.value; }
     btn.disabled = true;
     errorEl.hidden = true;
-    const r = await window.IBA.api("/api/login", {
+    const r = await window.IBA.api(signup ? "/api/signup" : "/api/login", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
     });
     btn.disabled = false;
     if (r.ok) { location.href = window.IBA.nextPath(); return; }
-    errorEl.textContent = (r.body && r.body.message) || `로그인하지 못했습니다 (HTTP ${r.status})`;
+    errorEl.textContent = (r.body && r.body.message)
+      || (signup ? `가입하지 못했습니다 (HTTP ${r.status})` : `로그인하지 못했습니다 (HTTP ${r.status})`);
     errorEl.hidden = false;
   });
 })();

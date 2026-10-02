@@ -92,7 +92,7 @@ curl -X DELETE -H "X-Admin-Key: $ADMIN_KEY" https://<도메인>/api/submissions/
 
 채점은 두 단계다. 대회 중에는 public 구간(test의 30%) 점수만 보여주고, 대회 마지막 날 다음 날 0시(KST)부터 제출을 막고 리더보드를 전체 데이터 기준 최종 순위로 바꾼다. 최종 순위에는 팀마다 public 점수가 가장 좋았던 제출 1건이 쓰인다. 마감일은 `scoring/clock.py`의 `CONTEST_END`가 정한다.
 
-기수 교체: `scripts/reset_season.py --yes`로 제출 기록을 비우고, 새 정답을 `load_answers.py`로 적재하고, `public/data/`의 CSV와 `public/assets/contest.js`의 대회 기간·공지사항을 바꾼다. `scoring/clock.py`의 `CONTEST_END`도 contest.js의 `end`와 같은 날짜로 맞춘 뒤 배포한다.
+기수 교체: `scripts/reset_season.py --yes`로 제출 기록을 비우고, 새 정답을 `load_answers.py`로 적재하고, `public/data/`의 CSV와 `public/assets/contest.js`의 대회 기간·공지사항을 바꾼다. 리더보드의 데이터셋 내려받기 버튼이 받는 `public/data/dataset.zip`도 새 CSV 네 개로 다시 묶는다. `scoring/clock.py`의 `CONTEST_END`도 contest.js의 `end`와 같은 날짜로 맞춘 뒤 배포한다.
 
 ## 정답 파일 주의
 

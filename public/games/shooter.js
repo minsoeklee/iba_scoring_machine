@@ -5,7 +5,7 @@
   const PLAYER_SPEED = 300, HIT_R = 3, BULLET_R = 5, PICK_R = 18, MARGIN = 16;
   const FIRE_INTERVAL = 0.11, SHOT_SPEED = 760, SHOT_W = 3, SHOT_H = 12;
   const LIVES = 3, MAX_LIVES = 5, INVULN = 2, SCORE_MAX = 9999999, RESTART_DELAY = 800;
-  const LEVEL_TIME = 30;  // 이 초마다 단계가 오른다
+  const LEVEL_TIME = 20;  // 이 초마다 단계가 오른다
   const BEST_KEY = "iba.best.shooter";
   const STAR_COLORS = ["rgba(232,238,252,0.25)", "rgba(232,238,252,0.5)", "rgba(232,238,252,0.75)"];
 
@@ -45,7 +45,7 @@
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const rand = (lo, hi) => lo + Math.random() * (hi - lo);
   const near = (ax, ay, bx, by, r) => (ax - bx) ** 2 + (ay - by) ** 2 < r * r;
-  const bulletSpeed = () => Math.min(160 + level * 15, 380);
+  const bulletSpeed = () => Math.min(190 + level * 18, 420);
 
   function readBest() { try { return Number(localStorage.getItem(BEST_KEY)) || 0; } catch (_) { return 0; } }
   function saveBest(v) { try { localStorage.setItem(BEST_KEY, String(v)); } catch (_) {} }
@@ -260,7 +260,7 @@
     nextWave -= dt;
     if (nextWave <= 0) {
       launchWave();
-      nextWave = Math.max(0.6, 2.8 - level * 0.22) * rand(0.8, 1.2);
+      nextWave = Math.max(0.5, 2.4 - level * 0.22) * rand(0.8, 1.2);
     }
 
     for (const s of shots) { s.x += s.vx * dt; s.y += s.vy * dt; }

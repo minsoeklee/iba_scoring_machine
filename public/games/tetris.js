@@ -189,7 +189,7 @@
     if (combo > 0) text += ` · ${combo} 콤보`;
     label = { text, t: 1200 };
     lines += n;
-    level = Math.floor(lines / 10) + 1;
+    level = Math.floor(lines / 8) + 1;
   }
 
   function finishClear() {
@@ -199,8 +199,8 @@
     spawn();
   }
 
-  // 한 줄 내려오는 시간(ms). 가이드라인 공식이라 레벨 10쯤부터 매우 빨라진다.
-  const interval = () => Math.pow(0.8 - (level - 1) * 0.007, level - 1) * 1000;
+  // 한 줄 내려오는 시간(ms). 가이드라인 공식에서 두 레벨 앞선 속도로 시작하고, 레벨 8쯤부터 매우 빨라진다.
+  const interval = () => { const g = level + 2; return Math.pow(0.8 - (g - 1) * 0.007, g - 1) * 1000; };
 
   // --- 그리기 -----------------------------------------------------------------
 

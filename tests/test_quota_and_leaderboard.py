@@ -25,7 +25,7 @@ def test_team_name_variants_share_quota(client):
     assert submit(client, csv_bytes(perfect_rows()), team="TEAM A").status_code == 200
     assert submit(client, csv_bytes(perfect_rows()), team="team a").status_code == 429
     # 리더보드에는 처음 표기만 한 행
-    board = client.get("/api/leaderboard").json()
+    board = client.get("/api/leaderboard").json()["rows"]
     assert [row["team"] for row in board] == ["Team A"]
 
 
@@ -62,7 +62,7 @@ def test_leaderboard_shows_best_record_per_team(client, clock):
     submit(client, csv_bytes(offset_rows(100)), team="A", nickname="a2")
     clock.advance(minutes=1)
     submit(client, csv_bytes(offset_rows(200)), team="B", nickname="b1")
-    board = client.get("/api/leaderboard").json()
+    board = client.get("/api/leaderboard").json()["rows"]
     assert [(r["rank"], r["team"], r["nickname"]) for r in board] == [(1, "A", "a2"), (2, "B", "b1")]
     assert board[0]["submitted_at"].endswith("+09:00")
 
@@ -72,7 +72,7 @@ def test_leaderboard_tie_breaks_by_r2_then_time(client, clock):
     submit(client, csv_bytes(offset_rows(100)), team="late-first", nickname="x")
     clock.advance(minutes=5)
     submit(client, csv_bytes(offset_rows(100)), team="second", nickname="y")
-    board = client.get("/api/leaderboard").json()
+    board = client.get("/api/leaderboard").json()["rows"]
     assert [r["team"] for r in board] == ["late-first", "second"]
 
 
@@ -104,7 +104,7 @@ def test_admin_delete_restores_quota_and_removes_from_leaderboard(client):
     # 전부 지우면 리더보드에서 사라진다
     for s in subs[1:]:
         client.delete(f"/api/submissions/{s['id']}", headers=ADMIN)
-    assert client.get("/api/leaderboard").json() == []
+    assert client.get("/api/leaderboard").json()["rows"] == []
 
 
 def test_admin_endpoints_require_key(client):

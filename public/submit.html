@@ -87,16 +87,22 @@
     <dl class="facts">
       <dt>주 지표</dt><dd><strong>RMSE</strong>: 리더보드 순위 기준. 낮을수록 좋음.</dd>
       <dt>보조 지표</dt><dd><strong>R²</strong>: 참고용. 1에 가까울수록 좋음.</dd>
+      <dt>중간 채점</dt><dd><strong>Public</strong>: test.csv 39,085행 중 무작위로 고른 30%(중복 없이)로 매긴 점수. 제출 결과와 대회 중 리더보드에 이 점수가 나옵니다. 어느 행이 public인지는 공개하지 않습니다.</dd>
+      <dt>최종 채점</dt><dd><strong>Private</strong>: 마감 뒤 test.csv 전체로 다시 채점해 최종 순위를 정합니다. 팀마다 public 점수가 가장 좋았던 제출 1건이 쓰입니다.</dd>
       <dt>음수 예측</dt><dd>0으로 바꿔 채점하고 몇 건이었는지 알려줍니다.</dd>
-      <dt>기준선</dt><dd>sample_submission.csv를 그대로 내면 RMSE 13,189.79 (아무것도 안 한 점수).</dd>
+      <dt>기준선</dt><dd>sample_submission.csv를 그대로 내면 RMSE 약 13,190 (아무것도 안 한 점수).</dd>
     </dl>
+
+    <h3>Public과 Private를 나누는 이유</h3>
+    <p class="lead">테스트셋은 모델이 한 번도 보지 못한 데이터여야 일반화 성능을 제대로 잴 수 있습니다. 그런데 제출할 때마다 점수가 보이면 그 점수가 오르는 쪽으로 모델을 고치게 되고, 테스트셋이 사실상 validation set 역할을 하게 됩니다. 그래서 대회 중에는 테스트셋의 일부로만 점수를 보여주고, 최종 순위는 대회 중 점수에 쓰이지 않은 70%가 들어간 전체 데이터로 매깁니다. public 점수에만 맞춘 모델은 최종 순위가 떨어질 수 있으니 train에서 직접 나눈 validation 점수도 함께 확인하세요.</p>
 
     <h3>제출 규칙</h3>
     <ul>
       <li>형식은 <code>sample_submission.csv</code>와 동일: 헤더 <code>id,price</code>, 데이터 39,085행, test.csv와 같은 순서.</li>
       <li>팀당 <strong>하루 3회</strong>. 한국 시간 자정에 초기화됩니다. 형식 오류로 거부된 제출은 횟수에 들어가지 않습니다.</li>
       <li>제출하려면 로그인해야 합니다. 가입할 때 같은 팀명을 적은 사람끼리 한 팀이 되며, 팀명은 공백·대소문자를 무시하고 비교합니다.</li>
-      <li>리더보드에는 팀별 최고 기록 한 건이 올라갑니다. 실험 제출을 두려워하지 마세요.</li>
+      <li>리더보드에는 팀별로 public 점수가 가장 좋은 기록 한 건이 올라가고, 이 제출이 최종 채점에 쓰입니다.</li>
+      <li>대회 마지막 날 자정(한국 시간)이 지나면 제출이 막히고 리더보드가 최종 순위로 바뀝니다.</li>
       <li>가입할 때 다른 팀의 팀명을 적지 마세요. 그 팀과 하루 제출 횟수를 나눠 쓰게 됩니다.</li>
     </ul>
 
@@ -148,11 +154,12 @@
     resultEl.innerHTML = `
       <p class="msg-ok"><strong>채점 완료</strong>: ${esc(b.team)}</p>
       <div class="score">
-        <div><div class="label">RMSE</div><div class="value">${f.rmse(b.rmse)}</div></div>
+        <div><div class="label">Public RMSE</div><div class="value">${f.rmse(b.rmse)}</div></div>
         <div><div class="label">R²</div><div class="value sub">${f.r2(b.r2)}</div></div>
         <div><div class="label">현재 팀 순위</div><div class="value sub">${b.rank ?? "-"}위</div></div>
       </div>
       ${clipped}
+      <p class="small">test.csv의 30%로 매긴 public 점수입니다. 최종 순위는 마감 뒤 전체 데이터로 다시 매깁니다.</p>
       <p class="small">오늘 ${b.remaining_today}회 남음. <a href="/leaderboard.html">리더보드 보기</a></p>`;
   }
 
@@ -174,6 +181,8 @@
         showError("로그인이 풀렸습니다.", "다시 로그인한 뒤 제출하세요.");
       } else if (r.status === 503 && r.body && r.body.message) {
         showError("채점 준비 중입니다.", r.body.message);
+      } else if (r.status === 403 && r.body && r.body.error_code === "contest_closed") {
+        showError("대회가 마감되었습니다.", "최종 순위는 리더보드에서 확인하세요.");
       } else if (r.status === 429) {
         showError(r.body.message, "초기화: " + window.IBA.fmt.time(r.body.resets_at) + " (KST)");
       } else if (r.body && r.body.message) {

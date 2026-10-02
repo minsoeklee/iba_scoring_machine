@@ -44,7 +44,7 @@
     </div>
     <div class="score" id="best" hidden>
       <div><div class="label">순위</div><div class="value sub" id="rank">–</div></div>
-      <div><div class="label">RMSE</div><div class="value" id="rmse">–</div></div>
+      <div><div class="label" id="rmseLabel">Public RMSE</div><div class="value" id="rmse">–</div></div>
       <div><div class="label">R²</div><div class="value sub" id="r2">–</div></div>
     </div>
     <p class="empty" id="noBest" hidden>아직 제출한 기록이 없습니다. <a href="/submit.html">첫 제출</a>을 해보세요.</p>
@@ -79,14 +79,16 @@
     }
 
     if (!board.ok) return;
-    const mine = board.body.find((row) => row.team === user.team);
+    const rows = board.body.rows;
+    if (board.body.final) document.getElementById("rmseLabel").textContent = "최종 RMSE";
+    const mine = rows.find((row) => row.team === user.team);
     if (!mine) { document.getElementById("noBest").hidden = false; return; }
     document.getElementById("rank").textContent = `${mine.rank}위`;
     document.getElementById("rmse").textContent = f.rmse(mine.rmse);
     document.getElementById("r2").textContent = f.r2(mine.r2);
     document.getElementById("best").hidden = false;
     const foot = document.getElementById("bestFoot");
-    foot.textContent = `전체 ${board.body.length}팀 중 ${mine.rank}위 · ${f.time(mine.submitted_at)} 제출 (${mine.nickname})`;
+    foot.textContent = `전체 ${rows.length}팀 중 ${mine.rank}위 · ${f.time(mine.submitted_at)} 제출 (${mine.nickname})`;
     foot.hidden = false;
   });
 })();

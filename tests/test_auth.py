@@ -61,7 +61,7 @@ def test_submission_uses_account_team_and_nickname(client):
     signup(client, "dave_123", team="딥밸류", nickname="태정")
     r = client.post("/api/submit", files={"file": ("s.csv", csv_bytes(perfect_rows()), "text/csv")})
     assert r.status_code == 200, r.text
-    board = client.get("/api/leaderboard").json()
+    board = client.get("/api/leaderboard").json()["rows"]
     assert (board[0]["team"], board[0]["nickname"]) == ("딥밸류", "태정")
 
 

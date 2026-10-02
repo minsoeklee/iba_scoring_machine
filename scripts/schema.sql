@@ -3,7 +3,8 @@
 CREATE TABLE IF NOT EXISTS answers (
     row_no  INTEGER PRIMARY KEY,          -- test.csv에서의 위치(0부터). 채점은 이 순서 기준.
     id      BIGINT NOT NULL,              -- test.csv의 id (고유하지 않음, 참고용)
-    price   DOUBLE PRECISION NOT NULL
+    price   DOUBLE PRECISION NOT NULL,
+    in_public BOOLEAN NOT NULL DEFAULT FALSE -- public 채점 구간(전체의 30%) 여부. load_answers.py가 정한다.
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -21,8 +22,10 @@ CREATE TABLE IF NOT EXISTS submissions (
     team_key         TEXT NOT NULL,       -- 정규화된 팀명 (하루 3회 판정·리더보드 그룹 기준)
     team_display     TEXT NOT NULL,       -- 제출자 팀의 표기 (users.team_display)
     nickname         TEXT NOT NULL,
-    rmse             DOUBLE PRECISION NOT NULL,
+    rmse             DOUBLE PRECISION NOT NULL, -- 전체 데이터 점수(최종 순위용)
     r2               DOUBLE PRECISION NOT NULL,
+    public_rmse      DOUBLE PRECISION NOT NULL, -- public 구간 점수(대회 중 공개)
+    public_r2        DOUBLE PRECISION NOT NULL,
     negative_clipped INTEGER NOT NULL DEFAULT 0,
     submitted_at     TIMESTAMPTZ NOT NULL,
     deleted_at       TIMESTAMPTZ
@@ -41,3 +44,12 @@ CREATE TABLE IF NOT EXISTS game_scores (
 CREATE INDEX IF NOT EXISTS game_scores_game ON game_scores (game);
 
 CREATE INDEX IF NOT EXISTS submissions_team_day ON submissions (team_key, submitted_at) WHERE deleted_at IS NULL;
+
+-- public/private 분할 전에 만든 DB용. 여러 번 실행해도 된다.
+-- 이전 제출은 예측값이 없어 public 점수를 다시 계산할 수 없으므로 전체 점수를 그대로 넣는다.
+ALTER TABLE answers ADD COLUMN IF NOT EXISTS in_public BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS public_rmse DOUBLE PRECISION;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS public_r2 DOUBLE PRECISION;
+UPDATE submissions SET public_rmse = rmse, public_r2 = r2 WHERE public_rmse IS NULL;
+ALTER TABLE submissions ALTER COLUMN public_rmse SET NOT NULL;
+ALTER TABLE submissions ALTER COLUMN public_r2 SET NOT NULL;

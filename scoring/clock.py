@@ -1,11 +1,23 @@
-"""'하루'의 기준. 한국 시간(KST) 자정에 제출 횟수가 초기화된다(스펙 18번)."""
+"""'하루'의 기준과 대회 마감. 한국 시간(KST) 자정에 제출 횟수가 초기화된다(스펙 18번)."""
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 
 KST = timezone(timedelta(hours=9), name="KST")
 DAILY_LIMIT = 3
+
+# 대회 마지막 날(KST). public/assets/contest.js의 end와 같은 날짜로 맞춘다.
+# 다음 날 0시부터 제출을 막고 리더보드를 전체 데이터 기준 최종 순위로 바꾼다.
+CONTEST_END = date(2026, 10, 5)
+
+
+def final_at() -> datetime:
+    return datetime.combine(CONTEST_END + timedelta(days=1), time(0, 0), tzinfo=KST)
+
+
+def is_final(now: datetime) -> bool:
+    return now >= final_at()
 
 
 def day_window(now: datetime) -> tuple[datetime, datetime]:

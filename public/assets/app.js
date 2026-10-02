@@ -141,7 +141,8 @@
   };
 
   // 리더보드 표의 <tr>들. myTeam과 같은 팀 행은 강조한다.
-  function boardRows(rows, myTeam) {
+  // final이면 최종 점수 옆에 대회 중 public 점수와 순위를 함께 보여준다.
+  function boardRows(rows, myTeam, final) {
     const teamIcon = icon("users");
     return rows.map((row) => {
       const mine = myTeam && row.team === myTeam;
@@ -151,6 +152,7 @@
         <td><div class="team"><span class="avatar">${teamIcon}</span><div><div class="name">${esc(row.team)}${mine ? ' <span class="tag">우리 팀</span>' : ""}</div><div class="sub">${esc(row.nickname)}</div></div></div></td>
         <td class="num score-main">${fmt.rmse(row.rmse)}</td>
         <td class="num soft">${fmt.r2(row.r2)}</td>
+        ${final ? `<td class="num soft">${fmt.rmse(row.public_rmse)} <span class="faint">(${row.public_rank}위)</span></td>` : ""}
         <td class="num faint" title="${fmt.time(row.submitted_at)}">${fmt.ago(row.submitted_at)}</td>
       </tr>`;
     }).join("");

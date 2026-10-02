@@ -62,7 +62,7 @@ DEV_ANSWER_CSV=/path/to/answer.csv ADMIN_KEY=dev SESSION_SECRET=dev .venv/bin/uv
 .venv/bin/pytest
 ```
 
-실제 정답 파일로 기준값 테스트(sample_submission → RMSE 13,189.79)까지 돌리려면:
+실제 정답 파일로 기준값 테스트(sample_submission → 전체 데이터 RMSE 13,189.79)까지 돌리려면:
 
 ```bash
 ANSWER_CSV=/path/to/answer.csv .venv/bin/pytest tests/test_real_data.py
@@ -71,8 +71,8 @@ ANSWER_CSV=/path/to/answer.csv .venv/bin/pytest tests/test_real_data.py
 ## 배포 (Vercel Hobby + Neon Free)
 
 1. Neon에서 무료 프로젝트를 만들고 연결 문자열을 받는다.
-2. 스키마 생성: `psql "$DATABASE_URL" -f scripts/schema.sql`
-3. 정답 적재: `DATABASE_URL=... .venv/bin/python scripts/load_answers.py /path/to/answer.csv`
+2. 스키마 생성: `psql "$DATABASE_URL" -f scripts/schema.sql`. 이미 만든 DB에 다시 실행해도 되며, 빠진 컬럼만 추가한다.
+3. 정답 적재: `DATABASE_URL=... .venv/bin/python scripts/load_answers.py /path/to/answer.csv`. 이때 public 채점 구간(전체의 30%)을 무작위로 정해 함께 저장한다. 대회 도중에 다시 적재하면 구간이 바뀌므로 기수 시작 때 한 번만 실행한다.
 4. Vercel에서 이 저장소를 가져오고 환경변수 세 개를 넣는다: `DATABASE_URL`, `ADMIN_KEY`, `SESSION_SECRET`(둘 다 긴 무작위 문자열, 서로 다르게). `SESSION_SECRET`을 바꾸면 모든 사용자가 로그아웃된다.
 5. 배포 후 확인: `/api/health`, 공개 저장소·정적 경로에 `answer.csv`가 없는지, 첫 요청 소요 시간.
 
@@ -90,7 +90,9 @@ curl -H "X-Admin-Key: $ADMIN_KEY" --get --data-urlencode "team=3조" https://<�
 curl -X DELETE -H "X-Admin-Key: $ADMIN_KEY" https://<도메인>/api/submissions/<id>
 ```
 
-기수 교체: `scripts/reset_season.py --yes`로 제출 기록을 비우고, 새 정답을 `load_answers.py`로 적재하고, `public/data/`의 CSV와 `public/assets/contest.js`의 대회 기간·공지사항을 바꿔 배포한다.
+채점은 두 단계다. 대회 중에는 public 구간(test의 30%) 점수만 보여주고, 대회 마지막 날 다음 날 0시(KST)부터 제출을 막고 리더보드를 전체 데이터 기준 최종 순위로 바꾼다. 최종 순위에는 팀마다 public 점수가 가장 좋았던 제출 1건이 쓰인다. 마감일은 `scoring/clock.py`의 `CONTEST_END`가 정한다.
+
+기수 교체: `scripts/reset_season.py --yes`로 제출 기록을 비우고, 새 정답을 `load_answers.py`로 적재하고, `public/data/`의 CSV와 `public/assets/contest.js`의 대회 기간·공지사항을 바꾼다. `scoring/clock.py`의 `CONTEST_END`도 contest.js의 `end`와 같은 날짜로 맞춘 뒤 배포한다.
 
 ## 정답 파일 주의
 

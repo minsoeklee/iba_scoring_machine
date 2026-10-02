@@ -22,6 +22,8 @@ from app import app
 from store import Answers, MemoryStore
 
 ANSWER_ROWS = [(69940, 20299.0), (44315, 13000.0), (10001, 8000.0), (10001, 25000.0), (55555, 15000.0)]
+# public 채점 구간: 첫 행과 셋째 행
+PUBLIC = [True, False, True, False, False]
 
 
 class FakeClock:
@@ -43,7 +45,7 @@ def clock():
 
 @pytest.fixture
 def store():
-    return MemoryStore(Answers(ids=[r[0] for r in ANSWER_ROWS], prices=[r[1] for r in ANSWER_ROWS]))
+    return MemoryStore(Answers(ids=[r[0] for r in ANSWER_ROWS], prices=[r[1] for r in ANSWER_ROWS], public=PUBLIC))
 
 
 @pytest.fixture

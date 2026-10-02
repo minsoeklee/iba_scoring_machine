@@ -5,8 +5,8 @@
 - POST   /api/login                  로그인 → 세션 쿠키
 - POST   /api/logout                 세션 쿠키 삭제
 - GET    /api/me                     로그인한 사용자 (로그인하지 않았으면 null)
-- POST   /api/submit                 (로그인) CSV → 채점·기록
-- GET    /api/leaderboard            팀별 최고 기록
+- POST   /api/submit                 (로그인) CSV → public·전체 점수 채점·기록 (마감 뒤에는 거부)
+- GET    /api/leaderboard            팀별 기록. 대회 중에는 public 순위, 마감 뒤에는 최종 순위
 - GET    /api/quota                  (로그인) 우리 팀 오늘 남은 횟수
 - POST   /api/games/{game}/score     (로그인) 미니게임 점수 기록
 - GET    /api/games/{game}/leaderboard  미니게임 팀별 최고 점수
@@ -51,14 +51,17 @@ def get_store(request: Request) -> Store:
 def _memory_store_for_dev() -> Store:
     """로컬 개발용: DB 없이 DEV_ANSWER_CSV의 정답으로 메모리 저장소를 쓴다. 재시작하면 제출 기록은 사라진다."""
     import csv
+    import random
 
+    from scoring.split import pick_public
     from store import MemoryStore
 
     with open(os.environ["DEV_ANSWER_CSV"], newline="", encoding="utf-8-sig") as f:
         reader = csv.reader(f)
         next(reader)
         rows = [(int(float(r[0])), float(r[1])) for r in reader if r and r[0].strip()]
-    return MemoryStore(Answers(ids=[r[0] for r in rows], prices=[r[1] for r in rows]))
+    public = pick_public(len(rows), random.Random(0))
+    return MemoryStore(Answers(ids=[r[0] for r in rows], prices=[r[1] for r in rows], public=public))
 
 
 def get_now(request: Request) -> Callable[[], datetime]:
@@ -70,8 +73,8 @@ def get_answers(request: Request, store: Store = Depends(get_store)) -> Answers:
     answers = getattr(request.app.state, "answers", None)
     if answers is None:
         answers = store.load_answers()
-        # 정답 적재 전이면 캐시하지 않는다. 적재 후 재배포 없이 바로 채점되게 하려고.
-        if answers.ids:
+        # 정답(과 public 구간) 적재 전이면 캐시하지 않는다. 적재 후 재배포 없이 바로 채점되게 하려고.
+        if any(answers.public):
             request.app.state.answers = answers
     return answers
 
@@ -129,14 +132,15 @@ def _quota_body(store: Store, team_key: str, now: datetime) -> dict:
 
 
 def _team_rank(store: Store, team_key: str) -> int | None:
+    """대회 중 public 리더보드에서 이 팀의 순위."""
     for row in store.leaderboard():
         if row.team_key == team_key:
             return row.rank
     return None
 
 
-def _leaderboard_row(row) -> dict:
-    return {
+def _leaderboard_row(row, final: bool) -> dict:
+    body = {
         "rank": row.rank,
         "team": row.team,
         "nickname": row.nickname,
@@ -144,6 +148,10 @@ def _leaderboard_row(row) -> dict:
         "r2": row.r2,
         "submitted_at": row.submitted_at.astimezone(clock.KST).isoformat(),
     }
+    # 대회 중에는 전체 데이터 점수를 내보내지 않는다. 마감 뒤에는 public 순위와 비교할 수 있게 함께 준다.
+    if final:
+        body.update(public_rmse=row.public_rmse, public_r2=row.public_r2, public_rank=row.public_rank)
+    return body
 
 
 def _submission_row(s: Submission) -> dict:
@@ -153,6 +161,8 @@ def _submission_row(s: Submission) -> dict:
         "nickname": s.nickname,
         "rmse": s.rmse,
         "r2": s.r2,
+        "public_rmse": s.public_rmse,
+        "public_r2": s.public_r2,
         "negative_clipped": s.negative_clipped,
         "submitted_at": s.submitted_at.astimezone(clock.KST).isoformat(),
         "deleted_at": s.deleted_at.astimezone(clock.KST).isoformat() if s.deleted_at else None,
@@ -251,7 +261,7 @@ async def submit(
     now_fn: Callable[[], datetime] = Depends(get_now),
     answers: Answers = Depends(get_answers),
 ):
-    if not answers.ids:
+    if not any(answers.public):
         return JSONResponse(
             status_code=503,
             content={"error_code": "answers_not_ready", "message": "정답이 아직 등록되지 않아 채점할 수 없습니다. 운영진에게 알려 주세요."},
@@ -259,6 +269,11 @@ async def submit(
 
     team_key = user.team_key
     now = now_fn()
+    if clock.is_final(now):
+        return JSONResponse(
+            status_code=403,
+            content={"error_code": "contest_closed", "message": "대회가 마감되어 더 이상 제출할 수 없습니다."},
+        )
     quota = _quota_body(store, team_key, now)
     if quota["remaining_today"] <= 0:
         return JSONResponse(
@@ -276,24 +291,29 @@ async def submit(
     except SubmissionError as e:
         return JSONResponse(status_code=400, content=e.to_dict())
 
-    result = score(answers.prices, parsed.prices)
+    full = score(answers.prices, parsed.prices)
+    public_idx = [i for i, p in enumerate(answers.public) if p]
+    public = score([answers.prices[i] for i in public_idx], [parsed.prices[i] for i in public_idx])
 
     record = Submission(
         id=0,
         team_key=team_key,
         team_display=user.team_display,
         nickname=user.nickname,
-        rmse=result.rmse,
-        r2=result.r2,
-        negative_clipped=result.negative_clipped,
+        rmse=full.rmse,
+        r2=full.r2,
+        public_rmse=public.rmse,
+        public_r2=public.r2,
+        negative_clipped=full.negative_clipped,
         submitted_at=now,
     )
     store.insert_submission(record)
 
+    # 학생에게는 public 점수만 보여준다. 전체 데이터 점수는 마감 뒤 리더보드에서 공개한다.
     return {
-        "rmse": result.rmse,
-        "r2": result.r2,
-        "negative_clipped": result.negative_clipped,
+        "rmse": public.rmse,
+        "r2": public.r2,
+        "negative_clipped": full.negative_clipped,
         "remaining_today": quota["remaining_today"] - 1,
         "resets_at": quota["resets_at"],
         "rank": _team_rank(store, team_key),
@@ -302,8 +322,16 @@ async def submit(
 
 
 @app.get("/api/leaderboard")
-def leaderboard(store: Store = Depends(get_store)):
-    return [_leaderboard_row(r) for r in store.leaderboard()]
+def leaderboard(
+    store: Store = Depends(get_store),
+    now_fn: Callable[[], datetime] = Depends(get_now),
+):
+    final = clock.is_final(now_fn())
+    return {
+        "final": final,
+        "final_at": clock.final_at().isoformat(),
+        "rows": [_leaderboard_row(r, final) for r in store.leaderboard(final)],
+    }
 
 
 @app.get("/api/quota")

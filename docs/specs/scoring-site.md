@@ -24,8 +24,8 @@
 
 ### 리더보드
 
-7. 동아리원으로서, 팀별로 닉네임·팀명·RMSE·R²가 RMSE 오름차순으로 정렬된 리더보드를 로그인 없이 보고 싶다.
-8. 동아리원으로서, 리더보드의 한 팀 행에는 그 팀의 **최고 기록(RMSE 최소)** 한 건만 표시되고, 그 기록을 낸 닉네임과 제출 시각이 함께 보이길 원한다. (Not yet specified였던 항목 — 본 스펙에서 최고 기록으로 확정. 이유: 하루 3회 제한 아래에서 팀이 실험 제출을 두려워하지 않게 하기 위함.)
+7. 동아리원으로서, 팀별로 닉네임·팀명·RMSE·R²가 RMSE 오름차순으로 정렬된 리더보드를 로그인 없이 보고 싶다. 대회 중에는 public 구간 점수로, 마감 뒤에는 전체 데이터 점수로 정렬된다.
+8. 동아리원으로서, 리더보드의 한 팀 행에는 그 팀의 **public 최고 기록(public RMSE 최소)** 한 건만 표시되고, 그 기록을 낸 닉네임과 제출 시각이 함께 보이길 원한다. 최종 순위에도 이 제출이 쓰인다.
 9. 동아리원으로서, RMSE가 같은 팀은 R²가 높은 쪽, 그것도 같으면 먼저 제출한 쪽이 위에 오길 원한다.
 
 ### 홈 화면·미니게임
@@ -59,9 +59,9 @@
 
 ### 데이터 모델 (Neon)
 
-- `answers`: `row_no`(0부터 시작하는 위치, 기본키), `id`(test.csv의 id, 참고용), `price`(정답). 39,085행. 기수 시작 시 운영자가 스크립트로 1회 적재.
+- `answers`: `row_no`(0부터 시작하는 위치, 기본키), `id`(test.csv의 id, 참고용), `price`(정답), `in_public`(public 채점 구간 여부). 39,085행. 기수 시작 시 운영자가 스크립트로 1회 적재하며, 이때 전체의 30%를 중복 없이 무작위로 골라 public 구간으로 표시한다.
 - `users`: `id`(자동), `username`(로그인 아이디, 소문자, 고유), `password_hash`(PBKDF2-SHA256), `nickname`, `team_key`(정규화된 팀명), `team_display`(그 팀으로 처음 가입한 사람의 표기), `created_at`.
-- `submissions`: `id`(자동), `team_key`(정규화된 팀명), `team_display`(제출자 팀의 표기), `nickname`, `rmse`, `r2`, `negative_clipped`(0으로 처리한 건수), `submitted_at`(UTC 저장, 표시·일 계산은 KST 변환), `deleted_at`(관리자 삭제 시 기록; 삭제된 행은 리더보드·횟수 계산에서 제외).
+- `submissions`: `id`(자동), `team_key`(정규화된 팀명), `team_display`(제출자 팀의 표기), `nickname`, `rmse`·`r2`(전체 데이터 점수), `public_rmse`·`public_r2`(public 구간 점수), `negative_clipped`(0으로 처리한 건수), `submitted_at`(UTC 저장, 표시·일 계산은 KST 변환), `deleted_at`(관리자 삭제 시 기록; 삭제된 행은 리더보드·횟수 계산에서 제외).
 - `game_scores`: `id`(자동), `game`, `team_key`, `team_display`, `nickname`, `score`, `played_at`. 미니게임을 마칠 때마다 한 행.
 - 제출 파일 원본은 저장하지 않는다. 점수와 메타데이터만 남긴다.
 
@@ -70,6 +70,8 @@
 - 검증 순서: 파일 크기 → UTF-8 텍스트 파싱 → 헤더가 정확히 `id,price` → 데이터 행 수 39,085 → 각 행의 id가 `answers.row_no` 순서의 id와 일치 → `price`가 모두 유한한 숫자. 첫 실패 지점에서 해당 사유와 (가능하면) 문제 행 번호를 반환한다.
 - 음수 price는 0으로 클리핑하고 건수를 기록한다.
 - RMSE = sqrt(mean((y − ŷ)²)), R² = 1 − Σ(y − ŷ)² / Σ(y − ȳ)². 소수점은 저장 시 전체 정밀도, 표시 시 RMSE 소수 2자리·R² 소수 4자리.
+- 제출마다 public 구간(전체의 30%)과 전체 데이터 두 가지로 점수를 계산해 저장한다. 대회 중 응답과 리더보드에는 public 점수만 내보낸다. 제출할 때마다 점수가 보이면 테스트셋이 사실상 validation set이 되므로, 최종 순위는 학생이 점수로 확인하지 못한 행이 들어간 전체 데이터로 매긴다.
+- 대회 마지막 날(`scoring/clock.py`의 `CONTEST_END`) 다음 날 0시(KST)부터 제출을 403으로 거부하고 리더보드를 최종 순위로 바꾼다. 최종 순위는 팀마다 public 점수가 가장 좋았던 제출 1건의 전체 데이터 점수로 정한다.
 - 정답은 함수 인스턴스 안에서 첫 요청 시 한 번 읽어 메모리에 캐시한다(인스턴스 재사용 시 DB 재조회 없음).
 
 ### 제출 제한 (결정 004, 007)
@@ -83,10 +85,10 @@
 - `POST /api/signup` — JSON `{ username, password, nickname, team }`. 성공 200: `{ username, nickname, team }` + 세션 쿠키. 형식 오류 400, 아이디 중복 409. 아이디는 영문 소문자·숫자·밑줄 4~20자, 비밀번호 8~72자.
 - `POST /api/login` — JSON `{ username, password }`. 성공 200 + 세션 쿠키, 실패 401. `POST /api/logout` — 쿠키 삭제.
 - `GET /api/me` — 로그인한 사용자 `{ username, nickname, team }`, 로그인하지 않았으면 `null`.
-- `POST /api/submit` (로그인 필요) — multipart: `file`. 로그인하지 않았으면 401. 성공 200: `{ rmse, r2, negative_clipped, remaining_today, rank }`. 검증 실패 400: `{ error_code, message, row? }`. 한도 초과 429: `{ message, resets_at }`.
+- `POST /api/submit` (로그인 필요) — multipart: `file`. 로그인하지 않았으면 401. 성공 200: `{ rmse, r2, negative_clipped, remaining_today, rank }`(점수와 순위는 public 기준). 검증 실패 400: `{ error_code, message, row? }`. 한도 초과 429: `{ message, resets_at }`. 마감 뒤 403 `contest_closed`.
 - `POST /api/games/{game}/score` (로그인 필요) — JSON `{ score }`. `game`은 `apple`(상한 170), `tetris`, `blocks`. 성공 200: `{ rank, team_best }`. 없는 게임 404, 범위 밖 점수 400.
 - `GET /api/games/{game}/leaderboard` — 팀별 최고 점수: `[{ rank, team, nickname, score, played_at }]`. 점수 내림차순, 동점이면 먼저 기록한 쪽.
-- `GET /api/leaderboard` — 팀별 최고 기록: `[{ rank, team, nickname, rmse, r2, submitted_at }]`. RMSE 오름차순, 동점 시 R² 내림차순, 그다음 `submitted_at` 오름차순.
+- `GET /api/leaderboard` — `{ final, final_at, rows }`. `rows`는 팀별 public 최고 기록 `[{ rank, team, nickname, rmse, r2, submitted_at }]`. 대회 중에는 public 점수로, `final`이 참이면 전체 데이터 점수로 정렬하고 각 행에 `public_rmse`, `public_r2`, `public_rank`를 더한다. RMSE 오름차순, 동점 시 R² 내림차순, 그다음 `submitted_at` 오름차순.
 - `GET /api/quota` (로그인 필요) — 우리 팀의 `{ used_today, remaining_today, resets_at, limit }`.
 - `DELETE /api/submissions/{id}` — 헤더 `X-Admin-Key` 필수. 소프트 삭제. 키 불일치 시 401.
 - `GET /api/submissions?team=` (관리자 키 필수) — 삭제할 대상을 찾기 위한 팀별 제출 목록.
@@ -109,7 +111,7 @@
 ## Validation Decisions
 
 - 좋은 테스트는 채점 API의 **외부 동작**만 본다: 특정 CSV를 넣으면 특정 상태 코드와 점수·오류 코드가 나오는지. 내부 파싱 함수나 DB 스키마는 직접 검사하지 않는다.
-- 채점 정확성 기준값: `sample_submission.csv`를 그대로 제출하면 RMSE ≈ 13,189.79, R² ≈ −0.79가 나와야 한다(조사 중 실측). `answer.csv` 자체를 제출하면 RMSE 0, R² 1이어야 한다. 이 두 파일이 회귀 테스트의 고정 입력이다.
+- 채점 정확성 기준값: `sample_submission.csv`를 그대로 제출하면 전체 데이터 RMSE ≈ 13,189.79, R² ≈ −0.79가 나와야 한다(조사 중 실측). `answer.csv` 자체를 제출하면 RMSE 0, R² 1이어야 한다. 이 두 파일이 회귀 테스트의 고정 입력이다.
 - 검증 실패 케이스별 테스트 입력을 만든다: 헤더 오타, 행 하나 누락, 두 행 순서 바꿈, price 빈 값, price 문자열, 음수 price(클리핑 후 성공 + 건수 확인), 2 MB 초과 파일.
 - 계정 테스트: 가입·로그인·로그아웃, 아이디 중복과 대소문자, 형식 오류, 비밀번호 평문 미저장, 변조·만료된 세션 거부, 로그인 없이 제출·횟수 조회 시 401.
 - 제출 제한 테스트: 같은 팀명(표기 변형 포함 — 공백·대소문자)으로 가입한 계정들로 3회 성공 후 4회째 429; 관리자 삭제 후 다시 제출 가능; KST 자정 경계는 시각을 주입할 수 있게 해 테스트.
@@ -126,7 +128,6 @@
 - 모바일·태블릿 화면과 터치 입력 — PC 브라우저에서만 쓰는 것을 전제로 한다.
 - 코드/노트북 제출과 서버 실행 — 예측 CSV만 받는다.
 - 관리자 웹 UI — 관리자 엔드포인트 + 문서화된 명령으로 대체.
-- public/private 리더보드 분할 — 하루 3회 제한으로 과적합 억제를 대신한다.
 - 점수 외 상세 피드백(오차 분포, 구간별 오차) — 첫 버전에서는 RMSE·R²·음수 처리 건수만.
 - test.csv의 id 재부여 — sample_submission 형식 호환을 위해 하지 않는다.
 - 후배용 모델 학습 환경 제공, 기존 3조 노트북 개선.

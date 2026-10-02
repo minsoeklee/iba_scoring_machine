@@ -89,9 +89,8 @@ def test_negative_price_is_clipped_and_counted(client):
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["negative_clipped"] == 2
-    # 0으로 클리핑됐으므로 두 행의 오차는 정답값 그대로
-    expected = math.sqrt((20299.0**2 + 13000.0**2) / 5)
-    assert math.isclose(body["rmse"], expected)
+    # 0으로 클리핑됐으므로 두 행의 오차는 정답값 그대로. 응답 점수는 public 구간(1·3번째 행)만 본다.
+    assert math.isclose(body["rmse"], math.sqrt(20299.0**2 / 2))
 
 
 def test_oversized_file_rejected(client):
@@ -117,7 +116,7 @@ def test_quota_not_consumed_by_invalid_file(client):
 
 def test_empty_answers_returns_503_and_is_not_cached(client, store):
     loaded = store._answers
-    store._answers = Answers(ids=[], prices=[])
+    store._answers = Answers(ids=[], prices=[], public=[])
 
     for data in (csv_bytes(perfect_rows()), csv_bytes([])):
         r = submit(client, data)

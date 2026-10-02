@@ -5,16 +5,23 @@
 
 answer.csv는 `id,price` 형식이며 test.csv와 행 순서가 같아야 한다.
 정답 파일은 저장소 밖에 두고, 이 스크립트에 경로만 넘긴다.
+
+적재할 때마다 public 채점 구간(전체의 30%)을 새로 무작위로 고른다. 대회 도중에 다시 적재하면
+이미 매긴 public 점수와 구간이 달라지므로 기수 시작 때 한 번만 실행한다.
 """
 
 from __future__ import annotations
 
 import csv
 import os
+import random
 import sys
 from pathlib import Path
 
 import psycopg
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scoring.split import pick_public  # noqa: E402
 
 TEST_CSV = Path(__file__).resolve().parents[1] / "public" / "data" / "test.csv"
 
@@ -46,12 +53,17 @@ def main(path: str) -> None:
         if answer_id != test_id:
             sys.exit(f"{row_no + 2}행의 id가 {answer_id}인데 test.csv는 {test_id}입니다. 적재하지 않았습니다.")
 
+    # 구간이 저장소 코드로 재현되지 않게 시드 없이 고른다.
+    public = pick_public(len(rows), random.SystemRandom())
     with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM answers")
-            cur.executemany("INSERT INTO answers (row_no, id, price) VALUES (%s, %s, %s)", rows)
+            cur.executemany(
+                "INSERT INTO answers (row_no, id, price, in_public) VALUES (%s, %s, %s, %s)",
+                [(*row, p) for row, p in zip(rows, public)],
+            )
         conn.commit()
-    print(f"answers 테이블에 {len(rows)}행 적재 완료")
+    print(f"answers 테이블에 {len(rows)}행 적재 완료 (public 구간 {sum(public)}행)")
 
 
 if __name__ == "__main__":

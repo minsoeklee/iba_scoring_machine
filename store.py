@@ -2,7 +2,9 @@
 
 두 구현은 같은 규칙을 지킨다:
 - 삭제된 제출(deleted_at IS NOT NULL)은 리더보드·오늘 횟수·순위 계산에서 제외한다.
-- 리더보드는 팀별 최고 기록 1건: RMSE 오름차순, 같으면 R² 내림차순, 같으면 먼저 제출한 쪽.
+- 리더보드는 팀별로 public 점수가 가장 좋은 제출 1건을 고른다(public RMSE 오름차순, 같으면 public R²
+  내림차순, 같으면 먼저 제출한 쪽). 대회 중에는 그 public 점수로, 마감 뒤에는 같은 제출의 전체 데이터
+  점수로 같은 규칙에 따라 순위를 매긴다.
 - 미니게임 순위도 팀별 최고 점수 1건: 점수 내림차순, 같으면 먼저 기록한 쪽.
 - 아이디(username)는 중복될 수 없다. 팀 표기는 그 팀으로 처음 가입한 사람의 표기를 따른다.
 """
@@ -19,6 +21,7 @@ from typing import Protocol
 class Answers:
     ids: list[int]
     prices: list[float]
+    public: list[bool]  # public 채점 구간에 들어가는 행
 
 
 class DuplicateUsername(Exception):
@@ -42,8 +45,10 @@ class Submission:
     team_key: str
     team_display: str
     nickname: str
-    rmse: float
+    rmse: float  # 전체 데이터 점수(최종 순위용)
     r2: float
+    public_rmse: float  # public 구간 점수(대회 중 공개)
+    public_r2: float
     negative_clipped: int
     submitted_at: datetime
     deleted_at: datetime | None = None
@@ -54,8 +59,11 @@ class LeaderboardRow:
     rank: int
     team: str
     nickname: str
-    rmse: float
+    rmse: float  # 순위 기준 점수: 대회 중에는 public, 마감 뒤에는 전체 데이터
     r2: float
+    public_rmse: float
+    public_r2: float
+    public_rank: int
     submitted_at: datetime
     team_key: str = field(repr=False)
 
@@ -94,22 +102,35 @@ def _rank_game(rows: list[GameScore]) -> list[GameRow]:
     ]
 
 
-def _rank(rows: list[Submission]) -> list[LeaderboardRow]:
+def _public_key(s: Submission):
+    return (s.public_rmse, -s.public_r2, s.submitted_at)
+
+
+def _final_key(s: Submission):
+    return (s.rmse, -s.r2, s.submitted_at)
+
+
+def _rank(rows: list[Submission], final: bool) -> list[LeaderboardRow]:
     best: dict[str, Submission] = {}
     for s in rows:
         if s.deleted_at is not None:
             continue
         cur = best.get(s.team_key)
-        if cur is None or (s.rmse, -s.r2, s.submitted_at) < (cur.rmse, -cur.r2, cur.submitted_at):
+        if cur is None or _public_key(s) < _public_key(cur):
             best[s.team_key] = s
-    ordered = sorted(best.values(), key=lambda s: (s.rmse, -s.r2, s.submitted_at))
+    public_order = sorted(best.values(), key=_public_key)
+    public_rank = {s.team_key: i + 1 for i, s in enumerate(public_order)}
+    ordered = sorted(best.values(), key=_final_key) if final else public_order
     return [
         LeaderboardRow(
             rank=i + 1,
             team=s.team_display,
             nickname=s.nickname,
-            rmse=s.rmse,
-            r2=s.r2,
+            rmse=s.rmse if final else s.public_rmse,
+            r2=s.r2 if final else s.public_r2,
+            public_rmse=s.public_rmse,
+            public_r2=s.public_r2,
+            public_rank=public_rank[s.team_key],
             submitted_at=s.submitted_at,
             team_key=s.team_key,
         )
@@ -125,7 +146,7 @@ class Store(Protocol):
     def first_team_display(self, team_key: str) -> str | None: ...
     def count_submissions_between(self, team_key: str, start: datetime, end: datetime) -> int: ...
     def insert_submission(self, s: Submission) -> int: ...
-    def leaderboard(self) -> list[LeaderboardRow]: ...
+    def leaderboard(self, final: bool = False) -> list[LeaderboardRow]: ...
     def list_submissions(self, team_key: str) -> list[Submission]: ...
     def soft_delete(self, submission_id: int, now: datetime) -> bool: ...
     def insert_game_score(self, s: GameScore) -> int: ...
@@ -170,8 +191,8 @@ class MemoryStore:
         self._rows.append(s)
         return s.id
 
-    def leaderboard(self) -> list[LeaderboardRow]:
-        return _rank(self._rows)
+    def leaderboard(self, final: bool = False) -> list[LeaderboardRow]:
+        return _rank(self._rows, final)
 
     def list_submissions(self, team_key: str) -> list[Submission]:
         return [s for s in self._rows if s.team_key == team_key]
@@ -205,8 +226,10 @@ class PostgresStore:
 
     def load_answers(self) -> Answers:
         with self._connect() as conn:
-            rows = conn.execute("SELECT id, price FROM answers ORDER BY row_no").fetchall()
-        return Answers(ids=[int(r[0]) for r in rows], prices=[float(r[1]) for r in rows])
+            rows = conn.execute("SELECT id, price, in_public FROM answers ORDER BY row_no").fetchall()
+        return Answers(
+            ids=[int(r[0]) for r in rows], prices=[float(r[1]) for r in rows], public=[bool(r[2]) for r in rows]
+        )
 
     def count_submissions_between(self, team_key: str, start: datetime, end: datetime) -> int:
         with self._connect() as conn:
@@ -262,9 +285,12 @@ class PostgresStore:
         with self._connect() as conn:
             row = conn.execute(
                 "INSERT INTO submissions "
-                "(team_key, team_display, nickname, rmse, r2, negative_clipped, submitted_at) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
-                (s.team_key, s.team_display, s.nickname, s.rmse, s.r2, s.negative_clipped, s.submitted_at),
+                "(team_key, team_display, nickname, rmse, r2, public_rmse, public_r2, negative_clipped, submitted_at) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+                (
+                    s.team_key, s.team_display, s.nickname, s.rmse, s.r2,
+                    s.public_rmse, s.public_r2, s.negative_clipped, s.submitted_at,
+                ),
             ).fetchone()
             conn.commit()
         s.id = int(row[0])
@@ -273,18 +299,20 @@ class PostgresStore:
     def _all_active(self) -> list[Submission]:
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT id, team_key, team_display, nickname, rmse, r2, negative_clipped, submitted_at, deleted_at "
+                "SELECT id, team_key, team_display, nickname, rmse, r2, public_rmse, public_r2, negative_clipped, "
+                "submitted_at, deleted_at "
                 "FROM submissions WHERE deleted_at IS NULL"
             ).fetchall()
         return [_row_to_submission(r) for r in rows]
 
-    def leaderboard(self) -> list[LeaderboardRow]:
-        return _rank(self._all_active())
+    def leaderboard(self, final: bool = False) -> list[LeaderboardRow]:
+        return _rank(self._all_active(), final)
 
     def list_submissions(self, team_key: str) -> list[Submission]:
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT id, team_key, team_display, nickname, rmse, r2, negative_clipped, submitted_at, deleted_at "
+                "SELECT id, team_key, team_display, nickname, rmse, r2, public_rmse, public_r2, negative_clipped, "
+                "submitted_at, deleted_at "
                 "FROM submissions WHERE team_key = %s ORDER BY id",
                 (team_key,),
             ).fetchall()
@@ -320,8 +348,8 @@ class PostgresStore:
 
 
 def _row_to_submission(r) -> Submission:
-    submitted = r[7] if r[7].tzinfo else r[7].replace(tzinfo=timezone.utc)
-    deleted = r[8]
+    submitted = r[9] if r[9].tzinfo else r[9].replace(tzinfo=timezone.utc)
+    deleted = r[10]
     if deleted is not None and deleted.tzinfo is None:
         deleted = deleted.replace(tzinfo=timezone.utc)
     return Submission(
@@ -331,7 +359,9 @@ def _row_to_submission(r) -> Submission:
         nickname=r[3],
         rmse=float(r[4]),
         r2=float(r[5]),
-        negative_clipped=int(r[6]),
+        public_rmse=float(r[6]),
+        public_r2=float(r[7]),
+        negative_clipped=int(r[8]),
         submitted_at=submitted,
         deleted_at=deleted,
     )

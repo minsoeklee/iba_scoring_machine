@@ -14,6 +14,9 @@ from fastapi.testclient import TestClient
 
 import auth
 from app import app
+import random
+
+from scoring.split import pick_public
 from store import Answers, MemoryStore
 from tests.conftest import submit
 
@@ -29,7 +32,8 @@ def real_client(monkeypatch):
         reader = csv.reader(f)
         next(reader)
         rows = [(int(float(r[0])), float(r[1])) for r in reader if r]
-    app.state.store = MemoryStore(Answers(ids=[r[0] for r in rows], prices=[r[1] for r in rows]))
+    public = pick_public(len(rows), random.Random(0))
+    app.state.store = MemoryStore(Answers(ids=[r[0] for r in rows], prices=[r[1] for r in rows], public=public))
     app.state.answers = None
     monkeypatch.setenv("ADMIN_KEY", "k")
     monkeypatch.setenv("SESSION_SECRET", "s")
@@ -41,8 +45,11 @@ def real_client(monkeypatch):
 
 def test_sample_submission_matches_known_baseline(real_client):
     body = submit(real_client, SAMPLE.read_bytes()).json()
-    assert math.isclose(body["rmse"], 13189.79, abs_tol=0.01)
-    assert math.isclose(body["r2"], -0.79, abs_tol=0.01)
+    # 응답은 public 구간 점수라 전체 기준값과 조금 다르다
+    assert math.isclose(body["rmse"], 13189.79, rel_tol=0.03)
+    full = real_client.get("/api/submissions", params={"team": "3조"}, headers={"X-Admin-Key": "k"}).json()[0]
+    assert math.isclose(full["rmse"], 13189.79, abs_tol=0.01)
+    assert math.isclose(full["r2"], -0.79, abs_tol=0.01)
 
 
 def test_answer_file_scores_perfectly(real_client):

@@ -22,7 +22,7 @@
   <div>
 <section class="card flush">
   <div class="card-head">
-    <h2>실시간 리더보드</h2>
+    <h2 id="boardTitle">Public 리더보드</h2>
     <div class="board-meta">
       <span id="meta">불러오는 중…</span>
       <button class="ghost" id="refresh" type="button"><i data-icon="refresh-cw"></i>새로고침</button>
@@ -32,13 +32,13 @@
   <div class="table-wrap">
     <table id="board">
       <thead>
-        <tr><th>순위</th><th>팀</th><th class="num">점수 (RMSE)</th><th class="num">R²</th><th class="num">제출 시각</th></tr>
+        <tr><th>순위</th><th>팀</th><th class="num" id="scoreHead">Public RMSE</th><th class="num">R²</th><th class="num" id="publicHead" hidden>Public RMSE (순위)</th><th class="num">제출 시각</th></tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
   <p class="empty" id="empty" hidden>아직 제출이 없습니다. <a href="/submit.html">첫 제출</a>을 해보세요.</p>
-  <div class="card-foot">팀별 최고 기록입니다. RMSE가 낮을수록 높은 순위이고, 같으면 R²가 높은 쪽, 그다음 먼저 제출한 쪽이 앞섭니다.</div>
+  <div class="card-foot" id="boardFoot">test.csv의 30%로 매긴 public 점수 기준 팀별 최고 기록입니다. RMSE가 낮을수록 높은 순위이고, 같으면 R²가 높은 쪽, 그다음 먼저 제출한 쪽이 앞섭니다. 최종 순위는 마감 뒤 전체 데이터로 다시 매깁니다.</div>
 </section>
   </div>
 
@@ -127,8 +127,15 @@
     btn.disabled = false;
     if (!r.ok) { meta.textContent = `불러오지 못했습니다 (HTTP ${r.status})`; return; }
     const f = window.IBA.fmt;
-    const rows = r.body;
-    tbody.innerHTML = window.IBA.boardRows(rows, user && user.team);
+    const { rows, final } = r.body;
+    if (final) {
+      document.getElementById("boardTitle").textContent = "최종 리더보드";
+      document.getElementById("scoreHead").textContent = "최종 RMSE";
+      document.getElementById("publicHead").hidden = false;
+      document.getElementById("boardFoot").textContent =
+        "팀마다 public 점수가 가장 좋았던 제출을 test.csv 전체로 다시 채점한 최종 순위입니다. 괄호 안은 대회 중 public 순위입니다.";
+    }
+    tbody.innerHTML = window.IBA.boardRows(rows, user && user.team, final);
     const hasRows = rows.length > 0;
     table.hidden = !hasRows;
     empty.hidden = hasRows;

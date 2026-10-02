@@ -128,6 +128,7 @@
   const res = await fetch("/api/me", { credentials: "same-origin" }).catch(() => null);
   if (!res || !res.ok) return;
   const user = await res.json();
+  if (!user) return;   // 로그인하지 않았으면 /api/me가 null을 돌려준다
   const who = document.createElement("a");
   who.className = "who";
   who.href = "/mypage.html";

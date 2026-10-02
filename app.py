@@ -230,13 +230,40 @@ def signup(
     return _user_body(user)
 
 
+def _dev_any_login() -> bool:
+    """로컬 개발 서버(DB 없는 메모리 모드)에서만 켜진다. 배포(Vercel)와 테스트에서는 꺼져 있다."""
+    return bool(os.environ.get("DEV_ANSWER_CSV")) and not os.environ.get("VERCEL")
+
+
+def _dev_user_for(store: Store, raw: str, password: str, now: datetime) -> User:
+    """개발용: 아무 아이디·비밀번호로 로그인한다. 처음 보는 아이디면 그 이름으로 계정을 바로 만든다."""
+    username = raw.strip().lower() or "guest"
+    user = store.get_user_by_username(username)
+    if user is None:
+        user = User(
+            id=0, username=username, password_hash=auth.hash_password(password or "dev"),
+            nickname=(raw.strip() or "guest")[:40], team_key="0", team_display="0", created_at=now,
+        )
+        store.create_user(user)
+    return user
+
+
 @app.post("/api/login")
-def login(body: LoginBody, response: Response, store: Store = Depends(get_store)):
+def login(
+    body: LoginBody,
+    response: Response,
+    store: Store = Depends(get_store),
+    now_fn: Callable[[], datetime] = Depends(get_now),
+):
+    if _dev_any_login():
+        user = _dev_user_for(store, body.username, body.password, now_fn())
+        _set_session(response, user)
+        return _user_body(user)
     user = store.get_user_by_username(body.username.strip().lower())
     if user is None or not auth.verify_password(body.password, user.password_hash):
         return JSONResponse(
             status_code=401,
-            content={"error_code": "bad_login", "message": "아이디 또는 비밀번호가 올바르지 않습니다."},
+            content={"error_code": "bad_login", "message": "Wrong ID or password."},
         )
     _set_session(response, user)
     return _user_body(user)

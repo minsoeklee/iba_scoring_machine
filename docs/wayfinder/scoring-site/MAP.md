@@ -10,7 +10,7 @@
 - 원자료: `scoring_machine/regression/` (2026-09-19 기준). 분류 과제는 2026-09-19에 폐기 결정 → Out of scope.
 - 회귀: 중고차 가격. train 58,627행(`mileage`/`tax`/`mpg` 결측 있음) / test 39,085행(`id` 포함, 결측 없음), 타깃 `price`. `brand_model.csv`는 model 인코딩용 클래스 목록.
 - 정답: `scoring_machine/regression/answer.csv`(`id,price`, 39,085행) — 2026-09-17 추가. 분포·상관이 train과 일치해 실제 정답으로 판단. `sample_submission.csv`의 price는 균등 난수 placeholder(정답 대비 RMSE 13,190).
-- **test.csv의 `id`는 고유하지 않음**: 31,573개 고유값 / 39,085행, 중복 id 7,512건이 서로 다른 차량. 따라서 id 조인으로 채점할 수 없고 **행 순서(위치) 기준**으로 채점해야 함. 제출 파일은 test.csv와 같은 순서·같은 행 수여야 함.
+- **원본 test.csv의 `id`는 고유하지 않았음**: 31,573개 고유값 / 39,085행, 중복 id 7,512건이 서로 다른 차량. 그래서 **행 순서(위치) 기준**으로 채점한다. 2026-10-02에 배포 전 test.csv·answer.csv·sample_submission.csv의 id를 0부터 행 번호로 다시 매겼다(id merge 채점 템플릿이 다른 차량끼리 짝지어 점수를 부풀리던 문제). 제출 파일은 test.csv와 같은 순서·같은 행 수여야 함.
 - 3조 노트북·베이스라인은 RMSE와 R²를 사용, 음수 예측은 0으로 클리핑, `id,price` 형식으로 제출 파일 생성.
 - 사용자: 운영자는 사용자와 친구 2명(졸업 이후 유지보수 주체가 불명확), 이용자는 매 기수 후배 팀.
 - 사이트 페이지 구성(2026-09-19 결정): **홈 화면 / 채점 페이지 / 리더보드 / 미니게임** 네 페이지. 앞 세 페이지는 001~007로 내용이 정해졌고, 미니게임은 채점과 무관한 순수 프론트 장난감(서버·DB 접근 없음).
@@ -33,7 +33,7 @@ Status: `ready`, `blocked`, `in-progress`, `resolved`, or `out-of-scope`.
 
 ## Decisions so far
 
-- [채점 입력 단위](decisions/001-submission-unit.md): `sample_submission.csv`와 같은 `id,price` CSV만 제출받는다. 코드 실행 없음. id 재부여 없이 행 순서 보존을 안내·검증.
+- [채점 입력 단위](decisions/001-submission-unit.md): `sample_submission.csv`와 같은 `id,price` CSV만 제출받는다. 코드 실행 없음. 행 순서 보존을 안내·검증하고, id는 행 번호로 다시 매김.
 - [정답 데이터 확보와 보관](decisions/002-ground-truth.md): `answer.csv` 확보 완료. id 중복 때문에 행 순서 기준 채점으로 확정. 정답 파일은 배포본·공개 저장소에서 분리해야 함(보관 위치는 005에서).
 - [공식 평가 지표](decisions/003-metrics.md): RMSE(주, 순위 기준)와 R²(보조)를 함께 계산·표시. 음수·결측 처리와 동점 규칙은 스펙 단계에서.
 - [참가자·제출 제한](decisions/004-participants-and-limits.md): 팀당 하루 3회. 리더보드는 닉네임·팀명·RMSE·R². 팀 식별 방식은 007로 분리.

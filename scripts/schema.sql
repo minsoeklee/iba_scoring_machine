@@ -2,7 +2,7 @@
 
 CREATE TABLE IF NOT EXISTS answers (
     row_no  INTEGER PRIMARY KEY,          -- test.csv에서의 위치(0부터). 채점은 이 순서 기준.
-    id      BIGINT NOT NULL,              -- test.csv의 id (고유하지 않음, 참고용)
+    id      BIGINT NOT NULL,              -- test.csv의 id (행 번호, 순서 확인용)
     price   DOUBLE PRECISION NOT NULL,
     in_public BOOLEAN NOT NULL DEFAULT FALSE -- public 채점 구간(전체의 30%) 여부. load_answers.py가 정한다.
 );

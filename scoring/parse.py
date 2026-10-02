@@ -63,7 +63,7 @@ def parse_submission(data: bytes, expected_ids: list[int]) -> ParsedSubmission:
     """제출 파일 바이트를 검증하고 id·price 목록으로 돌려준다.
 
     expected_ids는 정답의 id를 행 순서대로 담은 목록이다. 제출 파일의 id는
-    이 목록과 같은 순서로 완전히 일치해야 한다(id가 고유하지 않으므로 위치 기준).
+    이 목록과 같은 순서로 완전히 일치해야 한다(채점은 위치 기준).
     """
     if len(data) > MAX_FILE_BYTES:
         raise SubmissionError(

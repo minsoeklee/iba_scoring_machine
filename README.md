@@ -16,7 +16,7 @@
 핵심 결정 요약:
 
 - 제출: `sample_submission.csv`와 같은 `id,price` CSV. 코드 실행 없음.
-- 채점: **행 순서 기준**(test.csv의 id가 고유하지 않음). RMSE가 순위 기준, R²는 보조.
+- 채점: **행 순서 기준**. test.csv의 id는 0부터 매긴 행 번호이고, 제출 파일의 id가 같은 순서인지 확인한 뒤 같은 위치끼리 비교한다. RMSE가 순위 기준, R²는 보조.
 - 참가: 아이디·비밀번호로 가입하고, 가입 때 적은 팀명으로 팀이 묶인다. 제출만 로그인 필요. 팀당 하루 3회(KST 자정 초기화).
 - 리더보드: 팀별 최고 기록 1건 — 닉네임·팀명·RMSE·R².
 - 스택: Vercel Hobby + Python(FastAPI) + Neon Postgres Free + 정적 프론트. 비용 0원.

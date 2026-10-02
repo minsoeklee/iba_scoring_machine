@@ -159,7 +159,7 @@
     btn.disabled = false;
     if (r.ok) { location.href = window.IBA.nextPath(); return; }
     errorEl.textContent = (r.body && r.body.message)
-      || (signup ? `가입하지 못했습니다 (HTTP ${r.status})` : `로그인하지 못했습니다 (HTTP ${r.status})`);
+      || (signup ? `가입하지 못했습니다 (HTTP ${r.status})` : `Couldn\u2019t sign in (HTTP ${r.status}).`);
     errorEl.hidden = false;
   });
 })();

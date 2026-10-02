@@ -75,3 +75,29 @@ def test_tampered_or_expired_session_is_rejected(client):
     past = auth.make_session(int(user_id), now=0)
     client.cookies.set(auth.SESSION_COOKIE, past)
     assert client.get("/api/me").json() is None
+
+
+def test_wrong_login_message_is_english(client, monkeypatch):
+    monkeypatch.delenv("DEV_ANSWER_CSV", raising=False)
+    r = client.post("/api/login", json={"username": "nobody", "password": "whatever"})
+    assert r.status_code == 401
+    assert r.json()["message"] == "Wrong ID or password."
+
+
+def test_dev_mode_accepts_any_login(client, monkeypatch):
+    # 로컬 개발 서버(DEV_ANSWER_CSV)에서는 아무 값으로나 로그인되고, 처음 보는 아이디는 바로 계정이 생긴다
+    monkeypatch.setenv("DEV_ANSWER_CSV", "dev.csv")
+    monkeypatch.delenv("VERCEL", raising=False)
+    signup(client, "carol_1")
+    client.post("/api/logout")
+    assert client.post("/api/login", json={"username": "carol_1", "password": "anything"}).status_code == 200
+    client.post("/api/logout")
+    r = client.post("/api/login", json={"username": "Any Name", "password": "x"})
+    assert r.status_code == 200
+    assert client.get("/api/me").json()["nickname"] == "Any Name"
+
+
+def test_dev_any_login_is_off_on_vercel(client, monkeypatch):
+    monkeypatch.setenv("DEV_ANSWER_CSV", "dev.csv")
+    monkeypatch.setenv("VERCEL", "1")
+    assert client.post("/api/login", json={"username": "nobody", "password": "x"}).status_code == 401

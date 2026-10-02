@@ -56,6 +56,8 @@ DB 없이 돌리려면 정답 CSV 경로만 넘긴다(제출 기록은 메모리
 DEV_ANSWER_CSV=/path/to/answer.csv ADMIN_KEY=dev SESSION_SECRET=dev .venv/bin/uvicorn app:app --port 8765
 ```
 
+이 모드에서는 아무 아이디·비밀번호로나 로그인된다(처음 보는 아이디면 그 이름으로 계정이 바로 만들어진다). 화면을 빠르게 확인하기 위한 것이라 DB를 쓰는 실제 배포에서는 꺼져 있다.
+
 테스트:
 
 ```bash

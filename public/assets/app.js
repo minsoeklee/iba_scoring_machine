@@ -113,7 +113,7 @@
   function renderAuth(user) {
     if (!user) return;
     const corner = document.getElementById("cornerLinks");
-    corner.insertAdjacentHTML("beforeend", `<a class="who" href="/mypage.html">${esc(user.nickname)} · ${esc(user.team)}</a><button type="button" id="logoutBtn">Sign out</button>`);
+    corner.insertAdjacentHTML("beforeend", `<a class="who" href="/mypage.html">[${esc(user.team)}] ${esc(user.nickname)}</a><button type="button" id="logoutBtn">Sign out</button>`);
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await api("/api/logout", { method: "POST" });
       location.reload();

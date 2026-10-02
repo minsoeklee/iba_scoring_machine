@@ -40,7 +40,7 @@
 
 <!-- 오른쪽 위: 메뉴 버튼과 같은 높이에서 마주 보는 두 줄 -->
 <nav class="corner-links" aria-label="Quick links">
-  <a href="/login.html">Sign in</a>
+  <a href="/login.html" id="signIn">Sign in</a>
   <a href="/submit.html#rules">How to use?</a>
 </nav>
 
@@ -121,6 +121,25 @@
   window.addEventListener("scroll", sync, { passive: true });
   window.addEventListener("resize", sync);
   sync();
+})();
+
+// 로그인했으면 Sign in 자리에 내 이름(마이페이지로)과 로그아웃을 둔다.
+(async function () {
+  const res = await fetch("/api/me", { credentials: "same-origin" }).catch(() => null);
+  if (!res || !res.ok) return;
+  const user = await res.json();
+  const who = document.createElement("a");
+  who.className = "who";
+  who.href = "/mypage.html";
+  who.textContent = `[${user.team}] ${user.nickname}`;
+  const out = document.createElement("button");
+  out.type = "button";
+  out.textContent = "Sign out";
+  out.addEventListener("click", async () => {
+    await fetch("/api/logout", { method: "POST", credentials: "same-origin" });
+    location.reload();
+  });
+  document.getElementById("signIn").replaceWith(who, out);
 })();
 </script>
 </body>

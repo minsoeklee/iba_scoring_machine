@@ -4,7 +4,7 @@
   const W = COLS * CELL + PAD * 2, H = ROWS * CELL + PAD * 2;
   const TIME_LIMIT = 100;
   const BEST_KEY = "iba.best.apple";
-  const POP_MS = 520, FLOAT_MS = 800, FLASH_MS = 260;
+  const POP_MS = 520, FLASH_MS = 260;
 
   const $ = (id) => document.getElementById(id);
   const cv = $("board"), ctx = cv.getContext("2d");
@@ -57,11 +57,14 @@
     };
   }
 
+  // 사과 중심이 사각형 밖으로 PICK_SLACK만큼 벗어나 있어도 사각형이 사과에 걸쳐 있으면 고른 것으로 본다
+  const PICK_SLACK = CELL * 0.3;
+
   function inRect(r) {
     return apples.filter((a) => {
       if (!a.alive) return false;
       const c = centerOf(a);
-      return c.x >= r.x1 && c.x <= r.x2 && c.y >= r.y1 && c.y <= r.y2;
+      return c.x >= r.x1 - PICK_SLACK && c.x <= r.x2 + PICK_SLACK && c.y >= r.y1 - PICK_SLACK && c.y <= r.y2 + PICK_SLACK;
     });
   }
 
@@ -79,7 +82,6 @@
       const c = centerOf(a);
       effects.push({ kind: "pop", x: c.x, y: c.y, n: a.n, vx: (Math.random() - 0.5) * 120, t0: now });
     });
-    effects.push({ kind: "float", x: (r.x1 + r.x2) / 2, y: (r.y1 + r.y2) / 2, text: `+${picked.length}`, t0: now });
     return picked.length;
   }
 
@@ -106,9 +108,9 @@
     ctx.fillText(String(n), x, y + 2);
   }
 
-  // 사라지는 사과는 살짝 부풀었다가 떨어지며 흐려지고, +N 글자는 위로 떠오른다.
+  // 사라지는 사과는 살짝 부풀었다가 떨어지며 흐려진다.
   function drawEffects(now) {
-    effects = effects.filter((e) => now - e.t0 < (e.kind === "pop" ? POP_MS : e.kind === "float" ? FLOAT_MS : FLASH_MS));
+    effects = effects.filter((e) => now - e.t0 < (e.kind === "pop" ? POP_MS : FLASH_MS));
     effects.forEach((e) => {
       const s = (now - e.t0) / 1000;
       ctx.save();
@@ -119,14 +121,6 @@
         ctx.translate(e.x + e.vx * s, e.y - 90 * s + 900 * s * s);
         ctx.scale(scale, scale);
         drawApple(0, 0, e.n, true);
-      } else if (e.kind === "float") {
-        const p = (now - e.t0) / FLOAT_MS;
-        ctx.globalAlpha = 1 - p * p;
-        ctx.fillStyle = "#4cc38a";
-        ctx.font = '700 22px "Noto Sans KR", sans-serif';
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(e.text, e.x, e.y - 36 * p);
       } else {
         ctx.globalAlpha = 1 - (now - e.t0) / FLASH_MS;
         ctx.strokeStyle = "#e5484d";
@@ -156,19 +150,6 @@
       ctx.lineWidth = 2;
       ctx.fillRect(r.x1, r.y1, r.x2 - r.x1, r.y2 - r.y1);
       ctx.strokeRect(r.x1, r.y1, r.x2 - r.x1, r.y2 - r.y1);
-      if (picked.length) {
-        // 현재 합을 사각형 모서리에 작게 보여 준다
-        const label = String(sum);
-        ctx.font = '700 13px "Noto Sans KR", sans-serif';
-        const w = ctx.measureText(label).width + 12;
-        const lx = Math.min(r.x2 - w, W - w), ly = Math.max(r.y1 - 22, 0);
-        ctx.fillStyle = sum === 10 ? "#4cc38a" : sum > 10 ? "#e5484d" : "#7d9cf5";
-        ctx.fillRect(lx, ly, w, 20);
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(label, lx + w / 2, ly + 11);
-      }
     }
 
     drawEffects(now);

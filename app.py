@@ -70,7 +70,9 @@ def get_answers(request: Request, store: Store = Depends(get_store)) -> Answers:
     answers = getattr(request.app.state, "answers", None)
     if answers is None:
         answers = store.load_answers()
-        request.app.state.answers = answers
+        # 정답 적재 전이면 캐시하지 않는다. 적재 후 재배포 없이 바로 채점되게 하려고.
+        if answers.ids:
+            request.app.state.answers = answers
     return answers
 
 
@@ -249,6 +251,12 @@ async def submit(
     now_fn: Callable[[], datetime] = Depends(get_now),
     answers: Answers = Depends(get_answers),
 ):
+    if not answers.ids:
+        return JSONResponse(
+            status_code=503,
+            content={"error_code": "answers_not_ready", "message": "정답이 아직 등록되지 않아 채점할 수 없습니다. 운영진에게 알려 주세요."},
+        )
+
     team_key = user.team_key
     now = now_fn()
     quota = _quota_body(store, team_key, now)

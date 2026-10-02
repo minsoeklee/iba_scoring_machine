@@ -2,6 +2,7 @@ import math
 
 import pytest
 
+from store import Answers
 from tests.conftest import ANSWER_ROWS, csv_bytes, perfect_rows, quota, submit
 
 
@@ -112,3 +113,19 @@ def test_quota_not_consumed_by_invalid_file(client):
     q = quota(client).json()
     assert q["used_today"] == 0
     assert q["remaining_today"] == 3
+
+
+def test_empty_answers_returns_503_and_is_not_cached(client, store):
+    loaded = store._answers
+    store._answers = Answers(ids=[], prices=[])
+
+    for data in (csv_bytes(perfect_rows()), csv_bytes([])):
+        r = submit(client, data)
+        assert r.status_code == 503
+        assert r.json()["error_code"] == "answers_not_ready"
+    assert quota(client).json()["used_today"] == 0
+
+    store._answers = loaded
+    r = submit(client, csv_bytes(perfect_rows()))
+    assert r.status_code == 200, r.text
+    assert r.json()["rmse"] == 0

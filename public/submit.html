@@ -172,6 +172,8 @@
         showScore(r.body);
       } else if (r.status === 401) {
         showError("로그인이 풀렸습니다.", "다시 로그인한 뒤 제출하세요.");
+      } else if (r.status === 503 && r.body && r.body.message) {
+        showError("채점 준비 중입니다.", r.body.message);
       } else if (r.status === 429) {
         showError(r.body.message, "초기화: " + window.IBA.fmt.time(r.body.resets_at) + " (KST)");
       } else if (r.body && r.body.message) {

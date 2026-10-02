@@ -16,6 +16,15 @@ from pathlib import Path
 
 import psycopg
 
+TEST_CSV = Path(__file__).resolve().parents[1] / "public" / "data" / "test.csv"
+
+
+def test_ids() -> list[int]:
+    with TEST_CSV.open(newline="", encoding="utf-8-sig") as f:
+        reader = csv.reader(f)
+        next(reader)
+        return [int(float(row[0])) for row in reader if row and row[0].strip()]
+
 
 def main(path: str) -> None:
     rows: list[tuple[int, int, float]] = []
@@ -28,6 +37,14 @@ def main(path: str) -> None:
             if not row or all(c.strip() == "" for c in row):
                 continue
             rows.append((i, int(float(row[0])), float(row[1])))
+
+    # 채점은 행 순서 기준이라, test.csv와 행 수·id 순서가 다르면 적재하지 않는다.
+    expected = test_ids()
+    if len(rows) != len(expected):
+        sys.exit(f"정답 행 수가 {len(rows)}개인데 test.csv는 {len(expected)}개입니다. 적재하지 않았습니다.")
+    for (row_no, answer_id, _), test_id in zip(rows, expected):
+        if answer_id != test_id:
+            sys.exit(f"{row_no + 2}행의 id가 {answer_id}인데 test.csv는 {test_id}입니다. 적재하지 않았습니다.")
 
     with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
         with conn.cursor() as cur:

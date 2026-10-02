@@ -4,7 +4,7 @@
   // HIT_R는 비행기 가운데 빨간 점, BULLET_R은 적 탄의 반지름이다. 판정은 그려진 크기와 같다.
   const PLAYER_SPEED = 300, HIT_R = 3, BULLET_R = 5, PICK_R = 18, MARGIN = 16;
   const FIRE_INTERVAL = 0.11, SHOT_SPEED = 760, SHOT_W = 3, SHOT_H = 12;
-  const LIVES = 3, MAX_LIVES = 5, INVULN = 2, SCORE_MAX = 9999999, RESTART_DELAY = 800;
+  const SCORE_MAX = 9999999, RESTART_DELAY = 800;
   const LEVEL_TIME = 20;  // 이 초마다 단계가 오른다
   const BEST_KEY = "iba.best.shooter";
   const STAR_COLORS = ["rgba(232,238,252,0.25)", "rgba(232,238,252,0.5)", "rgba(232,238,252,0.75)"];
@@ -29,7 +29,6 @@
   const POWERS = {
     power: { label: "P", name: "화력", color: "#f29b4c" },
     shield: { label: "S", name: "보호막", color: "#4cc38a" },
-    life: { label: "+", name: "목숨", color: "#ef6b6b" },
   };
 
   const $ = (id) => document.getElementById(id);
@@ -38,7 +37,7 @@
   const stageBox = cv.parentElement;
 
   let player, shots, enemies, bullets, drops, particles, popups, stars;
-  let score, lives, level, elapsed, nextWave, fireCool, banner;
+  let score, level, elapsed, nextWave, fireCool, banner;
   let state = "ready", last = 0, overAt = 0, dpr = 0;
   const held = { left: false, right: false, up: false, down: false };
 
@@ -172,12 +171,9 @@
     if (Math.random() < def.drop) dropPower(e);
   }
 
-  // 목숨은 대형기에서만 가끔 나온다. 화력이 가득 찬 뒤의 화력 캡슐은 점수로 바뀐다.
+  // 대형기는 늘 화력 캡슐을 떨어뜨린다. 화력이 가득 찬 뒤의 화력 캡슐은 점수로 바뀐다.
   function dropPower(e) {
-    const r = Math.random();
-    let type = "power";
-    if (e.type === "heavy") { if (r < 0.2) type = "life"; }
-    else if (r < 0.3) type = "shield";
+    const type = e.type !== "heavy" && Math.random() < 0.3 ? "shield" : "power";
     drops.push({ x: e.x, y: e.y, t: 0, type });
   }
 
@@ -187,13 +183,9 @@
     if (type === "power") {
       if (player.power < SHOTS.length) player.power += 1;
       else { addScore(500); label = "+500"; }
-    } else if (type === "shield") {
+    } else {
       if (player.shield) { addScore(500); label = "+500"; }
       player.shield = true;
-    } else if (lives < MAX_LIVES) {
-      lives += 1;
-    } else {
-      addScore(1000); label = "+1000";
     }
     popups.push({ x: player.x, y: player.y - 26, text: label, color: p.color, life: 0.9 });
     updateStats();
@@ -202,19 +194,15 @@
   function hitPlayer() {
     if (player.invuln > 0) return;
     burst(player.x, player.y, "#e8eefc", 14);
-    // 맞으면 화면의 적 탄을 지워서 되살아나자마자 또 맞지 않게 한다.
+    // 맞으면 화면의 적 탄을 지워서 보호막이 깨지자마자 또 맞지 않게 한다. 보호막이 없으면 바로 끝난다.
     bullets = [];
     if (player.shield) {
       player.shield = false;
       player.invuln = 1;
       return;
     }
-    lives -= 1;
-    player.power = Math.max(1, player.power - 1);
-    player.invuln = INVULN;
     burst(player.x, player.y, "#f29b4c", 30);
-    if (lives <= 0) { gameOver(); return; }
-    updateStats();
+    gameOver();
   }
 
   function addScore(n) {
@@ -390,10 +378,6 @@
   }
 
   function drawHud() {
-    for (let i = 0; i < lives; i++) {
-      const x = 18 + i * 18, y = 22;
-      poly([[x, y - 7], [x + 7, y + 5], [x - 7, y + 5]], "#e8eefc");
-    }
     const barX = W - 16 - SHOTS.length * 12;
     text("화력", barX - 8, 22, "600 12px", "rgba(255,255,255,0.7)", "right");
     for (let i = 0; i < SHOTS.length; i++) {
@@ -458,7 +442,6 @@
 
   function updateStats() {
     $("score").textContent = score.toLocaleString("ko-KR");
-    $("lives").textContent = lives;
     $("level").textContent = level;
     $("best").textContent = Math.max(readBest(), score).toLocaleString("ko-KR");
   }
@@ -476,7 +459,7 @@
   }
 
   function reset() {
-    score = 0; lives = LIVES; level = 1; elapsed = 0; nextWave = 1; fireCool = 0; banner = 1.6;
+    score = 0; level = 1; elapsed = 0; nextWave = 1; fireCool = 0; banner = 1.6;
     player = { x: W / 2, y: H - 70, power: 1, shield: false, invuln: 0 };
     shots = []; enemies = []; bullets = []; drops = []; particles = []; popups = [];
   }
@@ -565,7 +548,7 @@
     banner = 0;
     updateStats();
     draw();
-    showOverlay("슈팅게임", "적기를 격추하고 탄을 피하세요. 목숨은 3개이고, 총알은 저절로 나갑니다.", "시작하기", start);
+    showOverlay("슈팅게임", "적기를 격추하고 탄을 피하세요. 한 번 맞으면 끝나고, 총알은 저절로 나갑니다.", "시작하기", start);
     window.IBA.gameBoard("shooter");
     requestAnimationFrame((t) => { last = t; frame(t); });
   });

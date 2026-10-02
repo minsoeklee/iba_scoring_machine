@@ -8,7 +8,7 @@
   const BALL_R = 7, START_SPEED = 400, SPEED_UP = 1.18, MAX_SPEED = 800;
   // 패들에 맞은 공이 세로축에서 기우는 각도의 최대·최소. 최소가 있어 공이 수직으로만 오가지 않는다.
   const MAX_BOUNCE = Math.PI / 3, MIN_BOUNCE = 0.12;
-  const LIVES = 3, MAX_BALLS = 8, SCORE_MAX = 999999, RESTART_DELAY = 800;
+  const MAX_BALLS = 8, SCORE_MAX = 999999, RESTART_DELAY = 800;
   const BEST_KEY = "iba.best.blocks";
 
   // 스테이지 배치. 숫자는 깨는 데 필요한 타격 수, 점은 빈칸이다. 차례로 돌아가며 쓴다.
@@ -35,7 +35,7 @@
   const stageBox = cv.parentElement;
 
   let bricks, balls, drops, particles, popups, effects;
-  let paddleX, paddleW, speed, lives, stage, score, combo, banner;
+  let paddleX, paddleW, speed, stage, score, combo, banner;
   let state = "ready", last = 0, overAt = 0, dpr = 0;
   const held = { left: false, right: false };
 
@@ -65,7 +65,7 @@
     });
   }
 
-  // 공 하나를 패들 위에 올려 두고 떨어지던 캡슐과 효과를 지운다. 스테이지 시작과 목숨을 잃었을 때 부른다.
+  // 공 하나를 패들 위에 올려 두고 떨어지던 캡슐과 효과를 지운다. 스테이지를 시작할 때 부른다.
   function serve() {
     balls = [{ x: paddleX, y: PADDLE_Y - BALL_R, dx: 0, dy: -1, stuck: true }];
     drops = [];
@@ -195,9 +195,9 @@
     for (const p of popups) { p.y -= 30 * dt; p.life -= dt; }
     popups = popups.filter((p) => p.life > 0);
 
-    // 마지막 블록을 깬 프레임에 공이 떨어져도 스테이지를 깬 것으로 본다.
+    // 마지막 블록을 깬 프레임에 공이 떨어져도 스테이지를 깬 것으로 본다. 공을 모두 놓치면 바로 끝난다.
     if (!bricks.length) nextStage();
-    else if (!balls.length) loseLife();
+    else if (!balls.length) gameOver();
   }
 
   // 가로와 세로를 따로 움직여 부딪힌 면을 가린다. 모서리에 맞으면 두 방향이 모두 꺾인다.
@@ -232,13 +232,6 @@
     buildBricks();
     serve();
     banner = 1.6;
-    updateStats();
-  }
-
-  function loseLife() {
-    lives -= 1;
-    if (lives <= 0) { gameOver(); return; }
-    serve();
     updateStats();
   }
 
@@ -279,12 +272,6 @@
   }
 
   function drawHud() {
-    for (let i = 0; i < LIVES; i++) {
-      ctx.fillStyle = i < lives ? "#ffffff" : "rgba(255,255,255,0.15)";
-      ctx.beginPath();
-      ctx.arc(PAD + 6 + i * 18, 30, 5, 0, Math.PI * 2);
-      ctx.fill();
-    }
     if (comboMult() > 1) text(`콤보 ×${comboMult()}`, W / 2, 30, "700 13px", "#f2c94c");
     // 이어지는 효과는 오른쪽 위에 남은 시간 막대로 보여 준다.
     let x = W - PAD;
@@ -346,7 +333,6 @@
 
   function updateStats() {
     $("score").textContent = score.toLocaleString("ko-KR");
-    $("lives").textContent = lives;
     $("stage").textContent = stage;
     $("best").textContent = Math.max(readBest(), score).toLocaleString("ko-KR");
   }
@@ -364,7 +350,7 @@
   }
 
   function reset() {
-    score = 0; lives = LIVES; stage = 1; speed = START_SPEED;
+    score = 0; stage = 1; speed = START_SPEED;
     paddleX = W / 2; paddleW = PADDLE_W;
     particles = []; popups = [];
     buildBricks();
@@ -450,7 +436,7 @@
     banner = 0;
     updateStats();
     draw();
-    showOverlay("블록깨기", "공을 튕겨 블록을 모두 깨세요. 목숨은 3개입니다.", "시작하기", start);
+    showOverlay("블록깨기", "공을 튕겨 블록을 모두 깨세요. 공을 놓치면 바로 끝납니다.", "시작하기", start);
     window.IBA.gameBoard("blocks");
     requestAnimationFrame((t) => { last = t; frame(t); });
   });
